@@ -13,3 +13,138 @@
         select { background: #1a1a1a; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; cursor: pointer; }
 
         .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 100px 20px; flex-wrap: wrap; }
+        
+        .panel { background: #111; border: 1px solid #222; border-radius: 20px; width: 400px; padding: 20px; box-sizing: border-box; }
+        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 15px; border-radius: 10px; position: relative; display: flex; align-items: center; }
+        canvas { width: 100%; height: 50%; }
+
+        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; }
+        #recBtn { background: #ff3e3e; color: white; }
+        .play-btn { background: #333; color: white; display: none; }
+        .buy-btn { background: var(--accent); color: black; display: none; text-decoration: none; text-align: center; box-sizing: border-box; }
+        
+        h2 { font-size: 1rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <select id="langSelect">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="zh">中文</option>
+        </select>
+    </div>
+
+    <div class="main-container">
+        <div class="panel">
+            <h2 id="t1">CANLI SES DÖVMESİ</h2>
+            <div class="tattoo-box"><canvas id="c1"></canvas></div>
+            <button id="recBtn" class="btn">🎤 SESİ KAYDET</button>
+            <button id="p1" class="btn play-btn">▶️ KAYDI DİNLE</button>
+            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b1" class="btn buy-btn">BU SESİ HATIRAYA DÖNÜŞTÜR</a>
+        </div>
+
+        <div class="panel">
+            <h2 id="t2">DOSYADAN DÖVME YAP</h2>
+            <div class="tattoo-box"><canvas id="c2"></canvas></div>
+            <input type="file" id="fIn" hidden accept="audio/*">
+            <button onclick="document.getElementById('fIn').click()" id="fBtn" class="btn" style="background:#222; color:#fff;">📁 SES DOSYASI SEÇ</button>
+            <button id="p2" class="btn play-btn">▶️ DOSYAYI DİNLE</button>
+            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b2" class="btn buy-btn">BU SESİ HATIRAYA DÖNÜŞTÜR</a>
+        </div>
+    </div>
+
+    <script>
+        const langData = {
+            tr: {t1:"CANLI SES DÖVMESİ", t2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 SES DOSYASI SEÇ", buy:"BU SESİ HATIRAYA DÖNÜŞTÜR", play:"▶️ DİNLE", recStop:"8sn Kaydediliyor..."},
+            en: {t1:"LIVE VOICE TATTOO", t2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE AUDIO FILE", buy:"CONVERT VOICE TO MEMORY", play:"▶️ PLAY", recStop:"Recording 8s..."},
+            ru: {t1:"ЖИВАЯ ТАТУ ГОЛОСА", t2:"ТАТУ ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ ГОЛОС", f:"📁 ВЫБРАТЬ ФАЙЛ", buy:"ПРЕВРАТИТЕ В ПАМЯТЬ", play:"▶️ СЛУШАТЬ", recStop:"Запись 8 сек..."},
+            de: {t1:"LIVE-STIMMTÄTOWIERUNG", t2:"STIMME AUS DATEI", rec:"🎤 AUFNEHMEN", f:"📁 DATEI WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", play:"▶️ ABSPIELEN", recStop:"8 Sek. Aufnahme..."},
+            es: {t1:"TATUAJE DE VOZ", t2:"DESDE ARCHIVO", rec:"🎤 GRABAR VOZ", f:"📁 ELEGIR ARCHIVO", buy:"CONVERTIR EN RECUERDO", play:"▶️ REPRODUCIR", recStop:"Grabando 8s..."},
+            fr: {t1:"TATOUAGE VOCAL", t2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR FICHIER", buy:"TRANSFORMER EN SOUVENIR", play:"▶️ ÉCOUTER", recStop:"Enregistrement 8s..."},
+            zh: {t1:"现场声音纹身", t2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择音频文件", buy:"将声音转化为回忆", play:"▶️ 播放", recStop:"正在录音 8秒..."}
+        };
+
+        const langSelect = document.getElementById('langSelect');
+        langSelect.onchange = function() {
+            const l = langData[this.value];
+            document.getElementById('t1').innerText = l.t1; document.getElementById('t2').innerText = l.t2;
+            document.getElementById('recBtn').innerText = l.rec; document.getElementById('fBtn').innerText = l.f;
+            document.getElementById('b1').innerText = l.buy; document.getElementById('b2').innerText = l.buy;
+            document.getElementById('p1').innerText = l.play; document.getElementById('p2').innerText = l.play;
+        };
+
+        let audioCtx, recorder, chunks = [], liveAud = new Audio(), fileAud = new Audio();
+        let fSource, fAnalyser;
+
+        function draw(analyser, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            function render() {
+                requestAnimationFrame(render);
+                analyser.getByteTimeDomainData(data);
+                ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.lineWidth = 3; ctx.strokeStyle = "#d4ff00";
+                ctx.beginPath();
+                let x = 0, slice = canvas.width / data.length;
+                for(let i=0; i<data.length; i++) {
+                    let v = data[i]/128, y = v * canvas.height/2;
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                    x += slice;
+                }
+                ctx.stroke();
+            }
+            render();
+        }
+
+        // --- CANLI KAYIT ---
+        document.getElementById('recBtn').onclick = async function() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const analyser = audioCtx.createAnalyser();
+            audioCtx.createMediaStreamSource(stream).connect(analyser);
+            draw(analyser, 'c1');
+            
+            recorder = new MediaRecorder(stream);
+            chunks = [];
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const b = new Blob(chunks, {type:'audio/wav'});
+                liveAud.src = URL.createObjectURL(b);
+                document.getElementById('p1').style.display = 'block';
+                document.getElementById('b1').style.display = 'block';
+            };
+            recorder.start();
+            this.innerText = langData[langSelect.value].recStop;
+            setTimeout(() => { recorder.stop(); stream.getTracks().forEach(t=>t.stop()); this.style.display='none'; }, 8000);
+        };
+
+        // --- DOSYA YÜKLEME ---
+        document.getElementById('fIn').onchange = function(e) {
+            const f = e.target.files[0];
+            if(f) {
+                fileAud.src = URL.createObjectURL(f);
+                document.getElementById('p2').style.display = 'block';
+                document.getElementById('b2').style.display = 'block';
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(!fSource) {
+                    fSource = audioCtx.createMediaElementSource(fileAud);
+                    fAnalyser = audioCtx.createAnalyser();
+                    fSource.connect(fAnalyser);
+                    fAnalyser.connect(audioCtx.destination);
+                }
+                draw(fAnalyser, 'c2');
+            }
+        };
+
+        document.getElementById('p1').onclick = () => liveAud.play();
+        document.getElementById('p2').onclick = () => fileAud.play();
+    </script>
+</body>
+</html>
