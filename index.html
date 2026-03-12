@@ -1,18 +1,116 @@
-<script>
-    // ... (wavesurfer kurulum kodları aynı) ...
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonikSkin - Ses Tasarımı</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        body { background: #000; color: #00ffcc; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        #wave-outer { background: white; padding: 20px; border-radius: 10px; margin: 20px auto; width: 90%; max-width: 500px; display: block; }
+        #wave-container { background: white; width: 100%; height: 120px; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
+        button { padding: 15px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 250px; }
+        #recordBtn { background: #ff4444; color: white; }
+        #playBtn { background: #00ffcc; color: black; display: none; }
+        #downloadBtn { background: #ffffff; color: #000; display: none; border: 2px solid #00ffcc; }
+        #timer { font-size: 2rem; margin: 10px 0; color: #fff; }
+        .recording { animation: blink 1s infinite; border: 3px solid white !important; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
 
-    recordBtn.onclick = () => {
-        // Tarayıcıdan mikrofon izni iste ve kontrol et
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                if (record.isRecording()) stopRecording();
-                else startRecording();
-            })
-            .catch(err => {
-                alert("Mikrofon hatası: " + err.name + ". Lütfen tarayıcı ayarlarından mikrofona izin verin.");
-                console.error(err);
+    <h1>SONIKSKIN</h1>
+    <p>Dövmen için sesini kaydet (Maks 8 sn)</p>
+
+    <div id="wave-outer">
+        <div id="wave-container"></div>
+    </div>
+    
+    <div id="timer">00:0.0</div>
+
+    <div class="controls">
+        <button id="recordBtn">KAYDA BAŞLA</button>
+        <button id="playBtn">DİNLE / DURDUR</button>
+        <button id="downloadBtn">TASARIMI İNDİR (.PNG)</button>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const playBtn = document.getElementById('playBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const timer = document.getElementById('timer');
+        
+        // 1. Wavesurfer Kurulumu
+        const wavesurfer = WaveSurfer.create({
+            container: '#wave-container',
+            waveColor: '#000000',
+            progressColor: '#666',
+            barWidth: 4,
+            barRadius: 4,
+            height: 120
+        });
+
+        // 2. Kayıt Eklentisi
+        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
+
+        // 3. Kayıt İşlemleri
+        recordBtn.onclick = async () => {
+            if (record.isRecording()) {
+                record.stopRecording();
+                return;
+            }
+
+            try {
+                // Mikrofon iznini kontrol et
+                await record.startRecording();
+                recordBtn.textContent = 'KAYDI DURDUR';
+                recordBtn.classList.add('recording');
+                playBtn.style.display = 'none';
+                downloadBtn.style.display = 'none';
+            } catch (err) {
+                alert("Mikrofon izni reddedildi veya bulunamadı!");
+            }
+        };
+
+        // Kayıt Durunca
+        record.on('record-end', (blob) => {
+            recordBtn.textContent = 'YENİ KAYIT AL';
+            recordBtn.classList.remove('recording');
+            playBtn.style.display = 'inline-block';
+            downloadBtn.style.display = 'inline-block';
+            
+            const url = URL.createObjectURL(blob);
+            wavesurfer.load(url);
+        });
+
+        // Oynatma Butonu
+        playBtn.onclick = () => wavesurfer.playPause();
+
+        // İlerleme ve 8 Saniye Sınırı
+        record.on('record-progress', (time) => {
+            const displaySec = (time / 1000).toFixed(1);
+            timer.textContent = `00:0${displaySec}`;
+            
+            if (time >= 8000) {
+                record.stopRecording();
+                alert("8 saniye doldu! İdeal dövme süresine ulaşıldı.");
+            }
+        });
+
+        // Resim Olarak Kaydetme
+        downloadBtn.onclick = () => {
+            html2canvas(document.querySelector("#wave-outer")).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'SonikSkin-Tasarim.png';
+                link.href = canvas.toDataURL();
+                link.click();
             });
-    };
-
-    // ... (diğer fonksiyonlar aynı kalsın) ...
-</script>
+        };
+    </script>
+</body>
+</html>
