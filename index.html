@@ -2,13 +2,96 @@
 <html lang="tr" translate="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="google" content="notranslate">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SonikSkin | Tattoo</title>
-    <script src="https://unpkg.com/wavesurfer.js@7"></script>
-    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.min.js"></script>
     <style>
-        :root { --neon: #00ffcc; --bg: #000; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        :root { --neon: #00ffcc; --bg: #0a0a0a; }
+        body { background: var(--bg); color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; overflow-x: hidden; }
         .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .l-btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding
+        .l-btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        
+        /* Ses Görselleştirici Alanı */
+        #visualizer { width: 100%; height: 200px; background: #000; border: 1px solid #222; border-radius: 10px; margin: 20px 0; }
+        
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .btn { 
+            width: 100%; max-width: 320px; padding: 20px; border-radius: 50px; 
+            border: none; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s;
+        }
+        #recBtn { background: #ff4757; color: white; }
+        #buyBtn { background: #25d366; color: white; display: none; }
+        .recording { animation: pulse 1s infinite; opacity: 0.7; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.98); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <span style="color:var(--neon); font-weight:bold;">SONIKSKIN</span>
+        <div>
+            <button class="l-btn" onclick="lang('TR')">TR</button>
+            <button class="l-btn" onclick="lang('EN')">EN</button>
+            <button class="l-btn" onclick="lang('RU')">RU</button>
+        </div>
+    </div>
+
+    <h1 id="title">Sesini Sanata Dönüştür</h1>
+    <canvas id="visualizer"></canvas>
+
+    <div class="controls">
+        <button id="recBtn" onclick="toggleRecord()" class="btn">KAYDA BAŞLA</button>
+        <button id="buyBtn" onclick="goWhatsApp()" class="btn">ŞABLONU SATIN AL (WA)</button>
+    </div>
+
+    <script>
+        const ui = {
+            'TR': { h: "Sesini Sanata Dönüştür", b1: "KAYDA BAŞLA", b2: "DURDUR", buy: "ŞABLONU SATIN AL" },
+            'EN': { h: "Turn Voice into Art", b1: "START RECORDING", b2: "STOP", buy: "BUY DESIGN" },
+            'RU': { h: "Голос в Искусство", b1: "НАЧАТЬ ЗАПИСЬ", b2: "СТОП", buy: "КУПИТЬ ЭСКИЗ" }
+        };
+
+        let currentLang = 'TR';
+        let isRecording = false;
+        let audioCtx, analyser, dataArray, source, animationId;
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        function lang(l) {
+            currentLang = l;
+            document.getElementById('title').innerText = ui[l].h;
+            document.getElementById('recBtn').innerText = isRecording ? ui[l].b2 : ui[l].b1;
+            document.getElementById('buyBtn').innerText = ui[l].buy;
+        }
+
+        async function toggleRecord() {
+            const btn = document.getElementById('recBtn');
+            const buy = document.getElementById('buyBtn');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    isRecording = true;
+                    btn.innerText = ui[currentLang].b2;
+                    btn.classList.add('recording');
+                    buy.style.display = 'none';
+
+                    // Ses Analizini Başlat
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioCtx.createAnalyser();
+                    source = audioCtx.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    analyser.fftSize = 256;
+                    dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    
+                    draw();
+                } catch (e) { alert("Mikrofon hatası!"); }
+            } else {
+                isRecording = false;
+                btn.innerText = ui[currentLang].b1;
+                btn.classList.remove('recording');
+                buy.style.display = 'block';
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function draw() {
