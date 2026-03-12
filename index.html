@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Final Pro</title>
+    <title>Sonic Skin | Final Pro V2</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -24,6 +24,7 @@
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
+        .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
@@ -68,6 +69,7 @@
             <div class="box"><canvas id="cv1"></canvas></div>
             <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
             <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
+            <button id="bR1" class="btn retry-btn" onclick="tekrarYap()">🔄 YENİDEN TEKRAR YAP</button>
             <a href="#" id="bS1" class="btn buy-btn">SATIN AL</a>
         </div>
 
@@ -82,14 +84,15 @@
     </div>
 
     <script>
+        // DİLLER - "DİNLE" VE "TEKRAR YAP" BURAYA EKLENDİ
         const diller = {
-            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"SATIN AL"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"BUY DRAFT"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"КУПИТЬ"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"购买草图"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"KAUFEN"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"COMPRAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"ACHETER"}
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"SATIN AL", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"BUY DRAFT", listen:"▶️ LISTEN", retry:"🔄 RETRY / RECORD AGAIN"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"КУПИТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"购买草图", listen:"▶️ 听", retry:"🔄 重试"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"KAUFEN", listen:"▶️ ANHÖREN", retry:"🔄 WIEDERHOLEN"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"COMPRAR", listen:"▶️ ESCUCHAR", retry:"🔄 REINTENTAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"ACHETER", listen:"▶️ ÉCOUTER", retry:"🔄 RÉESSAYER"}
         };
 
         function dilDegistir(v) {
@@ -100,13 +103,16 @@
             document.getElementById('bF').innerText = d.f;
             document.getElementById('bS1').innerText = d.buy;
             document.getElementById('bS2').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen;
+            document.getElementById('bP2').innerText = d.listen;
+            document.getElementById('bR1').innerText = d.retry;
         }
 
         function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
         function kapat() { document.getElementById('pop').style.display = 'none'; }
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let source1, source2; // Ses kaynaklarını tutmak için
+        let source1, source2;
 
         function ciz(an, id) {
             const c = document.getElementById(id), x = c.getContext('2d'), da = new Uint8Array(an.frequencyBinCount);
@@ -137,11 +143,26 @@
                     const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
                     ses1.src = URL.createObjectURL(blob);
                     document.getElementById('bP1').style.display = 'block';
+                    document.getElementById('bR1').style.display = 'block'; // Tekrar yap butonu görünüyor
                     document.getElementById('bS1').style.display = 'block';
                 };
                 rec.start(); document.getElementById('bRec').innerText = "8sn...";
                 setTimeout(() => { rec.stop(); s.getTracks().forEach(t=>t.stop()); document.getElementById('bRec').style.display='none'; }, 8000);
             } catch(e) { alert("Mikrofon hatası!"); }
+        }
+
+        // YENİDEN TEKRAR YAP FONKSİYONU
+        function tekrarYap() {
+            // Kaydı sıfırla ve butonları eski haline getir
+            document.getElementById('bP1').style.display = 'none';
+            document.getElementById('bR1').style.display = 'none';
+            document.getElementById('bS1').style.display = 'none';
+            document.getElementById('bRec').style.display = 'block';
+            document.getElementById('bRec').innerText = diller[document.getElementById('langSel').value].rec;
+            // Eski görseli temizle (isteğe bağlı)
+            const c = document.getElementById('cv1');
+            const x = c.getContext('2d');
+            x.clearRect(0,0,c.width,c.height);
         }
 
         function dinle1() {
@@ -163,7 +184,6 @@
             document.getElementById('bP2').style.display = 'block';
             document.getElementById('bS2').style.display = 'block';
             if(!ctx) ctx = new AudioContext();
-            
             if (!source2) {
                 source2 = ctx.createMediaElementSource(ses2);
                 const an = ctx.createAnalyser();
