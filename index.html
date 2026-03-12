@@ -4,80 +4,106 @@
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SonikSkin v4</title>
+    <title>SonikSkin | Pro</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.min.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; margin: 0; padding: 20px; overflow-x: hidden; }
-        .lang-container { margin: 20px 0; display: flex; justify-content: center; gap: 8px; }
-        .l-btn { background: #111; border: 1px solid #00ffcc; color: #00ffcc; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .l-btn:active { background: #00ffcc; color: #000; }
-        h1 { font-size: 24px; margin: 30px 0 10px; color: #fff; }
-        p { color: #888; font-size: 15px; margin-bottom: 40px; }
-        .main-button { 
-            background: #ff4757; color: white; border: none; padding: 22px; 
-            width: 100%; max-width: 320px; font-size: 18px; font-weight: bold; 
-            border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
-            text-transform: uppercase; letter-spacing: 1px;
+        :root { --neon: #00ffcc; --bg: #000; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .l-btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        
+        /* Ses Dalgaları Alanı */
+        #waveform { width: 100%; height: 150px; margin: 30px 0; background: #050505; border-radius: 10px; border: 1px solid #111; }
+        
+        .main-btn { 
+            background: #ff4757; color: white; border: none; padding: 20px; 
+            width: 100%; max-width: 300px; font-size: 18px; font-weight: bold; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
         }
-        #status { margin: 25px 0; color: #00ffcc; font-weight: 500; font-size: 16px; min-height: 20px; }
+        .recording { background: #222 !important; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        #status { color: var(--neon); margin-top: 20px; font-size: 14px; }
     </style>
 </head>
 <body class="notranslate">
 
-    <div class="lang-container">
-        <button class="l-btn" onclick="translateUI('TR')">TR</button>
-        <button class="l-btn" onclick="translateUI('EN')">EN</button>
-        <button class="l-btn" onclick="translateUI('RU')">RU</button>
+    <div class="nav">
+        <span style="color:var(--neon); font-weight:bold;">SONIKSKIN</span>
+        <div>
+            <button class="l-btn" onclick="setLang('TR')">TR</button>
+            <button class="l-btn" onclick="setLang('EN')">EN</button>
+            <button class="l-btn" onclick="setLang('RU')">RU</button>
+        </div>
     </div>
 
-    <h1 id="txt-title">Sesini Sanata Dönüştür</h1>
-    <p id="txt-sub">Dövmen için ses kaydı yapmaya hazır mısın?</p>
+    <h1 id="t-h">Sesini Sanata Dönüştür</h1>
+    <p id="t-p" style="color:#666;">Ses dalganı oluşturmak için kayda başla.</p>
 
-    <div id="status">Sistem: Hazır</div>
+    <div id="waveform"></div>
 
-    <button id="main-btn" class="main-button" onclick="handleAction()">KAYDA BAŞLA</button>
+    <button id="rec-btn" class="main-btn">KAYDA BAŞLA</button>
+    
+    <div id="status">Hazır</div>
 
     <script>
-        const content = {
-            'TR': { title: "Sesini Sanata Dönüştür", sub: "Dövmen için ses kaydı yapmaya hazır mısın?", btn: "KAYDA BAŞLA", wait: "Mikrofon aranıyor...", active: "KAYIT YAPILIYOR", done: "Kayıt Başarılı!" },
-            'EN': { title: "Turn Voice into Art", sub: "Ready to record your sound?", btn: "START RECORDING", wait: "Finding mic...", active: "RECORDING NOW", done: "Record Complete!" },
-            'RU': { title: "Голос в Искусство", sub: "Готовы записать звук?", btn: "НАЧАТЬ ЗАПИСЬ", wait: "Поиск микрофона...", active: "ИДЕТ ЗАПИСЬ", done: "Запись завершена!" }
+        const texts = {
+            'TR': { h: "Sesini Sanata Dönüştür", p: "Dövmen için ses kaydı yapmaya hazır mısın?", b1: "KAYDA BAŞLA", b2: "DURDUR", s: "Sesin analiz ediliyor..." },
+            'EN': { h: "Turn Voice into Art", p: "Ready to record your sound?", b1: "START RECORDING", b2: "STOP", s: "Analyzing voice..." },
+            'RU': { h: "Голос в Искусство", p: "Готовы записать звук?", b1: "НАЧАТЬ ЗАПИСЬ", b2: "СТОП", s: "Анализ голоса..." }
         };
 
-        let currentLanguage = 'TR';
+        let currentLang = 'TR';
+        
+        // Ses Dalga Motorunu Kur (WaveSurfer)
+        const wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+            waveColor: '#00ffcc',
+            progressColor: '#00ccaa',
+            cursorWidth: 0,
+            barWidth: 2,
+            barGap: 3,
+            height: 150
+        });
 
-        function translateUI(lang) {
-            currentLanguage = lang;
-            document.getElementById('txt-title').innerText = content[lang].title;
-            document.getElementById('txt-sub').innerText = content[lang].sub;
-            document.getElementById('main-btn').innerText = content[lang].btn;
-            document.getElementById('status').innerText = "Dil: " + lang;
-            console.log("Language changed to: " + lang);
-        }
+        // Kayıt Eklentisini Başlat
+        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
 
-        async function handleAction() {
-            const btn = document.getElementById('main-btn');
-            const st = document.getElementById('status');
-            
-            st.innerText = content[currentLanguage].wait;
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                st.innerText = content[currentLanguage].active;
-                btn.innerText = content[currentLanguage].active;
-                btn.style.background = "#222";
-
-                setTimeout(() => {
-                    stream.getTracks().forEach(track => track.stop());
-                    btn.style.background = "#ff4757";
-                    btn.innerText = content[currentLanguage].btn;
-                    st.innerText = content[currentLanguage].done;
-                }, 3000);
-
-            } catch (err) {
-                alert("Hata: Mikrofon izni verilmedi!");
-                st.innerText = "Hata!";
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('t-h').innerText = texts[lang].h;
+            document.getElementById('t-p').innerText = texts[lang].p;
+            if(!record.isRecording()) {
+                document.getElementById('rec-btn').innerText = texts[lang].b1;
             }
         }
+
+        const btn = document.getElementById('rec-btn');
+        const st = document.getElementById('status');
+
+        btn.onclick = async () => {
+            if (record.isRecording()) {
+                record.stopRecording();
+                btn.innerText = texts[currentLang].b1;
+                btn.classList.remove('recording');
+                st.innerText = "Kayıt Tamamlandı.";
+                return;
+            }
+
+            try {
+                await record.startRecording();
+                btn.innerText = texts[currentLang].b2;
+                btn.classList.add('recording');
+                st.innerText = texts[currentLang].s;
+            } catch (err) {
+                alert("Mikrofon izni gerekli!");
+            }
+        };
+
+        // Kayıt sırasında dalgayı çiz
+        record.on('record-progress', () => {
+            st.innerText = texts[currentLang].s;
+        });
     </script>
 </body>
 </html>
