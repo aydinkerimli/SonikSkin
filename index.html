@@ -1,15 +1,14 @@
-// ÖDEME ÖNCESİ KORUMALI BUTON
-        downBtn.onclick = () => {
-            const canvas = document.querySelector('#waveform canvas');
-            if (canvas) {
-                // Kullanıcıya bir seçenek sunuyoruz
-                const onay = confirm("Ses dalganız başarıyla oluşturuldu! \n\nNet dövme şablonunu indirmek ve telif haklarını almak için ödeme adımına geçmek ister misiniz?");
-                
-                if (onay) {
-                    // Buraya senin ödeme linkin (Iyzico, Papara, Shopier vb.) gelecek
-                    window.location.href = "https://senin-odeme-linkin.com"; 
-                } else {
-                    alert("Şablonu almak için dilediğiniz zaman bu butona basabilirsiniz.");
-                }
-            }
-        };
+<!DOCTYPE html>
+<html lang="tr" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SonikSkin | Tattoo</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.min.js"></script>
+    <style>
+        :root { --neon: #00ffcc; --bg: #000; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .l-btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding
