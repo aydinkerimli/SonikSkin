@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Final Full Edition</title>
+    <title>Sonic Skin | Sanatsal Yansımalı Soundwave</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
 
-        /* Üst Menü - Geri Geldi! */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
         .nav-right { display: flex; gap: 10px; align-items: center; }
@@ -16,24 +15,19 @@
         .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-artist { background: var(--neon); color: #000; border: none; }
 
-        /* Paneller - Yan Yana Düzen */
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
         
-        .box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
+        /* Çizim Kutusu (Beyaz arka plan - image_4.png'ye uygun) */
+        .box { width: 100%; aspect-ratio: 16/9; background: #fff; border: 1px solid #eee; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
         canvas { width: 100%; height: 100%; }
 
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
-        .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; justify-content: center; align-items: center; }
+        .buy-btn { background: #000; color: #fff; display: none; text-decoration: none; justify-content: center; align-items: center; } /* Buton siyah - dövme uyumlu */
 
-        /* Giriş Penceresi - Geri Geldi! */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
-        .soc-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        
         select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
@@ -45,24 +39,9 @@
             <select id="langSel" onchange="dilDegistir(this.value)">
                 <option value="tr">TR</option>
                 <option value="en">EN</option>
-                <option value="ru">RU</option>
-                <option value="zh">ZH</option>
-                <option value="de">DE</option>
-                <option value="es">ES</option>
-                <option value="fr">FR</option>
             </select>
-            <button class="btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
-        </div>
-    </div>
-
-    <div id="pop" class="modal">
-        <div class="modal-content">
-            <h3 id="pTitle">Üye Girişi</h3>
-            <p style="font-size: 12px; color: #888;">Anılarını saklamak ve üyelere özel fırsatlar için giriş yap.</p>
-            <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
-            <button class="soc-btn" style="background:black; color:white; border:1px solid #444;">Apple ID ile Bağlan</button>
-            <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
+            <button class="btn-top">GİRİŞ YAP</button>
+            <button class="btn-top btn-artist">SANATÇI PORTALI</button>
         </div>
     </div>
 
@@ -90,50 +69,54 @@
         const diller = {
             tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP"},
             en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆", listen:"▶️ 听", retry:"🔄 重试"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", retry:"🔄 WIEDERHOLEN"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", retry:"🔄 REINTENTAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", retry:"🔄 RÉESSAYER"}
         };
 
         function dilDegistir(v) {
             const d = diller[v];
-            document.getElementById('h1').innerText = d.h1;
-            document.getElementById('h2').innerText = d.h2;
-            document.getElementById('bRec').innerText = d.rec;
-            document.getElementById('bF').innerText = d.f;
-            document.getElementById('bS1').innerText = d.buy;
-            document.getElementById('bS2').innerText = d.buy;
-            document.getElementById('bP1').innerText = d.listen;
-            document.getElementById('bP2').innerText = d.listen;
+            document.getElementById('h1').innerText = d.h1; document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec; document.getElementById('bF').innerText = d.f;
+            document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
             document.getElementById('bR1').innerText = d.retry;
         }
 
-        function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
-        function kapat() { document.getElementById('pop').style.display = 'none'; }
+        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio(), source1, source2;
 
-        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let source1, source2;
-
-        // Dövme için Blok Çizim Sistemi
+        // --- YANSIMALI SOUNDWAVE ÇİZİM SİSTEMİ (HEDEF GÖRSEL - image_4.png'ye uygun) ---
         function ciz(an, id) {
             const c = document.getElementById(id), x = c.getContext('2d');
-            an.fftSize = 256;
+            an.fftSize = 512; // Dolgun ve detaylı dalgalar için
             const bLen = an.frequencyBinCount;
             const da = new Uint8Array(bLen);
 
             function render() {
                 requestAnimationFrame(render);
-                an.getByteFrequencyData(da);
-                x.fillStyle = "#000"; 
+                an.getByteFrequencyData(da); // Frekans verisi
+
+                // 1. Arka Planı Çiz (Beyaz)
+                x.fillStyle = "#fff"; 
                 x.fillRect(0, 0, c.width, c.height);
-                let bWidth = (c.width / bLen) * 2.5;
+
                 let curX = 0;
+                let bWidth = (c.width / bLen) * 3;
+                let middle = c.height * 0.45; // Ana dalganın merkezi (image_4.png'ye göre biraz yukarıda)
+
                 for(let i = 0; i < bLen; i++) {
-                    let bHeight = da[i] / 2;
-                    x.fillStyle = "#d4ff00"; 
-                    x.fillRect(curX, (c.height - bHeight) / 2, bWidth - 2, bHeight);
+                    let bHeight = da[i] * 0.7; // Ana dalga yüksekliği
+                    
+                    // 2. ANA DALGA (Siyah, Dolgun, Ortada)
+                    x.fillStyle = "#000"; 
+                    x.fillRect(curX, middle - (bHeight / 2), bWidth - 1, bHeight);
+
+                    // 3. YANSIMA (Alt kısım - image_4.png'deki gibi)
+                    // Yansımayı daha az hassas ve daha silik çizmek için yükseklik çarpanını düşürüyoruz
+                    let refHeight = bHeight * 0.35; 
+                    let refTop = c.height * 0.8; // Yansıma ana dalganın çok altından başlar (image_4.png'ye göre)
+                    
+                    // Yansıma efekti (Yarım transparan gri)
+                    x.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    x.fillRect(curX, refTop, bWidth - 1, refHeight);
+
                     curX += bWidth;
                 }
             } render();
@@ -145,11 +128,12 @@
                 const s = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const an = ctx.createAnalyser(); 
                 ctx.createMediaStreamSource(s).connect(an);
-                ciz(an, 'cv1'); 
+                ciz(an, 'cv1'); // Kayıt anında çizimi başlat
                 rec = new MediaRecorder(s); chunks = [];
                 rec.ondataavailable = e => chunks.push(e.data);
                 rec.onstop = () => {
-                    ses1.src = URL.createObjectURL(new Blob(chunks));
+                    const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+                    ses1.src = URL.createObjectURL(blob);
                     document.getElementById('bP1').style.display = 'block';
                     document.getElementById('bR1').style.display = 'block';
                     document.getElementById('bS1').style.display = 'flex';
@@ -161,11 +145,20 @@
 
         function tekrarYap() { location.reload(); }
 
+        // RESMİ İNDİRME - YENİ VE GARANTİLİ YÖNTEM
         function resimIndir(id) {
             const c = document.getElementById(id);
+            const x = c.getContext('2d');
+            
+            // Eğer çizim durduysa (sol taraf gibi), canvas'taki son görüntüyü dondur
+            const currentData = x.getImageData(0,0,c.width,c.height);
+            
+            // İndirilebilir URL oluştur
+            const dataUrl = c.toDataURL("image/png");
+            
             const link = document.createElement('a');
-            link.download = 'tattoo-design.png';
-            link.href = c.toDataURL("image/png");
+            link.download = 'sonic-skin-dovme-taslagi.png';
+            link.href = dataUrl;
             link.click();
         }
 
