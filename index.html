@@ -17,6 +17,7 @@
         .btn-play { background: #333; color: white; display: none; }
         .btn-buy { background: var(--accent); color: black; display: none; }
         .btn-file { background: #222; border: 1px solid #444; color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -46,19 +47,3 @@
         <div class="panel">
             <h2 id="txt-file-title">DOSYADAN DÖVME YAP</h2>
             <div class="tattoo-box"><canvas id="fileCanvas"></canvas></div>
-            <input type="file" id="fileInput" hidden accept="audio/*">
-            <button onclick="document.getElementById('fileInput').click()" id="txt-file-btn" class="btn btn-file">📁 SES DOSYASI SEÇ</button>
-            <button id="playBtn2" class="btn btn-play">▶️ DOSYAYI DİNLE</button>
-            <button id="buyBtn2" class="btn btn-buy">BU SESİ HATIRAYA DÖNÜŞTÜR</button>
-        </div>
-    </div>
-
-    <script>
-        const langData = {
-            tr: { live: "CANLI SES DÖVMESİ", file: "DOSYADAN DÖVME YAP", rec: "🎤 SESİ KAYDET", fileBtn: "📁 SES DOSYASI SEÇ", buy: "BU SESİ HATIRAYA DÖNÜŞTÜR", play: "▶️ KAYDI DİNLE" },
-            en: { live: "LIVE VOICE TATTOO", file: "TATTOO FROM FILE", rec: "🎤 RECORD VOICE", fileBtn: "📁 CHOOSE AUDIO FILE", buy: "CONVERT THIS VOICE INTO A MEMORY", play: "▶️ PLAY AUDIO" },
-            ru: { live: "ЖИВАЯ ТАТУ ГОЛОСА", file: "ТАТУ ИЗ ФАЙЛА", rec: "🎤 ЗАПИСАТЬ", fileBtn: "📁 ВЫБРАТЬ ФАЙЛ", buy: "ПРЕВРАТИТЕ ЭТОТ ГОЛОС В ПАМЯТЬ", play: "▶️ СЛУШАТЬ" },
-            fr: { live: "TATOUAGE VOCAL EN DIRECT", file: "TATOUAGE VIA FICHIER", rec: "🎤 ENREGISTRER", fileBtn: "📁 CHOISIR UN FICHIER", buy: "TRANSFORMER CETTE VOIX EN SOUVENIR", play: "▶️ ÉCOUTER" },
-            de: { live: "LIVE-STIMMTÄTOWIERUNG", file: "TATTOO AUS DATEI", rec: "🎤 STIMME AUFNEHMEN", fileBtn: "📁 AUDIO-DATEI WÄHLEN", buy: "DIESE STIMME IN EINE ERINNERUNG VERWANDELN", play: "▶️ AUDIO ABSPIELEN" },
-            es: { live: "TATUAJE DE VOZ EN VIVO", file: "TATUAJE DESDE ARCHIVO", rec: "🎤 GRABAR VOZ", fileBtn: "📁 ELEGIR ARCHIVO", buy: "CONVIERTE ESTA VOZ EN UN RECUERDO", play: "▶️ REPRODUCIR AUDIO" },
-            zh: { live: "现场声音纹身", file: "从文件制作纹身", rec: "🎤 录制声音", fileBtn: "📁 选择音频文件", buy
