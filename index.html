@@ -108,19 +108,30 @@
         }
 
         async function kaydet() {
-            ctx = new (window.AudioContext || window.webkitAudioContext)();
-            var s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            var an = ctx.createAnalyser(); ctx.createMediaStreamSource(s).connect(an); ciz(an, 'cv1');
-            rec = new MediaRecorder(s); chunks = [];
-            rec.ondataavailable = e => chunks.push(e.data);
-            rec.onstop = () => {
-                ses1.src = URL.createObjectURL(new Blob(chunks));
-                document.getElementById('bP1').style.display='block';
-                document.getElementById('bS1').style.display='block';
-            };
-            rec.start(); document.getElementById('bRec').innerText = "8sn...";
-            setTimeout(() => { rec.stop(); s.getTracks().forEach(t=>t.stop()); document.getElementById('bRec').style.display='none'; }, 8000);
-        }
+           async function kaydet() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var s = await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+    // Sol tarafı canlandıran sihirli dokunuş:
+    var an = ctx.createAnalyser(); 
+    ctx.createMediaStreamSource(s).connect(an); 
+    ciz(an, 'cv1'); // cv1 sol taraftaki siyah kutudur
+    
+    rec = new MediaRecorder(s); chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => {
+        ses1.src = URL.createObjectURL(new Blob(chunks));
+        document.getElementById('bP1').style.display = 'block';
+        document.getElementById('bS1').style.display = 'block';
+    };
+    rec.start(); 
+    document.getElementById('bRec').innerText = "8sn...";
+    setTimeout(() => { 
+        rec.stop(); 
+        s.getTracks().forEach(t => t.stop()); 
+        document.getElementById('bRec').style.display = 'none'; 
+    }, 8000);
+}
 
         function dosyaSecildi(i) {
             var f = i.files[0]; if(!f) return;
