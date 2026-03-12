@@ -3,58 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Final Edition</title>
+    <title>Sonic Skin | Final Fixed</title>
     <style>
         :root { --accent: #d4ff00; --bg: #050505; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
         /* Sağ Üst Dil Seçici */
-        .header { position: absolute; top: 20px; right: 40px; z-index: 100; }
-        select { background: #1a1a1a; color: white; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; cursor: pointer; outline: none; }
+        .header { position: absolute; top: 20px; right: 40px; z-index: 1000; }
+        select { background: #1a1a1a; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; cursor: pointer; }
 
-        /* Yan Yana Düzen (Flexbox) */
-        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 30px; padding-top: 100px; flex-wrap: wrap; min-height: 100vh; }
-        
-        .panel { background: #111; border: 1px solid #222; border-radius: 24px; width: 420px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transition: 0.3s; }
-        .panel:hover { border-color: var(--accent); }
-        
-        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; }
-        canvas { width: 100%; height: 60%; } /* Dalga formu ortada düz çizgi gibi başlar */
-
-        .btn { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        #recBtn { background: #ff3e3e; color: white; }
-        .btn-play { background: #222; color: #aaa; display: none; border: 1px solid #333; }
-        .buy-btn { background: var(--accent); color: black; display: none; text-decoration: none; text-align: center; box-sizing: border-box; }
-        
-        h2 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 25px; color: #eee; }
-        #debug { position: fixed; bottom: 10px; left: 10px; color: #444; font-size: 10px; }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <select id="langSelect">
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-            <option value="de">Deutsch</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="zh">中文</option>
-        </select>
-    </div>
-
-    <div class="main-container">
-        <div class="panel">
-            <h2 id="t1">CANLI SES DÖVMESİ</h2>
-            <div class="tattoo-box"><canvas id="c1"></canvas></div>
-            <button id="recBtn" class="btn">🎤 SESİ KAYDET</button>
-            <button id="playBtn1" class="btn btn-play">▶️ KAYDI DİNLE</button>
-            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="buy1" class="btn buy-btn">BU SESİ HATIRAYA DÖNÜŞTÜR</a>
-        </div>
-
-        <div class="panel">
-            <h2 id="t2">DOSYADAN DÖVME YAP</h2>
-            <div class="tattoo-box"><canvas id="c2"></canvas></div>
-            <input type="file" id="fIn" hidden accept="audio/*">
-            <button onclick="document.getElementById('fIn').click()" id="fBtn" class="btn" style="background:#222; color:#fff; border:1px solid #4
+        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 100px 20px; flex-wrap: wrap; }
