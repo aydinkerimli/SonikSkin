@@ -1,29 +1,102 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonikSkin - Tasarımını Oluştur</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-      body { margin: 0; overflow: hidden; }
-      #ui { position: absolute; z-index: 100; bottom: 20px; left: 50%; transform: translateX(-50%); }
-      .scan-btn { padding: 15px 30px; background: #00ffcc; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        body { background: #000; color: #00ffcc; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        #wave-outer { background: white; padding: 20px; border-radius: 10px; margin: 20px auto; width: 90%; display: inline-block; }
+        #wave-container { background: white; width: 100%; height: 120px; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; }
+        button { padding: 15px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 220px; }
+        #recordBtn { background: #ff4444; color: white; }
+        #recordBtn.recording { background: #222; border: 2px solid #ff4444; animation: blink 1s infinite; }
+        #playBtn { background: #00ffcc; color: black; display: none; }
+        #downloadBtn { background: #ffffff; color: #000; display: none; border: 2px solid #00ffcc; }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
-    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <h1>SONIKSKIN</h1>
+    <p>Sesin Sanata Dönüşsün</p>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane color="blue" opaciy="0.5" position="0 0 0" height="0.55" width="1" rotation="0 0 0"></a-plane>
-      </a-entity>
-    </a-scene>
+    <div id="wave-outer">
+        <div id="wave-container"></div>
+    </div>
+    
+    <div id="timer" style="font-size: 1.5rem; margin: 10px 0;">00:0.0</div>
 
-    <div id="ui">
-      <button class="scan-btn">KAMERA AKTİF</button>
+    <div class="controls">
+        <button id="recordBtn">Kayda Başla</button>
+        <button id="playBtn">Dinle / Durdur</button>
+        <button id="downloadBtn">Tasarımı İndir (.PNG)</button>
     </div>
 
-  </body>
+    <script>
+        const recordBtn = document.querySelector('#recordBtn');
+        const playBtn = document.querySelector('#playBtn');
+        const downloadBtn = document.querySelector('#downloadBtn');
+        const timer = document.querySelector('#timer');
+        
+        const wavesurfer = WaveSurfer.create({
+            container: '#wave-container',
+            waveColor: '#000000', // Dövme için siyah dalga
+            progressColor: '#555',
+            barWidth: 4,
+            barRadius: 4,
+            height: 120
+        });
+
+        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
+
+        recordBtn.onclick = () => {
+            if (record.isRecording()) stopRecording();
+            else startRecording();
+        };
+
+        function startRecording() {
+            record.startRecording();
+            recordBtn.textContent = 'Kaydı Durdur';
+            recordBtn.classList.add('recording');
+            playBtn.style.display = 'none';
+            downloadBtn.style.display = 'none';
+        }
+
+        function stopRecording() {
+            record.stopRecording();
+            recordBtn.textContent = 'Yeni Kayıt Al';
+            recordBtn.classList.remove('recording');
+            playBtn.style.display = 'inline-block';
+            downloadBtn.style.display = 'inline-block';
+        }
+
+        record.on('record-end', (blob) => {
+            const url = URL.createObjectURL(blob);
+            wavesurfer.load(url);
+            playBtn.onclick = () => wavesurfer.playPause();
+        });
+
+        record.on('record-progress', (time) => {
+            const displaySec = (time / 1000).toFixed(1);
+            timer.textContent = `00:0${displaySec}`;
+            if (time >= 8000) stopRecording();
+        });
+
+        // TASARIMI RESİM OLARAK KAYDETME SİHRİ
+        downloadBtn.onclick = () => {
+            html2canvas(document.querySelector("#wave-outer")).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'SonikSkin-Tasarim.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        };
+    </script>
+</body>
 </html>
