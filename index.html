@@ -3,26 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Member & Artist Portal</title>
+    <title>Sonic Skin | Portal</title>
     <style>
         :root { --accent: #d4ff00; --bg: #050505; --card: #111; }
         body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        /* Navigasyon Çubuğu */
+        /* Navbar */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #222; }
         .logo { font-weight: bold; color: var(--accent); letter-spacing: 2px; font-size: 1.2rem; }
         .nav-right { display: flex; gap: 15px; align-items: center; }
 
-        .btn-join { background: var(--accent); color: #000; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
-        .btn-artist { background: transparent; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-        .btn-artist:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-join { background: transparent; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-artist { background: var(--accent); color: #000; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-artist:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(212, 255, 0, 0.3); }
 
-        /* Panel Düzeni */
+        /* Ana Paneller */
         .main-container { display: flex; justify-content: center; gap: 30px; padding: 60px 20px; flex-wrap: wrap; }
-        .panel { background: var(--card); border: 1px solid #222; border-radius: 24px; width: 420px; padding: 30px; box-sizing: border-box; position: relative; }
-        .panel:hover { border-color: #333; }
+        .panel { background: var(--card); border: 1px solid #222; border-radius: 24px; width: 420px; padding: 30px; box-sizing: border-box; }
         
-        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; }
+        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
         canvas { width: 100%; height: 50%; }
 
         .btn { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
@@ -30,14 +29,14 @@
         .play-btn { background: #222; color: #fff; display: none; border: 1px solid #333; }
         .buy-btn { background: var(--accent); color: black; display: none; text-decoration: none; text-align: center; }
 
-        /* Login Modal */
+        /* Giriş Modalı */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #111; padding: 40px; border-radius: 30px; border: 1px solid #333; width: 350px; text-align: center; }
-        .social-btn { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .social-btn { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; }
         .google { background: white; color: black; }
         .apple { background: black; color: white; border: 1px solid #333; }
 
-        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 8px; }
+        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 8px; outline: none; }
     </style>
 </head>
 <body>
@@ -50,119 +49,20 @@
                 <option value="en">EN</option>
                 <option value="ru">RU</option>
             </select>
-            <button class="btn-join" onclick="openModal('member')">ÜYE OL / GİRİŞ</button>
-            <button class="btn-artist" onclick="openModal('artist')">👨‍🎨 SANATÇI PORTALI</button>
+            <button class="btn-join" onclick="openModal('member')">GİRİŞ YAP</button>
+            <button class="btn-artist" onclick="openModal('artist')">SANATÇI PORTALI</button>
         </div>
     </div>
 
     <div id="loginModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">Hoş Geldiniz</h2>
-            <p id="modalDesc" style="color:#777; font-size:14px; margin-bottom:25px;">Avantajlardan faydalanmak için bağlanın.</p>
-            <button class="social-btn google">Gmail ile Hızlı Bağlan</button>
-            <button class="social-btn apple">Apple ID ile Bağlan</button>
-            <p style="font-size: 12px; color: #444; margin-top: 15px;">Kayıt olarak VIP indirimleri kabul etmiş olursunuz.</p>
-            <button onclick="closeModal()" style="background:none; border:none; color:#ff3e3e; margin-top:20px; cursor:pointer; font-weight:bold;">KAPAT</button>
+            <h2 id="modalTitle" style="margin-bottom: 30px;">Giriş Yap</h2>
+            <button class="social-btn google">Gmail ile Giriş</button>
+            <button class="social-btn apple">Apple ID ile Giriş</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:#555; margin-top:25px; cursor:pointer; font-weight:bold; font-size: 12px; letter-spacing: 1px;">KAPAT</button>
         </div>
     </div>
 
     <div class="main-container">
         <div class="panel">
-            <h2 id="t1">CANLI SES DÖVMESİ</h2>
-            <div class="tattoo-box"><canvas id="c1"></canvas></div>
-            <button id="recBtn" class="btn">🎤 SESİ KAYDET</button>
-            <button id="p1" class="btn play-btn">▶️ KAYDI DİNLE</button>
-            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b1" class="btn buy-btn">TASLAĞI OLUŞTUR VE İNDİR</a>
-        </div>
-
-        <div class="panel">
-            <h2 id="t2">DOSYADAN DÖVME YAP</h2>
-            <div class="tattoo-box"><canvas id="c2"></canvas></div>
-            <input type="file" id="fIn" hidden accept="audio/*">
-            <button onclick="document.getElementById('fIn').click()" id="fBtn" class="btn" style="background:#1a1a1a; border: 1px solid #333;">📁 SES DOSYASI SEÇ</button>
-            <button id="p2" class="btn play-btn">▶️ DOSYAYI DİNLE</button>
-            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b2" class="btn buy-btn">TASLAĞI OLUŞTUR VE İNDİR</a>
-        </div>
-    </div>
-
-    <script>
-        // Modal Yönetimi
-        function openModal(type) {
-            const title = document.getElementById('modalTitle');
-            const desc = document.getElementById('modalDesc');
-            if(type === 'artist') {
-                title.innerText = "Sanatçı Girişi";
-                desc.innerText = "Dövme sanatçılarına özel %30 indirim ve ticari lisans fırsatları.";
-            } else {
-                title.innerText = "Üye Girişi";
-                desc.innerText = "Sesini kaydet, üyelere özel ilk sipariş indirimini kap!";
-            }
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
-
-        // Görselleştirme ve Ses Mantığı (8 Saniye Kayıt Dahil)
-        let audioCtx, recorder, chunks = [], liveAud = new Audio(), fileAud = new Audio();
-        let fSource, fAnalyser;
-
-        function drawWave(analyser, canvasId) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            function render() {
-                requestAnimationFrame(render);
-                analyser.getByteTimeDomainData(data);
-                ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.lineWidth = 3; ctx.strokeStyle = "#d4ff00";
-                ctx.beginPath();
-                let x = 0, slice = canvas.width / data.length;
-                for(let i=0; i<data.length; i++) {
-                    let v = data[i]/128, y = v * canvas.height/2;
-                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                    x += slice;
-                }
-                ctx.stroke();
-            }
-            render();
-        }
-
-        document.getElementById('recBtn').onclick = async function() {
-            if(!audioCtx) audioCtx = new AudioContext();
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const analyser = audioCtx.createAnalyser();
-            audioCtx.createMediaStreamSource(stream).connect(analyser);
-            drawWave(analyser, 'c1');
-            recorder = new MediaRecorder(stream);
-            chunks = [];
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                liveAud.src = URL.createObjectURL(new Blob(chunks));
-                document.getElementById('p1').style.display = 'block';
-                document.getElementById('b1').style.display = 'block';
-            };
-            recorder.start();
-            this.innerText = "8sn Kaydediliyor...";
-            setTimeout(() => { recorder.stop(); stream.getTracks().forEach(t=>t.stop()); this.style.display='none'; }, 8000);
-        };
-
-        document.getElementById('fIn').onchange = function(e) {
-            const f = e.target.files[0];
-            if(f) {
-                fileAud.src = URL.createObjectURL(f);
-                document.getElementById('p2').style.display = 'block';
-                document.getElementById('b2').style.display = 'block';
-                if(!audioCtx) audioCtx = new AudioContext();
-                if(!fSource) {
-                    fSource = audioCtx.createMediaElementSource(fileAud);
-                    fAnalyser = audioCtx.createAnalyser();
-                    fSource.connect(fAnalyser); fAnalyser.connect(audioCtx.destination);
-                }
-                drawWave(fAnalyser, 'c2');
-            }
-        };
-
-        document.getElementById('p1').onclick = () => liveAud.play();
-        document.getElementById('p2').onclick = () => fileAud.play();
-    </script>
-</body>
-</html>
+            <h2 id="t1" style="font-size: 1rem; letter-spacing: 1px; margin
