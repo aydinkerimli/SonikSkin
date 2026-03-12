@@ -2,102 +2,139 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SonikSkin Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonikSkin | Ses Dövmesi Platformu</title>
     <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        body { background: #000; color: #00ffcc; font-family: sans-serif; text-align: center; padding: 20px; }
-        #wave-outer { background: white; padding: 20px; border-radius: 10px; margin: 20px auto; width: 90%; max-width: 400px; min-height: 100px; }
-        #wave-container { width: 100%; height: 100px; background: #eee; }
-        .controls { display: flex; flex-direction: column; gap: 15px; align-items: center; }
-        button { padding: 20px; width: 280px; border-radius: 50px; border: none; font-weight: bold; font-size: 1.1rem; }
-        #recordBtn { background: #ff4444; color: white; box-shadow: 0 0 15px rgba(255,68,68,0.5); }
-        #playBtn { background: #00ffcc; color: #000; display: none; }
-        #downloadBtn { background: #fff; color: #000; display: none; }
-        #status { color: yellow; margin-top: 10px; font-size: 0.9rem; }
-        #log { color: red; font-size: 0.8rem; margin-top: 20px; }
+        :root { --neon: #00ffcc; --bg: #0a0a0a; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Navigasyon ve Dil */
+        nav { width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #222; }
+        .logo { font-weight: bold; font-size: 24px; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        .lang-switch button { background: transparent; border: 1px solid var(--neon); color: var(--neon); cursor: pointer; padding: 5px 10px; border-radius: 5px; margin-left: 5px; }
+
+        /* Ana Alan */
+        .container { max-width: 600px; width: 90%; margin-top: 50px; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        
+        /* Tasarım Kutusu */
+        #wave-outer { background: white; padding: 30px; border-radius: 15px; margin: 30px 0; box-shadow: 0 0 30px rgba(0,255,204,0.2); }
+        #wave-container { width: 100%; height: 130px; }
+
+        /* Butonlar */
+        .btn { padding: 18px 35px; border-radius: 50px; border: none; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 15px; }
+        #recordBtn { background: #ff4757; color: white; box-shadow: 0 5px 15px rgba(255,71,87,0.4); }
+        #recordBtn.recording { background: #2f3542; animation: pulse 1.5s infinite; }
+        #playBtn { background: var(--neon); color: black; display: none; }
+        #downloadBtn { background: white; color: black; border: 2px solid var(--neon); display: none; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
-    <h1>SONIKSKIN</h1>
-    <div id="wave-outer"><div id="wave-container"></div></div>
-    <div id="status">Hazır</div>
-    
-    <div class="controls">
-        <button id="recordBtn" type="button">KAYDI BAŞLAT/DURDUR</button>
-        <button id="playBtn" type="button">DİNLE</button>
-        <button id="downloadBtn" type="button">TASARIMI İNDİR</button>
+
+    <nav>
+        <div class="logo">SONIKSKIN</div>
+        <div class="lang-switch">
+            <button onclick="changeLang('TR')">TR</button>
+            <button onclick="changeLang('EN')">EN</button>
+            <button onclick="changeLang('RU')">RU</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 id="mainTitle">Sesini Sanata Dönüştür</h1>
+        <p id="subTitle">Dövmen için maksimum 8 saniyelik kayıt yap.</p>
+
+        <div id="wave-outer">
+            <div id="wave-container"></div>
+        </div>
+
+        <div id="timer" style="font-size: 2.5rem; color: var(--neon); margin-bottom: 20px;">00:00.0</div>
+
+        <button id="recordBtn" class="btn">KAYDA BAŞLA</button>
+        <button id="playBtn" class="btn">DİNLE / DURDUR</button>
+        <button id="downloadBtn" class="btn">TASARIMI İNDİR (.PNG)</button>
     </div>
 
-    <div id="log"></div>
-
     <script>
-        const logDiv = document.getElementById('log');
-        function debug(msg) { logDiv.innerText += msg + "\n"; }
+        const recordBtn = document.getElementById('recordBtn');
+        const playBtn = document.getElementById('playBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const timer = document.getElementById('timer');
 
-        let mediaRecorder;
-        let audioChunks = [];
-        let wavesurfer;
+        const wavesurfer = WaveSurfer.create({
+            container: '#wave-container',
+            waveColor: '#000000',
+            progressColor: '#444',
+            barWidth: 4,
+            barRadius: 4,
+            height: 130
+        });
 
-        // Sayfa yüklenince WaveSurfer'ı hazırla
-        window.onload = () => {
-            wavesurfer = WaveSurfer.create({
-                container: '#wave-container',
-                waveColor: '#000',
-                progressColor: '#555',
-                height: 100
-            });
-            debug("Sistem yüklendi.");
-        };
+        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
 
-        document.getElementById('recordBtn').onclick = async () => {
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
-                document.getElementById('recordBtn').style.background = "#ff4444";
-                document.getElementById('status').innerText = "Kayıt işleniyor...";
+        // Mikrofon İzni ve Kayıt Başlatma
+        recordBtn.onclick = async () => {
+            if (record.isRecording()) {
+                record.stopRecording();
                 return;
             }
 
             try {
-                debug("Mikrofon isteniyor...");
+                // Tarayıcıdan izin iste
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                    const url = URL.createObjectURL(audioBlob);
-                    wavesurfer.load(url);
-                    document.getElementById('playBtn').style.display = "block";
-                    document.getElementById('downloadBtn').style.display = "block";
-                    document.getElementById('status').innerText = "Tasarım Hazır!";
-                };
-
-                mediaRecorder.start();
-                document.getElementById('recordBtn').style.background = "white";
-                document.getElementById('recordBtn').style.color = "black";
-                document.getElementById('status').innerText = "KAYDEDİLİYOR... (Durdurmak için bas)";
-                debug("Kayıt başladı.");
-
+                await record.startRecording();
+                
+                recordBtn.textContent = 'KAYDI DURDUR';
+                recordBtn.classList.add('recording');
+                playBtn.style.display = 'none';
+                downloadBtn.style.display = 'none';
             } catch (err) {
-                debug("HATA: " + err.message);
-                alert("Mikrofon izni hatası! Ayarları kontrol edin.");
+                alert("Mikrofon hatası! Lütfen ayarlardan izin verin. Hata: " + err.name);
             }
         };
 
-        document.getElementById('playBtn').onclick = () => wavesurfer.playPause();
+        record.on('record-end', (blob) => {
+            recordBtn.textContent = 'YENİ KAYIT AL';
+            recordBtn.classList.remove('recording');
+            playBtn.style.display = 'block';
+            downloadBtn.style.display = 'block';
+            wavesurfer.load(URL.createObjectURL(blob));
+        });
 
-        document.getElementById('downloadBtn').onclick = () => {
+        playBtn.onclick = () => wavesurfer.playPause();
+
+        record.on('record-progress', (time) => {
+            const sec = (time / 1000).toFixed(1);
+            timer.textContent = `00:0${sec}`;
+            if (time >= 8000) record.stopRecording();
+        });
+
+        downloadBtn.onclick = () => {
             html2canvas(document.querySelector("#wave-outer")).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'sonikskin-tattoo.png';
+                link.download = 'SonikSkin-Design.png';
                 link.href = canvas.toDataURL();
                 link.click();
             });
         };
+
+        // Basit Dil Değiştirme Fonksiyonu (Geliştirilecek)
+        function changeLang(lang) {
+            const titles = {
+                'TR': { main: 'Sesini Sanata Dönüştür', sub: 'Maksimum 8 saniyelik kayıt yap.' },
+                'EN': { main: 'Turn Voice into Art', sub: 'Record up to 8 seconds.' },
+                'RU': { main: 'Превратите голос в искусство', sub: 'Запись до 8 секунд.' }
+            };
+            document.getElementById('mainTitle').innerText = titles[lang].main;
+            document.getElementById('subTitle').innerText = titles[lang].sub;
+            alert(lang + " seçildi!");
+        }
     </script>
 </body>
 </html>
