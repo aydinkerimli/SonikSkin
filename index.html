@@ -1,44 +1,87 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Spor Takip Sistemi</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
-        .konteynir { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        .liste { margin-top: 20px; }
-        .ozet { margin-top: 20px; font-weight: bold; color: #e74c3c; border-top: 1px solid #ddd; pt: 10px; }
-    </style>
-</head>
-<body>
+import React, { useState, useRef } from 'react';
 
-<div class="konteynir">
-    <h2>Spor Takip Özeti</h2>
-    <div id="aktivite-listesi" class="liste">
-        </div>
-    <div id="toplam-sonuc" class="ozet"></div>
-</div>
+const SonicSkinProjesi = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const canvasRef = useRef(null);
 
-<script>
-    // ARTIK RENKLİ VE ÇALIŞIR DURUMDA!
-    const sporVerileri = [
-        { ad: "Koşu", sure: 30, kalori: 300 },
-        { ad: "Yüzme", sure: 45, kalori: 450 },
-        { ad: "Ağırlık", sure: 60, kalori: 200 }
-    ];
+  // SESİ GÖRSELE DÖNÜŞTÜREN SİHİRLİ FONKSİYON
+  const startSonicArt = async () => {
+    setIsRecording(true);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const audioContext = new AudioContext();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    source.connect(analyser);
 
-    let listeHTML = "";
-    let toplamKalori = 0;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    sporVerileri.forEach(spor => {
-        listeHTML += `<p>✅ <b>${spor.ad}</b>: ${spor.sure} dk | ${spor.kalori} kcal</p>`;
-        toplamKalori += spor.kalori;
-    });
+    const draw = () => {
+      if (!isRecording) return;
+      requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
 
-    document.getElementById("aktivite-listesi").innerHTML = listeHTML;
-    document.getElementById("toplam-sonuc").innerHTML = `Toplam Harcanan: ${toplamKalori} kcal`;
-</script>
+      // Burası "Skin" (Deri) dokusunu oluşturan kısım
+      ctx.fillStyle = 'rgba(10, 10, 10, 0.1)'; // Hafif iz bırakma efekti
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-</body>
-</html>
+      dataArray.forEach((val, i) => {
+        const ratio = val / 255;
+        ctx.beginPath();
+        // Sesin şiddetine göre organik daireler/dokular çiziyoruz
+        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, ratio * 50, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${200 + val}, 70%, 60%)`; // Sese göre değişen renkler
+        ctx.fill();
+      });
+    };
+    draw();
+    
+    // 5 saniye sonra kaydı otomatik durdur ve ödeme butonunu göster
+    setTimeout(() => {
+      setIsRecording(false);
+      setShowCheckout(true);
+      stream.getTracks().forEach(track => track.stop());
+    }, 5000);
+  };
+
+  return (
+    <div style={{ textAlign: 'center', backgroundColor: '#0a0a0a', color: 'white', minHeight: '100vh', padding: '20px' }}>
+      <h1>Sonic Skin Art Generator</h1>
+      <p>Sesini kaydet, benzersiz deri dokunu dönüştür.</p>
+      
+      <canvas ref={canvasRef} width={600} height={400} style={{ border: '2px solid #333', borderRadius: '20px', marginBottom: '20px' }} />
+
+      <div>
+        {!isRecording && !showCheckout && (
+          <button onClick={startSonicArt} style={buttonStyle}>🎤 Sesini Analiz Et</button>
+        )}
+
+        {isRecording && <p>Sesin sanata dönüşüyor... Lütfen konuşun.</p>}
+
+        {showCheckout && (
+          <div>
+            <h3>Harika bir doku oluştu!</h3>
+            <button 
+              onClick={() => window.location.href = 'https://YOUR_STORE.lemonsqueezy.com/checkout/buy/DESIGN_ID'} 
+              style={{...buttonStyle, backgroundColor: '#d4ff00', color: 'black'}}>
+              Görseli İndirmek İçin Satın Al ($5)
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const buttonStyle = {
+  padding: '15px 30px',
+  fontSize: '18px',
+  borderRadius: '50px',
+  cursor: 'pointer',
+  border: 'none',
+  fontWeight: 'bold'
+};
+
+export default SonicSkinProjesi;
