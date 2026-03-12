@@ -1,18 +1,29 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonikSkin - Sesin Teninle Buluşsun</title>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; font-family: sans-serif; background: #000; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        h1 { color: #00ffcc; text-shadow: 0 0 10px #00ffcc; }
-        .btn { padding: 15px 30px; background: #00ffcc; color: #000; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; text-decoration: none; }
+      body { margin: 0; overflow: hidden; }
+      #ui { position: absolute; z-index: 100; bottom: 20px; left: 50%; transform: translateX(-50%); }
+      .scan-btn { padding: 15px 30px; background: #00ffcc; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; }
     </style>
-</head>
-<body>
-    <h1>SONIKSKIN</h1>
-    <p>Geleceğin Dövme Deneyimine Hoş Geldin</p>
-    <button class="btn" onclick="alert('Kamera Sistemi Yakında Aktif Olacak!')">Dövmeyi Tara</button>
-</body>
+  </head>
+  <body>
+
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane color="blue" opaciy="0.5" position="0 0 0" height="0.55" width="1" rotation="0 0 0"></a-plane>
+      </a-entity>
+    </a-scene>
+
+    <div id="ui">
+      <button class="scan-btn">KAMERA AKTİF</button>
+    </div>
+
+  </body>
 </html>
