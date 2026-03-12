@@ -1,4 +1,51 @@
-<a href="https://sonikskin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e" 
-   style="background-color: #7047eb; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold;">
-   Hemen Satın Al ($10)
-</a>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonikSkin | AI Skin Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center text-white font-sans">
+
+    <div class="bg-white/10 p-8 rounded-2xl backdrop-blur-md shadow-2xl border border-white/20 text-center max-w-md w-full">
+        <h1 class="text-3xl font-bold mb-6">SonikSkin AI</h1>
+        
+        <div id="status" class="mb-8 text-lg font-medium text-purple-200">Sistem Hazır</div>
+
+        <div class="space-y-4">
+            <button id="startBtn" onclick="startProcess()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                Kaydı Başlat
+            </button>
+
+            <button id="stopBtn" onclick="stopProcess()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg hidden transition duration-300">
+                Kaydı Bitir
+            </button>
+
+            <a id="downloadBtn" href="https://sonikskin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e" 
+               class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg hidden transition duration-300 inline-block text-center">
+                Görseli İndir ($10)
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function startProcess() {
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('stopBtn').classList.remove('hidden');
+            document.getElementById('status').innerText = "🔴 Kayıt Yapılıyor...";
+            document.getElementById('status').classList.add('animate-pulse');
+        }
+
+        function stopProcess() {
+            document.getElementById('stopBtn').classList.add('hidden');
+            document.getElementById('status').innerText = "✅ Kayıt Tamamlandı! Görseliniz Hazır.";
+            document.getElementById('status').classList.remove('animate-pulse');
+            document.getElementById('downloadBtn').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
