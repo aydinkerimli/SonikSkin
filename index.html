@@ -1,140 +1,54 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonikSkin | Ses Dövmesi Platformu</title>
-    <script src="https://unpkg.com/wavesurfer.js@7"></script>
-    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
+    <title>SonikSkin | Global</title>
     <style>
         :root { --neon: #00ffcc; --bg: #0a0a0a; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        
-        /* Navigasyon ve Dil */
-        nav { width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: #111; border-bottom: 1px solid #222; }
-        .logo { font-weight: bold; font-size: 24px; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
-        .lang-switch button { background: transparent; border: 1px solid var(--neon); color: var(--neon); cursor: pointer; padding: 5px 10px; border-radius: 5px; margin-left: 5px; }
-
-        /* Ana Alan */
-        .container { max-width: 600px; width: 90%; margin-top: 50px; text-align: center; }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        
-        /* Tasarım Kutusu */
-        #wave-outer { background: white; padding: 30px; border-radius: 15px; margin: 30px 0; box-shadow: 0 0 30px rgba(0,255,204,0.2); }
-        #wave-container { width: 100%; height: 130px; }
-
-        /* Butonlar */
-        .btn { padding: 18px 35px; border-radius: 50px; border: none; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 15px; }
-        #recordBtn { background: #ff4757; color: white; box-shadow: 0 5px 15px rgba(255,71,87,0.4); }
-        #recordBtn.recording { background: #2f3542; animation: pulse 1.5s infinite; }
-        #playBtn { background: var(--neon); color: black; display: none; }
-        #downloadBtn { background: white; color: black; border: 2px solid var(--neon); display: none; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(0.95); } 100% { transform: scale(1); } }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 10px; border-bottom: 1px solid #222; }
+        .logo { font-weight: bold; color: var(--neon); font-size: 20px; }
+        .lang-btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 { font-size: 28px; margin-bottom: 10px; }
+        #status { color: var(--neon); margin: 20px 0; font-weight: bold; height: 24px; }
+        .btn { padding: 20px; width: 100%; font-size: 18px; border-radius: 15px; border: none; cursor: pointer; margin-bottom: 15px; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
+        #recordBtn { background: #ff4757; color: white; box-shadow: 0 5px 15px rgba(255,71,87,0.3); }
+        #debug { color: #555; font-size: 11px; margin-top: 40px; border-top: 1px solid #222; padding-top: 10px; }
     </style>
 </head>
-<body>
+<body class="notranslate">
 
     <nav>
         <div class="logo">SONIKSKIN</div>
-        <div class="lang-switch">
-            <button onclick="changeLang('TR')">TR</button>
-            <button onclick="changeLang('EN')">EN</button>
-            <button onclick="changeLang('RU')">RU</button>
+        <div>
+            <button class="lang-btn" onclick="updateUI('TR')">TR</button>
+            <button class="lang-btn" onclick="updateUI('EN')">EN</button>
+            <button class="lang-btn" onclick="updateUI('RU')">RU</button>
         </div>
     </nav>
 
     <div class="container">
-        <h1 id="mainTitle">Sesini Sanata Dönüştür</h1>
-        <p id="subTitle">Dövmen için maksimum 8 saniyelik kayıt yap.</p>
-
-        <div id="wave-outer">
-            <div id="wave-container"></div>
-        </div>
-
-        <div id="timer" style="font-size: 2.5rem; color: var(--neon); margin-bottom: 20px;">00:00.0</div>
+        <h1 id="title">Sesini Sanata Dönüştür</h1>
+        <p id="subtitle">Dövmen için ses kaydı yapmaya hazır mısın?</p>
+        
+        <div id="status">Durum: Bekleniyor...</div>
 
         <button id="recordBtn" class="btn">KAYDA BAŞLA</button>
-        <button id="playBtn" class="btn">DİNLE / DURDUR</button>
-        <button id="downloadBtn" class="btn">TASARIMI İNDİR (.PNG)</button>
+        
+        <div id="debug">Sistem: Hazır.</div>
     </div>
 
     <script>
+        let currentLang = 'TR';
         const recordBtn = document.getElementById('recordBtn');
-        const playBtn = document.getElementById('playBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const timer = document.getElementById('timer');
+        const statusDisplay = document.getElementById('status');
+        const titleText = document.getElementById('title');
+        const subtitleText = document.getElementById('subtitle');
 
-        const wavesurfer = WaveSurfer.create({
-            container: '#wave-container',
-            waveColor: '#000000',
-            progressColor: '#444',
-            barWidth: 4,
-            barRadius: 4,
-            height: 130
-        });
-
-        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
-
-        // Mikrofon İzni ve Kayıt Başlatma
-        recordBtn.onclick = async () => {
-            if (record.isRecording()) {
-                record.stopRecording();
-                return;
-            }
-
-            try {
-                // Tarayıcıdan izin iste
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                await record.startRecording();
-                
-                recordBtn.textContent = 'KAYDI DURDUR';
-                recordBtn.classList.add('recording');
-                playBtn.style.display = 'none';
-                downloadBtn.style.display = 'none';
-            } catch (err) {
-                alert("Mikrofon hatası! Lütfen ayarlardan izin verin. Hata: " + err.name);
-            }
-        };
-
-        record.on('record-end', (blob) => {
-            recordBtn.textContent = 'YENİ KAYIT AL';
-            recordBtn.classList.remove('recording');
-            playBtn.style.display = 'block';
-            downloadBtn.style.display = 'block';
-            wavesurfer.load(URL.createObjectURL(blob));
-        });
-
-        playBtn.onclick = () => wavesurfer.playPause();
-
-        record.on('record-progress', (time) => {
-            const sec = (time / 1000).toFixed(1);
-            timer.textContent = `00:0${sec}`;
-            if (time >= 8000) record.stopRecording();
-        });
-
-        downloadBtn.onclick = () => {
-            html2canvas(document.querySelector("#wave-outer")).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'SonikSkin-Design.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        };
-
-        // Basit Dil Değiştirme Fonksiyonu (Geliştirilecek)
-        function changeLang(lang) {
-            const titles = {
-                'TR': { main: 'Sesini Sanata Dönüştür', sub: 'Maksimum 8 saniyelik kayıt yap.' },
-                'EN': { main: 'Turn Voice into Art', sub: 'Record up to 8 seconds.' },
-                'RU': { main: 'Превратите голос в искусство', sub: 'Запись до 8 секунд.' }
-            };
-            document.getElementById('mainTitle').innerText = titles[lang].main;
-            document.getElementById('subTitle').innerText = titles[lang].sub;
-            alert(lang + " seçildi!");
-        }
-    </script>
-</body>
-</html>
+        const langData = {
+            'TR': { title: 'Sesini Sanata Dönüştür', sub: 'Ses kaydı yapmaya hazır mısın?', start: 'KAYDA BAŞLA', stop: 'KAYDI DURDUR', ready: 'İzin Verildi!', wait: 'Mikrofon Aranıyor...' },
+            'EN': { title: 'Turn Voice into Art', sub: 'Ready to record your voice?', start: 'START RECORDING', stop: 'STOP RECORDING', ready: 'Permission Granted!', wait: 'Finding Mic...' },
+            'RU': { title: 'Голос в Искусство', sub: 'Готовы записать голос?', start: 'НАЧАТЬ ЗА
