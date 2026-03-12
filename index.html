@@ -3,89 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonikSkin v3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SonikSkin v4</title>
     <style>
-        body { background: #0a0a0a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .lang-bar { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; }
-        .l-btn { background: none; border: 2px solid #00ffcc; color: #00ffcc; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .main-btn { 
-            background: #ff4757; color: white; border: none; padding: 25px; 
-            width: 90%; max-width: 400px; font-size: 20px; font-weight: bold; 
-            border-radius: 15px; cursor: pointer; margin-top: 20px;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+        body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; margin: 0; padding: 20px; overflow-x: hidden; }
+        .lang-container { margin: 20px 0; display: flex; justify-content: center; gap: 8px; }
+        .l-btn { background: #111; border: 1px solid #00ffcc; color: #00ffcc; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .l-btn:active { background: #00ffcc; color: #000; }
+        h1 { font-size: 24px; margin: 30px 0 10px; color: #fff; }
+        p { color: #888; font-size: 15px; margin-bottom: 40px; }
+        .main-button { 
+            background: #ff4757; color: white; border: none; padding: 22px; 
+            width: 100%; max-width: 320px; font-size: 18px; font-weight: bold; 
+            border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        #status { color: #00ffcc; margin: 20px; font-size: 18px; height: 30px; }
-        .info { color: #555; font-size: 12px; margin-top: 50px; }
+        #status { margin: 25px 0; color: #00ffcc; font-weight: 500; font-size: 16px; min-height: 20px; }
     </style>
 </head>
 <body class="notranslate">
 
-    <div class="lang-bar">
-        <button class="l-btn" onclick="degistir('TR')">TR</button>
-        <button class="l-btn" onclick="degistir('EN')">EN</button>
-        <button class="l-btn" onclick="degistir('RU')">RU</button>
+    <div class="lang-container">
+        <button class="l-btn" onclick="translateUI('TR')">TR</button>
+        <button class="l-btn" onclick="translateUI('EN')">EN</button>
+        <button class="l-btn" onclick="translateUI('RU')">RU</button>
     </div>
 
-    <h1 id="baslik">Sesini Sanata Dönüştür</h1>
-    <p id="altbaslik">Dövmen için ses kaydı yapmaya hazır mısın?</p>
+    <h1 id="txt-title">Sesini Sanata Dönüştür</h1>
+    <p id="txt-sub">Dövmen için ses kaydı yapmaya hazır mısın?</p>
 
-    <div id="status">Durum: Hazır</div>
+    <div id="status">Sistem: Hazır</div>
 
-    <button id="anaButon" class="main-btn" onclick="kayitIslemi()">KAYDA BAŞLA</button>
-
-    <div class="info">Sistem Sürümü: 3.0.1 (Anti-Freeze)</div>
+    <button id="main-btn" class="main-button" onclick="handleAction()">KAYDA BAŞLA</button>
 
     <script>
-        // Dil Verileri
-        const diller = {
-            'TR': { h: "Sesini Sanata Dönüştür", p: "Dövmen için ses kaydı yapmaya hazır mısın?", b: "KAYDA BAŞLA", s: "Kayıt Başladı...", e: "Hata: Mikrofon Kapalı!" },
-            'EN': { h: "Turn Voice into Art", p: "Ready to record your sound?", b: "START RECORDING", s: "Recording...", e: "Error: Mic Blocked!" },
-            'RU': { h: "Голос в Искусство", p: "Готовы записать звук?", b: "НАЧАТЬ ЗАПИСЬ", s: "Запись...", e: "Ошибка микрофона!" }
+        const content = {
+            'TR': { title: "Sesini Sanata Dönüştür", sub: "Dövmen için ses kaydı yapmaya hazır mısın?", btn: "KAYDA BAŞLA", wait: "Mikrofon aranıyor...", active: "KAYIT YAPILIYOR", done: "Kayıt Başarılı!" },
+            'EN': { title: "Turn Voice into Art", sub: "Ready to record your sound?", btn: "START RECORDING", wait: "Finding mic...", active: "RECORDING NOW", done: "Record Complete!" },
+            'RU': { title: "Голос в Искусство", sub: "Готовы записать звук?", btn: "НАЧАТЬ ЗАПИСЬ", wait: "Поиск микрофона...", active: "ИДЕТ ЗАПИСЬ", done: "Запись завершена!" }
         };
 
-        let su ankiDil = 'TR';
+        let currentLanguage = 'TR';
 
-        // Dil Değiştirme Fonksiyonu
-        function degistir(lang) {
-            su ankiDil = lang;
-            document.getElementById('baslik').innerText = diller[lang].h;
-            document.getElementById('altbaslik').innerText = diller[lang].p;
-            document.getElementById('anaButon').innerText = diller[lang].b;
+        function translateUI(lang) {
+            currentLanguage = lang;
+            document.getElementById('txt-title').innerText = content[lang].title;
+            document.getElementById('txt-sub').innerText = content[lang].sub;
+            document.getElementById('main-btn').innerText = content[lang].btn;
             document.getElementById('status').innerText = "Dil: " + lang;
-            console.log("Dil seçildi: " + lang);
+            console.log("Language changed to: " + lang);
         }
 
-        // Kayıt ve Mikrofon Fonksiyonu
-        async function kayitIslemi() {
-            const btn = document.getElementById('anaButon');
+        async function handleAction() {
+            const btn = document.getElementById('main-btn');
             const st = document.getElementById('status');
             
-            st.innerText = diller[su ankiDil].s;
-            btn.style.background = "#2f3542";
+            st.innerText = content[currentLanguage].wait;
 
             try {
-                // Mikrofon izni iste
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                st.innerText = "MİKROFON AKTİF - SES ALINIYOR";
-                
-                // 3 saniye sonra testi bitir
+                st.innerText = content[currentLanguage].active;
+                btn.innerText = content[currentLanguage].active;
+                btn.style.background = "#222";
+
                 setTimeout(() => {
-                    stream.getTracks().forEach(t => t.stop());
+                    stream.getTracks().forEach(track => track.stop());
                     btn.style.background = "#ff4757";
-                    btn.innerText = diller[su ankiDil].b;
-                    st.innerText = "Kayıt Başarıyla Tamamlandı.";
+                    btn.innerText = content[currentLanguage].btn;
+                    st.innerText = content[currentLanguage].done;
                 }, 3000);
 
             } catch (err) {
-                st.innerText = diller[su ankiDil].e;
-                btn.style.background = "red";
-                alert("Lütfen tarayıcı ayarlarından mikrofon izni verin.");
+                alert("Hata: Mikrofon izni verilmedi!");
+                st.innerText = "Hata!";
             }
         }
-
-        // Sayfa açıldığında otomatik TR yap
-        window.onload = () => { degistir('TR'); };
     </script>
 </body>
 </html>
