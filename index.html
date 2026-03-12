@@ -1,62 +1,26 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonikSkin | AI Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    </style>
-</head>
-<body class="gradient-bg min-h-screen flex items-center justify-center text-white px-4">
+class SporTakip:
+    def __init__(self, kullanici_adi):
+        self.kullanici = kullanici_adi
+        self.egzersizler = []
 
-    <div class="glass p-8 rounded-3xl shadow-2xl text-center max-w-md w-full">
-        <h1 class="text-2xl font-bold mb-2 tracking-tight">SonikSkin <span class="text-purple-400">Premium</span></h1>
-        <p class="text-gray-400 text-sm mb-8">Sesini AI ile skin'e dönüştür</p>
-        
-        <div id="status" class="mb-6 text-lg font-medium">Sistem Hazır</div>
-
-        <div id="audioPreview" class="hidden mb-6 p-4 bg-black/20 rounded-xl">
-            <p class="text-xs text-gray-400 mb-2 uppercase">Kaydın Önizlemesi</p>
-            <audio id="player" controls class="w-full h-8"></audio>
-        </div>
-
-        <div class="space-y-4">
-            <button id="startBtn" onclick="startRecord()" class="w-full bg-red-600 hover:bg-red-700 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-red-900/20">
-                ● Kaydı Başlat
-            </button>
-
-            <button id="stopBtn" onclick="stopRecord()" class="hidden w-full bg-gray-200 hover:bg-white text-black py-4 rounded-2xl font-bold transition-all">
-                ■ Kaydı Bitir
-            </button>
-
-            <a id="downloadBtn" href="https://sonikskin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e" 
-               class="hidden w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-purple-900/40 inline-block">
-                Görseli ve Sesi İndir ($10)
-            </a>
-        </div>
-    </div>
-
-    <script>
-        function startRecord() {
-            document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('stopBtn').classList.remove('hidden');
-            document.getElementById('status').innerHTML = '<span class="text-red-500 animate-pulse">● Kaydediliyor...</span>';
-            // Buraya gerçek mikrofon erişimi kodları eklenebilir
+    def egzersiz_ekle(self, isim, sure, kalori):
+        # Gereksiz tüm komutlar ve notlar silindi.
+        yeni_kayit = {
+            "egzersiz": isim,
+            "sure_dk": sure,
+            "yakilan_kalori": kalori
         }
+        self.egzersizler.append(yeni_kayit)
+        return f"{isim} başarıyla eklendi."
 
-        function stopRecord() {
-            document.getElementById('stopBtn').classList.add('hidden');
-            document.getElementById('status').innerText = "✅ Kayıt Tamamlandı!";
-            document.getElementById('audioPreview').classList.remove('hidden');
-            document.getElementById('downloadBtn').classList.remove('hidden');
-            
-            // Temsili bir ses dosyası (Test için)
-            const player = document.getElementById('player');
-            player.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
-        }
-    </script>
-</body>
-</html>
+    def ozet_goster(self):
+        print(f"--- {self.kullanici} İçin Spor Özeti ---")
+        for e in self.egzersizler:
+            print(f"- {e['egzersiz']}: {e['sure_dk']} dk, {e['yakilan_kalori']} kcal")
+
+# Kullanım:
+sporcu = SporTakip("Mert")
+sporcu.egzersiz_ekle("Koşu", 30, 300)
+sporcu.egzersiz_ekle("Yüzme", 45, 500)
+
+sporcu.ozet_goster()
