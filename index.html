@@ -1,33 +1,118 @@
-// GÖRSELİ İNDİRME FONKSİYONU - GÜÇLENDİRİLMİŞ VERSİYON
+<!DOCTYPE html>
+<html lang="tr" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonikSkin | Final Pro</title>
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/record.min.js"></script>
+    <style>
+        :root { --neon: #00ffcc; --bg: #000; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .l-btn { background: #111; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        #waveform { width: 100%; height: 200px; margin: 30px 0; background: #050505; border-radius: 10px; border: 1px solid #111; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .main-btn { 
+            background: #ff4757; color: white; border: none; padding: 18px; 
+            width: 100%; max-width: 300px; font-size: 16px; font-weight: bold; 
+            border-radius: 50px; cursor: pointer; transition: 0.3s;
+        }
+        .play-btn { background: var(--neon); color: #000; display: none; }
+        .download-btn { background: #fff; color: #000; display: none; }
+        .recording { background: #222 !important; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="notranslate">
+
+    <div class="nav">
+        <span style="color:var(--neon); font-weight:bold;">SONIKSKIN</span>
+        <div>
+            <button class="l-btn" onclick="setLang('TR')">TR</button>
+            <button class="l-btn" onclick="setLang('EN')">EN</button>
+            <button class="l-btn" onclick="setLang('RU')">RU</button>
+        </div>
+    </div>
+
+    <h1 id="t-h">Sesini Sanata Dönüştür</h1>
+    <div id="waveform"></div>
+
+    <div class="controls">
+        <button id="rec-btn" class="main-btn">KAYDA BAŞLA</button>
+        <button id="play-btn" class="main-btn play-btn">KAYDI DİNLE</button>
+        <button id="download-btn" class="main-btn download-btn">GÖRSELİ İNDİR (PNG)</button>
+    </div>
+
+    <script>
+        const texts = {
+            'TR': { h: "Sesini Sanata Dönüştür", b1: "KAYDA BAŞLA", b2: "DURDUR", p: "KAYDI DİNLE", d: "GÖRSELİ İNDİR" },
+            'EN': { h: "Turn Voice into Art", b1: "START RECORDING", b2: "STOP", p: "PLAY RECORDING", d: "DOWNLOAD IMAGE" },
+            'RU': { h: "Голос в Искусство", b1: "НАЧАТЬ ЗАПИСЬ", b2: "СТОП", p: "ПРОСЛУШАТЬ", d: "СКАЧАТЬ ГРАФИК" }
+        };
+
+        let currentLang = 'TR';
+        const wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+            waveColor: '#00ffcc',
+            progressColor: '#fff',
+            barWidth: 3,
+            barGap: 3,
+            height: 200
+        });
+
+        const record = wavesurfer.registerPlugin(WaveSurfer.Record.create());
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('t-h').innerText = texts[lang].h;
+            if(!record.isRecording()) {
+                document.getElementById('rec-btn').innerText = texts[lang].b1;
+                document.getElementById('play-btn').innerText = texts[lang].p;
+                document.getElementById('download-btn').innerText = texts[lang].d;
+            }
+        }
+
+        const recBtn = document.getElementById('rec-btn');
+        const playBtn = document.getElementById('play-btn');
+        const downBtn = document.getElementById('download-btn');
+
+        recBtn.onclick = async () => {
+            if (record.isRecording()) {
+                record.stopRecording();
+                recBtn.innerText = texts[currentLang].b1;
+                recBtn.classList.remove('recording');
+                return;
+            }
+            playBtn.style.display = 'none';
+            downBtn.style.display = 'none';
+            await record.startRecording();
+            recBtn.innerText = texts[currentLang].b2;
+            recBtn.classList.add('recording');
+        };
+
+        record.on('record-end', (blob) => {
+            wavesurfer.load(URL.createObjectURL(blob));
+            playBtn.style.display = 'block';
+            downBtn.style.display = 'block';
+        });
+
+        playBtn.onclick = () => wavesurfer.playPause();
+
+        // GÜÇLENDİRİLMİŞ İNDİRME FONKSİYONU
         downBtn.onclick = () => {
-            // Waveform içindeki tüm çizim katmanlarını bul
-            const canvases = document.querySelectorAll('#waveform canvas');
-            if (canvases.length > 0) {
-                // En üstteki ana çizimi al
-                const mainCanvas = canvases[0];
-                
-                try {
-                    // Resmi PNG formatına çevir
-                    const dataUrl = mainCanvas.toDataURL('image/png');
-                    
-                    // İndirme işlemini tetiklemek için geçici bir 'a' etiketi oluştur
-                    const link = document.createElement('a');
-                    link.href = dataUrl;
-                    
-                    // Dosya ismini tarihli yaparak karışıklığı önle
-                    const date = new Date().getTime();
-                    link.download = `sonikskin-dalga-${date}.png`;
-                    
-                    // Sayfaya ekle, tıkla ve sil (Mobil uyumluluk için şart)
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                } catch (e) {
-                    console.error("Görsel oluşturma hatası:", e);
-                    alert("Görsel hazırlanırken bir sorun oluştu. Lütfen ekran görüntüsü almayı deneyin.");
-                }
-            } else {
-                alert("Henüz bir ses dalgası oluşturulmadı!");
+            const canvas = document.querySelector('#waveform canvas');
+            if (canvas) {
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = `sonikskin-${Date.now()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         };
+    </script>
+</body>
+</html>
