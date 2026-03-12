@@ -3,36 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Ultimate Global</title>
+    <title>Sonic Skin | V3 Pro</title>
     <style>
-        :root { --accent: #d4ff00; --bg: #050505; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+        :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
+        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top:0; z-index:999; }
-        .logo { font-weight: bold; color: var(--accent); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 12px; align-items: center; }
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; }
+        .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
 
-        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-artist { background: var(--accent); color: #000; border: none; }
-        .btn-top:hover { border-color: var(--accent); }
+        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-artist { background: var(--neon); color: #000; border: none; }
 
-        .main-container { display: flex; justify-content: center; gap: 25px; padding: 50px 15px; flex-wrap: wrap; }
-        .panel { background: #111; border: 2px solid #222; border-radius: 24px; width: 420px; padding: 30px; box-sizing: border-box; }
+        /* Main */
+        .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
+        .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 420px; padding: 25px; box-sizing: border-box; text-align: center; }
         
-        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 25px; border-radius: 15px; display: flex; align-items: center; overflow: hidden; position: relative; }
+        .box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; }
         canvas { width: 100%; height: 50%; }
 
-        .btn { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        #recBtn { background: #ff3e3e; color: white; }
-        .play-btn { background: #333; color: white; display: none; }
-        .buy-btn { background: var(--accent); color: black; display: none; text-decoration: none; text-align: center; }
+        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; text-decoration: none; }
+        .rec-btn { background: #ff3e3e; color: white; }
+        .file-btn { background: #222; color: #fff; border: 1px solid #333; }
+        .play-btn { background: #444; color: white; display: none; }
+        .buy-btn { background: var(--neon); color: black; display: none; }
 
-        /* Modal / Giriş Penceresi */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: #161616; padding: 40px; border-radius: 30px; border: 1px solid #333; width: 340px; text-align: center; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .social-btn { width: 100%; padding: 15px; margin: 12px 0; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
+        .soc-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
         
-        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px 12px; border-radius: 8px; cursor: pointer; outline: none; }
+        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,55 +42,79 @@
     <div class="navbar">
         <div class="logo">SONIC SKIN</div>
         <div class="nav-right">
-            <select id="langSelect">
+            <select id="langSel">
                 <option value="tr">TR</option>
                 <option value="en">EN</option>
                 <option value="ru">RU</option>
-                <option value="zh">ZH (中文)</option>
+                <option value="zh">ZH</option>
                 <option value="de">DE</option>
                 <option value="es">ES</option>
                 <option value="fr">FR</option>
             </select>
-            <button class="btn-top" id="memberLoginBtn">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist" id="artistLoginBtn">SANATÇI PORTALI</button>
+            <button class="btn-top" onclick="showPop('login')">GİRİŞ YAP</button>
+            <button class="btn-top btn-artist" onclick="showPop('artist')">SANATÇI PORTALI</button>
         </div>
     </div>
 
-    <div id="loginModal" class="modal">
+    <div id="pop" class="modal">
         <div class="modal-content">
-            <h2 id="mTitle" style="margin-bottom:30px;">Giriş Yap</h2>
-            <button class="social-btn" style="background:white; color:black;" onclick="alert('Gmail servisine yönlendiriliyor...')">Gmail ile Giriş</button>
-            <button class="social-btn" style="background:black; color:white; border:1px solid #444;" onclick="alert('Apple servisine yönlendiriliyor...')">Apple ID ile Bağlan</button>
-            <button id="closeModal" style="background:none; border:none; color:#ff3e3e; margin-top:25px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px;">KAPAT</button>
+            <h3 id="pTitle">Giriş Yap</h3>
+            <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
+            <button class="soc-btn" style="background:black; color:white; border:1px solid #444;">Apple ID ile Giriş</button>
+            <button onclick="hidePop()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
         </div>
     </div>
 
     <div class="main-container">
         <div class="panel">
-            <h2 id="t1" style="text-align:center; font-size: 1.1rem; letter-spacing: 1px;">CANLI SES DÖVMESİ</h2>
-            <div class="tattoo-box"><canvas id="c1"></canvas></div>
-            <button id="recBtn" class="btn">🎤 SESİ KAYDET</button>
-            <button id="p1" class="btn play-btn">▶️ KAYDI DİNLE</button>
-            <a href="#" id="b1" class="btn buy-btn">TASLAĞI SATIN AL</a>
+            <h2 id="h1">CANLI SES DÖVMESİ</h2>
+            <div class="box"><canvas id="cv1"></canvas></div>
+            <button id="btnRec" class="btn rec-btn">🎤 SESİ KAYDET</button>
+            <button id="btnP1" class="btn play-btn">▶️ DİNLE</button>
+            <a href="#" id="btnB1" class="btn buy-btn">SATIN AL</a>
         </div>
 
         <div class="panel">
-            <h2 id="t2" style="text-align:center; font-size: 1.1rem; letter-spacing: 1px;">DOSYADAN DÖVME YAP</h2>
-            <div class="tattoo-box"><canvas id="c2"></canvas></div>
-            <input type="file" id="fIn" hidden accept="audio/*">
-            <button id="fBtn" class="btn" style="background:#222; color:#fff;">📁 SES DOSYASI SEÇ</button>
-            <button id="p2" class="btn play-btn">▶️ DOSYAYI DİNLE</button>
-            <a href="#" id="b2" class="btn buy-btn">TASLAĞI SATIN AL</a>
+            <h2 id="h2">DOSYADAN DÖVME YAP</h2>
+            <div class="box"><canvas id="cv2"></canvas></div>
+            <input type="file" id="fInput" hidden accept="audio/*">
+            <button id="btnF" class="btn file-btn">📁 DOSYA SEÇ</button>
+            <button id="btnP2" class="btn play-btn">▶️ DİNLE</button>
+            <a href="#" id="btnB2" class="btn buy-btn">SATIN AL</a>
         </div>
     </div>
 
     <script>
-        // TÜM DİLLER - EKSİKSİZ LİSTE
-        const translations = {
-            tr: {t1:"CANLI SES DÖVMESİ", t2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 SES DOSYASI SEÇ", buy:"TASLAĞI SATIN AL", l:"GİRİŞ YAP", p:"SANATÇI PORTALI"},
-            en: {t1:"LIVE VOICE TATTOO", t2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE AUDIO", buy:"BUY DRAFT", l:"LOGIN", p:"ARTIST PORTAL"},
-            ru: {t1:"ЖИВАЯ ТАТУ", t2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ ФАЙЛ", buy:"КУПИТЬ", l:"ВХОД", p:"ПОРТАЛ"},
-            zh: {t1:"现场声音纹身", t2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"购买草图", l:"登录", p:"艺术家"},
-            de: {t1:"LIVE-TÄTOWIERUNG", t2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 DATEI WÄHLEN", buy:"KAUFEN", l:"LOGIN", p:"KÜNSTLER"},
-            es: {t1:"TATUAJE EN VIVO", t2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR ARCHIVO", buy:"COMPRAR", l:"ENTRAR", p:"ARTISTA"},
-            fr: {t1:"TATOUAGE VOCAL", t2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"
+        // 1. DİL SİSTEMİ (TIKIR TIKIR ÇALIŞAN VERSİYON)
+        const dict = {
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"SATIN AL"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"BUY DRAFT"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"КУПИТЬ"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"购买草图"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 DATEI WÄHLEN", buy:"KAUFEN"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"COMPRAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"ACHETER"}
+        };
+
+        document.getElementById('langSel').onchange = function() {
+            const l = dict[this.value];
+            document.getElementById('h1').innerText = l.h1;
+            document.getElementById('h2').innerText = l.h2;
+            document.getElementById('btnRec').innerText = l.rec;
+            document.getElementById('btnF').innerText = l.f;
+            document.getElementById('btnB1').innerText = l.buy;
+            document.getElementById('btnB2').innerText = l.buy;
+        };
+
+        // 2. MODAL SİSTEMİ
+        function showPop(type) {
+            document.getElementById('pTitle').innerText = type === 'artist' ? 'Sanatçı Portalı' : 'Giriş Yap';
+            document.getElementById('pop').style.display = 'flex';
+        }
+        function hidePop() { document.getElementById('pop').style.display = 'none'; }
+
+        // 3. SES VE GÖRSELLEŞTİRME SİSTEMİ
+        let aCtx, rec, chunks = [], lAud = new Audio(), fAud = new Audio();
+
+        function draw(an, id) {
+            const c = document.getElementById(id), ctx = c.getContext
