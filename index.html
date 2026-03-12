@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Memory Creator</title>
+    <title>Sonic Skin | Memory Creator Pro</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -26,8 +26,7 @@
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         
-        /* Önemli: "Bunu Hatıraya Dönüştür" Butonu */
-        .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; display: none; justify-content: center; align-items: center; }
+        .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; justify-content: center; align-items: center; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
@@ -72,7 +71,7 @@
             <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
             <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
             <button id="bR1" class="btn retry-btn" onclick="tekrarYap()">🔄 YENİDEN TEKRAR YAP</button>
-            <a href="#" id="bS1" class="btn buy-btn">BUNU HATIRAYA DÖNÜŞTÜR</a>
+            <button id="bS1" class="btn buy-btn" onclick="resimIndir('cv1')">BUNU HATIRAYA DÖNÜŞTÜR</button>
         </div>
 
         <div class="panel">
@@ -81,7 +80,7 @@
             <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
             <button class="btn" style="background:#222; color:#fff;" onclick="document.getElementById('fIn').click()" id="bF">📁 DOSYA SEÇ</button>
             <button id="bP2" class="btn play-btn" onclick="dinle2()">▶️ DİNLE</button>
-            <a href="#" id="bS2" class="btn buy-btn">BUNU HATIRAYA DÖNÜŞTÜR</a>
+            <button id="bS2" class="btn buy-btn" onclick="resimIndir('cv2')">BUNU HATIRAYA DÖNÜŞTÜR</button>
         </div>
     </div>
 
@@ -161,7 +160,16 @@
             const c = document.getElementById('cv1');
             const x = c.getContext('2d');
             x.clearRect(0,0,c.width,c.height);
-            source1 = null; // Kaynağı sıfırla ki yeni kayıtta hata vermesin
+            source1 = null;
+        }
+
+        // RESMİ İNDİRME FONKSİYONU
+        function resimIndir(id) {
+            const c = document.getElementById(id);
+            const link = document.createElement('a');
+            link.download = 'sonic-skin-memory.png';
+            link.href = c.toDataURL("image/png");
+            link.click();
         }
 
         function dinle1() {
