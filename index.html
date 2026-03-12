@@ -2,131 +2,135 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Sonic Skin | Sanat Laboratuvarı</title>
+    <title>Sonic Skin | Voice Tattoo Art</title>
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
-        .header { display: flex; justify-content: space-between; padding: 20px 50px; border-bottom: 1px solid #222; }
-        select { background: #111; color: #fff; border: 1px solid #444; padding: 5px; border-radius: 5px; }
-        
-        .main { display: flex; justify-content: center; gap: 40px; padding: 50px; flex-wrap: wrap; }
-        .panel { background: #0a0a0a; border: 1px solid #333; border-radius: 25px; width: 400px; padding: 30px; transition: 0.3s; }
-        .panel:hover { border-color: #d4ff00; }
+        :root { --accent: #d4ff00; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; text-align: center; }
+        .header { padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; px: 50px; }
+        select { background: #111; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; }
 
-        /* KARE GÖRSEL ALANI */
-        .visual-box { 
+        .container { display: flex; justify-content: center; gap: 30px; padding: 40px; flex-wrap: wrap; }
+        .panel { background: #0c0c0c; border: 1px solid #222; border-radius: 20px; width: 420px; padding: 25px; }
+        
+        /* DÖVME TASLAK KARESI */
+        .tattoo-box { 
             width: 100%; 
             aspect-ratio: 1/1; 
             background: #000; 
-            border: 2px solid #222; 
-            border-radius: 15px; 
+            border: 1px dashed #444; 
             margin-bottom: 20px; 
-            position: relative; 
-            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas { width: 100%; height: 60%; } /* Ses dalgası ortada ince bir şerit gibi */
 
-        .btn { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .btn-rec { background: #ff4b2b; color: #fff; }
-        .btn-play { background: #333; color: #fff; display: none; }
-        .btn-buy { background: #d4ff00; color: #000; display: none; }
+        .btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-rec { background: #ff3e3e; color: white; }
+        .btn-buy { background: var(--accent); color: black; display: none; }
+        .btn-play { background: #333; color: white; display: none; }
+        
+        .info-text { font-size: 12px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="font-size: 22px; font-weight: bold; color: #d4ff00;">SONIC SKIN</div>
-        <select>
-            <option>Türkçe</option><option>English</option><option>Русский</option><option>Français</option><option>Deutsch</option><option>Español</option><option>Italiano</option><option>Português</option>
+    <div class="header" style="padding: 10px 50px;">
+        <div style="font-weight: bold; color: var(--accent); letter-spacing: 2px;">SONIC SKIN</div>
+        <select id="lang">
+            <option value="tr">Türkçe</option><option value="en">English</option>
         </select>
     </div>
 
-    <div class="main">
+    <div class="container">
         <div class="panel">
-            <h3>CANLI KAYIT ANALİZİ</h3>
-            <div class="visual-box">
-                <canvas id="liveCanvas"></canvas>
+            <h2 id="title">SES DÖVMENİ TASARLA</h2>
+            <div class="tattoo-box" id="captureArea">
+                <canvas id="waveCanvas"></canvas>
             </div>
-            <button id="recBtn" class="btn btn-rec">🎤 SESİ KAYDET</button>
-            <button id="playBtn" class="btn btn-play">▶️ KAYDI DİNLE</button>
-            <button id="buyBtn" class="btn btn-buy">GÖRSELİ YARAT VE İNDİR</button>
+            
+            <button id="recBtn" class="btn btn-rec">🎤 SESİNİ KAYDET (4sn)</button>
+            <button id="playBtn" class="btn btn-play">▶️ SESİ DİNLE</button>
+            <button id="buyBtn" class="btn btn-buy">DÖVME TASLAĞINI SATIN AL & İNDİR</button>
+            
+            <p class="info-text">Ödeme sonrası sesinizin yüksek çözünürlüklü dalga formu görseli (PNG) e-postanıza gönderilir.</p>
         </div>
 
         <div class="panel">
-            <h3>HAZIR SES DOSYASI</h3>
-            <div class="visual-box">
-                <canvas id="uploadCanvas"></canvas>
+            <h2>DOSYADAN DÖVME YAP</h2>
+            <div class="tattoo-box">
+                <div id="uploadStatus" style="color:#444">Ses dosyası yükleyin</div>
             </div>
-            <input type="file" id="fileIn" hidden accept="audio/*">
-            <button onclick="document.getElementById('fileIn').click()" class="btn" style="background:#444; color:#fff;">📁 SES DOSYASI SEÇ</button>
-            <button id="buyBtn2" class="btn btn-buy">DÖNÜŞTÜR VE İNDİR</button>
+            <input type="file" id="audioUp" hidden>
+            <button onclick="document.getElementById('audioUp').click()" class="btn" style="background:#222; color:white;">📁 DOSYA SEÇ</button>
+            <button id="buyBtn2" class="btn btn-buy">BU DALGAYI SATIN AL</button>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('liveCanvas');
+        const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         const recBtn = document.getElementById('recBtn');
-        const playBtn = document.getElementById('playBtn');
         const buyBtn = document.getElementById('buyBtn');
+        const playBtn = document.getElementById('playBtn');
 
-        let audioBlob, audioUrl, mediaRecorder, audioChunks = [];
-        let audio = new Audio();
-        let animationId;
-
-        // Kare Boyutu Ayarı
-        canvas.width = 400; canvas.height = 400;
+        let audioCtx, analyser, dataArray, mediaRecorder, chunks = [], audio = new Audio();
 
         recBtn.onclick = async () => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const analyser = audioCtx.createAnalyser();
-            const source = audioCtx.createMediaStreamSource(stream);
-            source.connect(analyser);
-            analyser.fftSize = 128;
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            audioCtx = new AudioContext();
+            analyser = audioCtx.createAnalyser();
+            audioCtx.createMediaStreamSource(stream).connect(analyser);
+            analyser.fftSize = 256;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
 
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.start();
-            recBtn.innerText = "KAYDEDİLİYOR... (5sn)";
-            
-            // Görselleştirme Fonksiyonu (Doku Efekti)
-            function render() {
-                analyser.getByteFrequencyData(dataArray);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Hafif iz bırakma
+            recBtn.innerText = "SESİNİZ İŞLENİYOR...";
+
+            function drawWave() {
+                if(mediaRecorder.state === "inactive") return;
+                requestAnimationFrame(drawWave);
+                analyser.getByteTimeDomainData(dataArray);
+
+                ctx.fillStyle = "black";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#d4ff00"; // Neon dalga çizgisi
+                ctx.beginPath();
 
-                dataArray.forEach((v, i) => {
-                    const radius = (v / 255) * 60;
-                    ctx.beginPath();
-                    ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, radius, 0, Math.PI * 2);
-                    ctx.fillStyle = `hsla(${200 + v}, 80%, 60%, 0.3)`;
-                    ctx.fill();
-                });
-                animationId = requestAnimationFrame(render);
+                let sliceWidth = canvas.width / dataArray.length;
+                let x = 0;
+                for(let i = 0; i < dataArray.length; i++) {
+                    let v = dataArray[i] / 128.0;
+                    let y = v * canvas.height / 2;
+                    if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+                ctx.stroke();
             }
-            render();
+            drawWave();
 
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                cancelAnimationFrame(animationId);
-                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                audioUrl = URL.createObjectURL(audioBlob);
-                audio.src = audioUrl;
-                playBtn.style.display = 'block';
-                buyBtn.style.display = 'block';
-                recBtn.style.display = 'none';
+            setTimeout(() => {
+                mediaRecorder.stop();
                 stream.getTracks().forEach(t => t.stop());
-            };
+                recBtn.style.display = "none";
+                buyBtn.style.display = "block";
+                playBtn.style.display = "block";
+            }, 4000);
 
-            setTimeout(() => { if(mediaRecorder.state === "recording") mediaRecorder.stop(); }, 5000);
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/wav' });
+                audio.src = URL.createObjectURL(blob);
+            };
         };
 
         playBtn.onclick = () => audio.play();
-        buyBtn.onclick = () => window.location.href = 'https://sonic-skin.lemonsqueezy.com/checkout';
-        
-        document.getElementById('fileIn').onchange = () => {
-            document.getElementById('buyBtn2').style.display = 'block';
-            alert("Dosya başarıyla yüklendi!");
+        buyBtn.onclick = () => {
+            // Lemon Squeezy linkine giderken kullanıcının oluşturduğu görseli temsil eder
+            window.location.href = 'https://sonic-skin.lemonsqueezy.com/checkout';
         };
     </script>
 </body>
