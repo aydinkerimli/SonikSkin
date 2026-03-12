@@ -1,87 +1,91 @@
-import React, { useState, useRef } from 'react';
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sonic Skin Art Generator</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        canvas { border: 2px solid #333; border-radius: 20px; background: #000; max-width: 90%; margin-top: 20px; }
+        .btn { padding: 15px 30px; font-size: 18px; border-radius: 50px; cursor: pointer; border: none; font-weight: bold; margin: 10px; transition: 0.3s; }
+        .record-btn { background: #ff4b2b; color: white; }
+        .buy-btn { background: #d4ff00; color: black; display: none; }
+        #status { margin: 15px; color: #888; }
+    </style>
+</head>
+<body>
 
-const SonicSkinProjesi = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const canvasRef = useRef(null);
+    <h1>Sonic Skin Art Generator</h1>
+    <p>Sesini kaydet, benzersiz deri dokuna dönüştür.</p>
 
-  // SESİ GÖRSELE DÖNÜŞTÜREN SİHİRLİ FONKSİYON
-  const startSonicArt = async () => {
-    setIsRecording(true);
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const audioContext = new AudioContext();
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    source.connect(analyser);
+    <canvas id="sonicCanvas" width="800" height="500"></canvas>
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-    const draw = () => {
-      if (!isRecording) return;
-      requestAnimationFrame(draw);
-      analyser.getByteFrequencyData(dataArray);
-
-      // Burası "Skin" (Deri) dokusunu oluşturan kısım
-      ctx.fillStyle = 'rgba(10, 10, 10, 0.1)'; // Hafif iz bırakma efekti
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      dataArray.forEach((val, i) => {
-        const ratio = val / 255;
-        ctx.beginPath();
-        // Sesin şiddetine göre organik daireler/dokular çiziyoruz
-        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, ratio * 50, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(${200 + val}, 70%, 60%)`; // Sese göre değişen renkler
-        ctx.fill();
-      });
-    };
-    draw();
-    
-    // 5 saniye sonra kaydı otomatik durdur ve ödeme butonunu göster
-    setTimeout(() => {
-      setIsRecording(false);
-      setShowCheckout(true);
-      stream.getTracks().forEach(track => track.stop());
-    }, 5000);
-  };
-
-  return (
-    <div style={{ textAlign: 'center', backgroundColor: '#0a0a0a', color: 'white', minHeight: '100vh', padding: '20px' }}>
-      <h1>Sonic Skin Art Generator</h1>
-      <p>Sesini kaydet, benzersiz deri dokunu dönüştür.</p>
-      
-      <canvas ref={canvasRef} width={600} height={400} style={{ border: '2px solid #333', borderRadius: '20px', marginBottom: '20px' }} />
-
-      <div>
-        {!isRecording && !showCheckout && (
-          <button onClick={startSonicArt} style={buttonStyle}>🎤 Sesini Analiz Et</button>
-        )}
-
-        {isRecording && <p>Sesin sanata dönüşüyor... Lütfen konuşun.</p>}
-
-        {showCheckout && (
-          <div>
-            <h3>Harika bir doku oluştu!</h3>
-            <button 
-              onClick={() => window.location.href = 'https://YOUR_STORE.lemonsqueezy.com/checkout/buy/DESIGN_ID'} 
-              style={{...buttonStyle, backgroundColor: '#d4ff00', color: 'black'}}>
-              Görseli İndirmek İçin Satın Al ($5)
-            </button>
-          </div>
-        )}
-      </div>
+    <div id="controls">
+        <button id="startBtn" class="btn record-btn">🎤 Sesini Analiz Et</button>
+        <div id="status"></div>
+        <button id="buyBtn" class="btn buy-btn">Görseli Satın Al ve İndir ($5)</button>
     </div>
-  );
-};
 
-const buttonStyle = {
-  padding: '15px 30px',
-  fontSize: '18px',
-  borderRadius: '50px',
-  cursor: 'pointer',
-  border: 'none',
-  fontWeight: 'bold'
-};
+    <script>
+        const canvas = document.getElementById('sonicCanvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const buyBtn = document.getElementById('buyBtn');
+        const status = document.getElementById('status');
 
-export default SonicSkinProjesi;
+        let isRecording = false;
+
+        startBtn.onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source.connect(analyser);
+
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                isRecording = true;
+                startBtn.style.display = 'none';
+                status.innerText = "Sesin sanata dönüşüyor... Konuşmaya devam et!";
+
+                function draw() {
+                    if (!isRecording) return;
+                    requestAnimationFrame(draw);
+                    analyser.getByteFrequencyData(dataArray);
+
+                    // İz bırakarak çizim yap (Doku/Skin efekti)
+                    ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    dataArray.forEach((val, i) => {
+                        const ratio = val / 255;
+                        if(val > 0) {
+                            ctx.beginPath();
+                            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, ratio * 40, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsl(${180 + (val)}, 60%, 50%)`;
+                            ctx.fill();
+                        }
+                    });
+                }
+                draw();
+
+                // 6 saniye sonra durdur
+                setTimeout(() => {
+                    isRecording = false;
+                    status.innerText = "İnanılmaz bir doku oluştu!";
+                    buyBtn.style.display = 'inline-block';
+                    stream.getTracks().forEach(track => track.stop());
+                }, 6000);
+
+            } catch (err) {
+                alert("Mikrofon izni gerekli!");
+            }
+        };
+
+        buyBtn.onclick = () => {
+            // BURAYA KENDİ LEMON SQUEEZY LİNKİNİ KOYACAKSIN
+            window.location.href = 'https://sonic-skin.lemonsqueezy.com/checkout';
+        };
+    </script>
+</body>
+</html>
