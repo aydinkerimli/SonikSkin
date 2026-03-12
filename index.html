@@ -1,25 +1,38 @@
-class SporYonetimi:
-    def __init__(self):
-        self.aktiviteler = []
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spor Takip</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .kart { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; }
+    </style>
+</head>
+<body>
 
-    def aktivite_kaydet(self, ad, dakika, kalori):
-        self.aktiviteler.append({
-            "ad": ad,
-            "sure": dakika,
-            "kalori": kalori
-        })
-        print(f"{ad} kaydedildi.")
+<div class="kart">
+    <h2>Spor Takip Sistemi</h2>
+    <div id="sonuc"></div>
+</div>
 
-    def rapor_olustur(self):
-        print("\n--- SPOR ÖZETİ ---")
-        toplam = 0
-        for a in self.aktiviteler:
-            print(f"{a['ad']}: {a['sure']} dk - {a['kalori']} kcal")
-            toplam += a['kalori']
-        print(f"Toplam: {toplam} kcal\n")
+<script>
+    // Burası artık "renkli" görünecek çünkü HTML'e uygun!
+    const aktiviteler = [
+        { ad: "Kardiyo", sure: 40, kalori: 400 },
+        { ad: "Ağırlık", sure: 50, kalori: 250 }
+    ];
 
-# Çalıştırma
-takip = SporYonetimi()
-takip.aktivite_kaydet("Kardiyo", 40, 400)
-takip.aktivite_kaydet("Ağırlık", 50, 250)
-takip.rapor_olustur()
+    let cikti = "";
+    let toplam = 0;
+
+    aktiviteler.forEach(a => {
+        cikti += `<p><b>${a.ad}</b>: ${a.sure} dk - ${a.kalori} kcal</p>`;
+        toplam += a.kalori;
+    });
+
+    cikti += `<hr><strong>Toplam: ${toplam} kcal</strong>`;
+    document.getElementById("sonuc").innerHTML = cikti;
+</script>
+
+</body>
+</html>
