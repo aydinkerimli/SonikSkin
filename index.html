@@ -3,35 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Memory Creator Pro</title>
+    <title>Sonic Skin | Profesyonel Dövme Taslağı</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
 
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 10px; align-items: center; }
-
-        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-artist { background: var(--neon); color: #000; border: none; }
-
-        .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
-        .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 420px; padding: 25px; box-sizing: border-box; text-align: center; }
         
-        .box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
-        canvas { width: 100%; height: 50%; }
+        .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
+        .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
+        
+        /* Çizim Alanı */
+        .box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
+        canvas { width: 100%; height: 100%; }
 
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
-        
         .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; justify-content: center; align-items: center; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
-        .soc-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        
         select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
@@ -39,29 +31,10 @@
 
     <div class="navbar">
         <div class="logo">SONIC SKIN</div>
-        <div class="nav-right">
-            <select id="langSel" onchange="dilDegistir(this.value)">
-                <option value="tr">TR</option>
-                <option value="en">EN</option>
-                <option value="ru">RU</option>
-                <option value="zh">ZH</option>
-                <option value="de">DE</option>
-                <option value="es">ES</option>
-                <option value="fr">FR</option>
-            </select>
-            <button class="btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
-        </div>
-    </div>
-
-    <div id="pop" class="modal">
-        <div class="modal-content">
-            <h3 id="pTitle">Üye Girişi</h3>
-            <p style="font-size: 12px; color: #888;">Anılarını saklamak ve üyelere özel fırsatlar için giriş yap.</p>
-            <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
-            <button class="soc-btn" style="background:black; color:white; border:1px solid #444;">Apple ID ile Bağlan</button>
-            <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
-        </div>
+        <select id="langSel" onchange="dilDegistir(this.value)">
+            <option value="tr">TR</option>
+            <option value="en">EN</option>
+        </select>
     </div>
 
     <div class="main-container">
@@ -87,12 +60,7 @@
     <script>
         const diller = {
             tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY / RECORD AGAIN"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆", listen:"▶️ 听", retry:"🔄 重试"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", retry:"🔄 WIEDERHOLEN"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", retry:"🔄 REINTENTAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", retry:"🔄 RÉESSAYER"}
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY"}
         };
 
         function dilDegistir(v) {
@@ -108,26 +76,39 @@
             document.getElementById('bR1').innerText = d.retry;
         }
 
-        function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
-        function kapat() { document.getElementById('pop').style.display = 'none'; }
-
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
         let source1, source2;
 
+        // --- YENİ PROFESYONEL ÇİZİM SİSTEMİ ---
         function ciz(an, id) {
-            const c = document.getElementById(id), x = c.getContext('2d'), da = new Uint8Array(an.frequencyBinCount);
+            const c = document.getElementById(id), x = c.getContext('2d');
+            an.fftSize = 256; 
+            const bLen = an.frequencyBinCount;
+            const da = new Uint8Array(bLen);
+
             function render() {
-                requestAnimationFrame(render); an.getByteTimeDomainData(da);
-                x.fillStyle = "#000"; x.fillRect(0,0,c.width,c.height);
-                x.lineWidth = 3; x.strokeStyle = "#d4ff00"; x.beginPath();
-                let s = c.width/da.length, curX = 0;
-                for(let i=0; i<da.length; i++) {
-                    let v = da[i]/128, y = v*c.height/2;
-                    if(i==0) x.moveTo(curX, y); else x.lineTo(curX, y);
-                    curX += s;
+                requestAnimationFrame(render);
+                an.getByteFrequencyData(da); // Frekans verisi (Blok görünümü için)
+
+                x.fillStyle = "#000"; 
+                x.fillRect(0, 0, c.width, c.height);
+
+                let bWidth = (c.width / bLen) * 2.5;
+                let bHeight;
+                let curX = 0;
+
+                for(let i = 0; i < bLen; i++) {
+                    bHeight = da[i] / 2; // Yükseklik hassasiyeti
+
+                    // Neon efekti ve dövme stili bloklar
+                    x.fillStyle = `rgb(212, 255, 0)`; 
+                    // Ortadan ikiye yansıyan simetrik bloklar
+                    x.fillRect(curX, (c.height - bHeight) / 2, bWidth - 2, bHeight);
+
+                    curX += bWidth;
                 }
-                x.stroke();
-            } render();
+            }
+            render();
         }
 
         async function kaydet() {
@@ -140,8 +121,7 @@
                 rec = new MediaRecorder(s); chunks = [];
                 rec.ondataavailable = e => chunks.push(e.data);
                 rec.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-                    ses1.src = URL.createObjectURL(blob);
+                    ses1.src = URL.createObjectURL(new Blob(chunks));
                     document.getElementById('bP1').style.display = 'block';
                     document.getElementById('bR1').style.display = 'block';
                     document.getElementById('bS1').style.display = 'flex';
@@ -152,41 +132,30 @@
         }
 
         function tekrarYap() {
-            document.getElementById('bP1').style.display = 'none';
-            document.getElementById('bR1').style.display = 'none';
-            document.getElementById('bS1').style.display = 'none';
-            document.getElementById('bRec').style.display = 'block';
-            document.getElementById('bRec').innerText = diller[document.getElementById('langSel').value].rec;
-            const c = document.getElementById('cv1');
-            const x = c.getContext('2d');
-            x.clearRect(0,0,c.width,c.height);
-            source1 = null;
+            location.reload(); // En temizi sayfayı yenilemek
         }
 
-        // RESMİ İNDİRME FONKSİYONU
         function resimIndir(id) {
             const c = document.getElementById(id);
             const link = document.createElement('a');
-            link.download = 'sonic-skin-memory.png';
+            link.download = 'tattoo-design.png';
             link.href = c.toDataURL("image/png");
             link.click();
         }
 
         function dinle1() {
-            if (ctx && ses1.src) {
-                if (!source1) {
-                    source1 = ctx.createMediaElementSource(ses1);
-                    const an = ctx.createAnalyser();
-                    source1.connect(an);
-                    an.connect(ctx.destination);
-                    ciz(an, 'cv1');
-                }
-                ses1.play();
+            if (!source1) {
+                source1 = ctx.createMediaElementSource(ses1);
+                const an = ctx.createAnalyser();
+                source1.connect(an);
+                an.connect(ctx.destination);
+                ciz(an, 'cv1');
             }
+            ses1.play();
         }
 
         function dosyaSecildi(i) {
-            const f = i.files[0]; if(!f) return;
+            const f = i.files[0];
             ses2.src = URL.createObjectURL(f);
             document.getElementById('bP2').style.display = 'block';
             document.getElementById('bS2').style.display = 'flex';
