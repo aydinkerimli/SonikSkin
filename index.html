@@ -1,37 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>Spor Takip</title>
+    <meta charset="UTF-8">
+    <title>Spor Takip Sistemi</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .kart { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        .konteynir { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .liste { margin-top: 20px; }
+        .ozet { margin-top: 20px; font-weight: bold; color: #e74c3c; border-top: 1px solid #ddd; pt: 10px; }
     </style>
 </head>
 <body>
 
-<div class="kart">
-    <h2>Spor Takip Sistemi</h2>
-    <div id="sonuc"></div>
+<div class="konteynir">
+    <h2>Spor Takip Özeti</h2>
+    <div id="aktivite-listesi" class="liste">
+        </div>
+    <div id="toplam-sonuc" class="ozet"></div>
 </div>
 
 <script>
-    // Burası artık "renkli" görünecek çünkü HTML'e uygun!
-    const aktiviteler = [
-        { ad: "Kardiyo", sure: 40, kalori: 400 },
-        { ad: "Ağırlık", sure: 50, kalori: 250 }
+    // ARTIK RENKLİ VE ÇALIŞIR DURUMDA!
+    const sporVerileri = [
+        { ad: "Koşu", sure: 30, kalori: 300 },
+        { ad: "Yüzme", sure: 45, kalori: 450 },
+        { ad: "Ağırlık", sure: 60, kalori: 200 }
     ];
 
-    let cikti = "";
-    let toplam = 0;
+    let listeHTML = "";
+    let toplamKalori = 0;
 
-    aktiviteler.forEach(a => {
-        cikti += `<p><b>${a.ad}</b>: ${a.sure} dk - ${a.kalori} kcal</p>`;
-        toplam += a.kalori;
+    sporVerileri.forEach(spor => {
+        listeHTML += `<p>✅ <b>${spor.ad}</b>: ${spor.sure} dk | ${spor.kalori} kcal</p>`;
+        toplamKalori += spor.kalori;
     });
 
-    cikti += `<hr><strong>Toplam: ${toplam} kcal</strong>`;
-    document.getElementById("sonuc").innerHTML = cikti;
+    document.getElementById("aktivite-listesi").innerHTML = listeHTML;
+    document.getElementById("toplam-sonuc").innerHTML = `Toplam Harcanan: ${toplamKalori} kcal`;
 </script>
 
 </body>
