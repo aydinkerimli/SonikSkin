@@ -1,91 +1,67 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Global Master</title>
+    <title>Sonic Skin Test</title>
     <style>
-        :root { --neon: #d4ff00; --bg: #050505; --panel: #111; }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        
-        /* Navbar */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
-        .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 12px; align-items: center; }
-
-        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
-        .btn-artist { background: var(--neon); color: #000; border: none; }
-
-        /* Ana Konteyner - Görseldeki Yan Yana Düzen */
-        .main-container { display: flex; justify-content: center; gap: 25px; padding: 50px 15px; flex-wrap: wrap; }
-        .panel { background: var(--panel); border: 2px solid #222; border-radius: 24px; width: 420px; padding: 30px; box-sizing: border-box; text-align: center; }
-        
-        /* Dalga Formu Kutusu */
-        .box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 25px; border-radius: 15px; display: flex; align-items: center; overflow: hidden; position: relative; }
-        canvas { width: 100%; height: 50%; }
-
-        /* Butonlar */
-        .btn { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        #bRec { background: #ff3e3e; color: white; }
-        .play-btn { background: #333; color: white; display: none; }
-        .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; text-align: center; line-height: 1.2; }
-
-        /* Giriş Penceresi (Modal) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-content { background: #161616; padding: 40px; border-radius: 30px; border: 1px solid #333; width: 340px; text-align: center; }
-        .soc-btn { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
-        
-        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 8px; cursor: pointer; outline: none; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
+        .panel { border: 1px solid #333; padding: 20px; margin: 20px auto; width: 300px; background: #111; }
+        canvas { width: 100%; height: 100px; background: #000; border: 1px solid #444; }
+        button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="navbar">
-        <div class="logo">SONIC SKIN</div>
-        <div class="nav-right">
-            <select id="langSel" onchange="dilDegistir(this.value)">
-                <option value="tr">TR</option>
-                <option value="en">EN</option>
-                <option value="ru">RU</option>
-                <option value="zh">ZH (中文)</option>
-                <option value="de">DE</option>
-                <option value="es">ES</option>
-                <option value="fr">FR</option>
-            </select>
-            <button class="btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
-        </div>
+    <h1>SONIC SKIN TEST</h1>
+    
+    <div class="panel">
+        <h3>SOL PANEL (CANLI)</h3>
+        <canvas id="cv1"></canvas>
+        <button onclick="kaydet()" id="btn1">🎤 SESİ KAYDET</button>
     </div>
 
-    <div id="pop" class="modal">
-        <div class="modal-content">
-            <h2 id="pTitle" style="margin-bottom:25px;">Giriş Yap</h2>
-            <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
-            <button class="soc-btn" style="background:black; color:white; border:1px solid #444;">Apple ID ile Bağlan</button>
-            <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:20px; cursor:pointer; font-weight:bold; font-size:14px;">KAPAT</button>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="panel">
-            <h2 id="h1">CANLI SES DÖVMESİ</h2>
-            <div class="box"><canvas id="cv1"></canvas></div>
-            <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
-            <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ KAYDI DİNLE</button>
-            <a href="#" id="bS1" class="btn buy-btn">TASLAĞI SATIN AL</a>
-        </div>
-
-        <div class="panel">
-            <h2 id="h2">DOSYADAN DÖVME YAP</h2>
-            <div class="box"><canvas id="cv2"></canvas></div>
-            <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
-            <button class="btn" style="background:#222; color:#fff;" onclick="document.getElementById('fIn').click()" id="bF">📁 SES DOSYASI SEÇ</button>
-            <button id="bP2" class="btn play-btn" onclick="dinle2()">▶️ DOSYAYI DİNLE</button>
-            <a href="#" id="bS2" class="btn buy-btn">TASLAĞI SATIN AL</a>
-        </div>
+    <div class="panel">
+        <h3>SAĞ PANEL (DOSYA)</h3>
+        <canvas id="cv2"></canvas>
+        <input type="file" id="fIn" hidden onchange="dosyaSecildi(this)">
+        <button onclick="document.getElementById('fIn').click()">📁 DOSYA SEÇ</button>
     </div>
 
     <script>
-        // --- 1. DİL VERİLERİ ---
-        const diller = {
-            tr: {h1:"CANLI SES DÖ
+        let ctx;
+
+        function ciz(an, id) {
+            const c = document.getElementById(id), x = c.getContext('2d'), da = new Uint8Array(an.frequencyBinCount);
+            function render() {
+                requestAnimationFrame(render); an.getByteTimeDomainData(da);
+                x.fillStyle = "#000"; x.fillRect(0,0,c.width,c.height);
+                x.lineWidth = 2; x.strokeStyle = "#d4ff00"; x.beginPath();
+                let s = c.width/da.length, curX = 0;
+                for(let i=0; i<da.length; i++) {
+                    let v = da[i]/128, y = v*c.height/2;
+                    if(i==0) x.moveTo(curX, y); else x.lineTo(curX, y);
+                    curX += s;
+                }
+                x.stroke();
+            } render();
+        }
+
+        async function kaydet() {
+            try {
+                if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const an = ctx.createAnalyser(); ctx.createMediaStreamSource(s).connect(an);
+                ciz(an, 'cv1');
+                document.getElementById('btn1').innerText = "KAYDEDİLİYOR (8sn)...";
+                setTimeout(() => { s.getTracks().forEach(t => t.stop()); }, 8000);
+            } catch(e) { alert("Hata: " + e.message); }
+        }
+
+        function dosyaSecildi(i) {
+            if(!ctx) ctx = new AudioContext();
+            const f = i.files[0]; const aud = new Audio(URL.createObjectURL(f));
+            const src = ctx.createMediaElementSource(aud), an = ctx.createAnalyser();
+            src.connect(an); an.connect(ctx.destination);
+            ciz(an, 'cv2'); aud.play();
+        }
+    </script>
+</body>
+</html>
