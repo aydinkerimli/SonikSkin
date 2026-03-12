@@ -3,62 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Artist Portal</title>
+    <title>Sonic Skin | Member & Artist Portal</title>
     <style>
-        :root { --accent: #d4ff00; --bg: #050505; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        :root { --accent: #d4ff00; --bg: #050505; --card: #111; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        /* Sağ Üst Kontroller */
-        .top-nav { position: absolute; top: 20px; right: 40px; z-index: 1000; display: flex; gap: 15px; align-items: center; }
-        
-        select { background: #1a1a1a; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; cursor: pointer; }
-        
-        .login-btn { background: transparent; color: white; border: 1px solid var(--accent); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .login-btn:hover { background: var(--accent); color: black; }
+        /* Navigasyon Çubuğu */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #222; }
+        .logo { font-weight: bold; color: var(--accent); letter-spacing: 2px; font-size: 1.2rem; }
+        .nav-right { display: flex; gap: 15px; align-items: center; }
 
-        /* Giriş Modal (Pencere) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; width: 320px; text-align: center; }
-        .social-login { width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .google-btn { background: #fff; color: #000; }
-        .apple-btn { background: #000; color: #fff; border: 1px solid #444; }
+        .btn-join { background: var(--accent); color: #000; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-artist { background: transparent; color: #fff; border: 1px solid #444; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+        .btn-artist:hover { border-color: var(--accent); color: var(--accent); }
 
-        .main-container { display: flex; justify-content: center; align-items: flex-start; gap: 20px; padding: 120px 20px; flex-wrap: wrap; }
-        .panel { background: #111; border: 1px solid #222; border-radius: 20px; width: 400px; padding: 20px; box-sizing: border-box; }
-        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 15px; border-radius: 10px; display: flex; align-items: center; }
+        /* Panel Düzeni */
+        .main-container { display: flex; justify-content: center; gap: 30px; padding: 60px 20px; flex-wrap: wrap; }
+        .panel { background: var(--card); border: 1px solid #222; border-radius: 24px; width: 420px; padding: 30px; box-sizing: border-box; position: relative; }
+        .panel:hover { border-color: #333; }
+        
+        .tattoo-box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; }
         canvas { width: 100%; height: 50%; }
 
-        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; }
+        .btn { width: 100%; padding: 16px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
         #recBtn { background: #ff3e3e; color: white; }
-        .play-btn { background: #333; color: white; display: none; }
+        .play-btn { background: #222; color: #fff; display: none; border: 1px solid #333; }
         .buy-btn { background: var(--accent); color: black; display: none; text-decoration: none; text-align: center; }
+
+        /* Login Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-content { background: #111; padding: 40px; border-radius: 30px; border: 1px solid #333; width: 350px; text-align: center; }
+        .social-btn { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .google { background: white; color: black; }
+        .apple { background: black; color: white; border: 1px solid #333; }
+
+        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <button class="login-btn" onclick="toggleModal(true)">Sanatçı Girişi</button>
-        <select id="langSelect">
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-            <option value="de">Deutsch</option>
-            <option value="es">Español</option>
-            <option value="zh">中文</option>
-        </select>
+    <div class="navbar">
+        <div class="logo">SONIC SKIN</div>
+        <div class="nav-right">
+            <select id="langSelect">
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+            </select>
+            <button class="btn-join" onclick="openModal('member')">ÜYE OL / GİRİŞ</button>
+            <button class="btn-artist" onclick="openModal('artist')">👨‍🎨 SANATÇI PORTALI</button>
+        </div>
     </div>
 
     <div id="loginModal" class="modal">
         <div class="modal-content">
-            <h2 style="margin-top:0">Sanatçı Girişi</h2>
-            <p style="color:#888; font-size: 14px; margin-bottom: 30px;">Dövmelerinizi yönetmek için giriş yapın.</p>
-            <button class="social-login google-btn">
-                <span>G</span> Gmail / Google ile Giriş
-            </button>
-            <button class="social-login apple-btn">
-                <span></span> Apple ID ile Giriş
-            </button>
-            <button onclick="toggleModal(false)" style="background:none; border:none; color:#555; margin-top:20px; cursor:pointer;">Kapat</button>
+            <h2 id="modalTitle">Hoş Geldiniz</h2>
+            <p id="modalDesc" style="color:#777; font-size:14px; margin-bottom:25px;">Avantajlardan faydalanmak için bağlanın.</p>
+            <button class="social-btn google">Gmail ile Hızlı Bağlan</button>
+            <button class="social-btn apple">Apple ID ile Bağlan</button>
+            <p style="font-size: 12px; color: #444; margin-top: 15px;">Kayıt olarak VIP indirimleri kabul etmiş olursunuz.</p>
+            <button onclick="closeModal()" style="background:none; border:none; color:#ff3e3e; margin-top:20px; cursor:pointer; font-weight:bold;">KAPAT</button>
         </div>
     </div>
 
@@ -68,53 +72,47 @@
             <div class="tattoo-box"><canvas id="c1"></canvas></div>
             <button id="recBtn" class="btn">🎤 SESİ KAYDET</button>
             <button id="p1" class="btn play-btn">▶️ KAYDI DİNLE</button>
-            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b1" class="btn buy-btn">BU SESİ HATIRAYA DÖNÜŞTÜR</a>
+            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b1" class="btn buy-btn">TASLAĞI OLUŞTUR VE İNDİR</a>
         </div>
 
         <div class="panel">
             <h2 id="t2">DOSYADAN DÖVME YAP</h2>
             <div class="tattoo-box"><canvas id="c2"></canvas></div>
             <input type="file" id="fIn" hidden accept="audio/*">
-            <button onclick="document.getElementById('fIn').click()" id="fBtn" class="btn" style="background:#222; color:#fff;">📁 SES DOSYASI SEÇ</button>
+            <button onclick="document.getElementById('fIn').click()" id="fBtn" class="btn" style="background:#1a1a1a; border: 1px solid #333;">📁 SES DOSYASI SEÇ</button>
             <button id="p2" class="btn play-btn">▶️ DOSYAYI DİNLE</button>
-            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b2" class="btn buy-btn">BU SESİ HATIRAYA DÖNÜŞTÜR</a>
+            <a href="https://sonic-skin.lemonsqueezy.com/checkout" id="b2" class="btn buy-btn">TASLAĞI OLUŞTUR VE İNDİR</a>
         </div>
     </div>
 
     <script>
-        // Modal Kontrolü
-        function toggleModal(show) {
-            document.getElementById('loginModal').style.display = show ? 'flex' : 'none';
+        // Modal Yönetimi
+        function openModal(type) {
+            const title = document.getElementById('modalTitle');
+            const desc = document.getElementById('modalDesc');
+            if(type === 'artist') {
+                title.innerText = "Sanatçı Girişi";
+                desc.innerText = "Dövme sanatçılarına özel %30 indirim ve ticari lisans fırsatları.";
+            } else {
+                title.innerText = "Üye Girişi";
+                desc.innerText = "Sesini kaydet, üyelere özel ilk sipariş indirimini kap!";
+            }
+            document.getElementById('loginModal').style.display = 'flex';
         }
+        function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
 
-        const langData = {
-            tr: {t1:"CANLI SES DÖVMESİ", t2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 SES DOSYASI SEÇ", buy:"BU SESİ HATIRAYA DÖNÜŞTÜR", play:"▶️ DİNLE", login: "Sanatçı Girişi"},
-            en: {t1:"LIVE VOICE TATTOO", t2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE AUDIO", buy:"CONVERT TO MEMORY", play:"▶️ PLAY", login: "Artist Login"},
-            // Diğer diller buraya eklenebilir...
-        };
-
-        const langSelect = document.getElementById('langSelect');
-        langSelect.onchange = function() {
-            const l = langData[this.value] || langData['en'];
-            document.getElementById('t1').innerText = l.t1;
-            document.getElementById('t2').innerText = l.t2;
-            document.getElementById('recBtn').innerText = l.rec;
-            document.querySelector('.login-btn').innerText = l.login;
-            document.getElementById('b1').innerText = l.buy;
-            document.getElementById('b2').innerText = l.buy;
-        };
-
-        // Ses ve Dalga Formu Mantığı (Önceki kararlı kodun aynısı)
+        // Görselleştirme ve Ses Mantığı (8 Saniye Kayıt Dahil)
         let audioCtx, recorder, chunks = [], liveAud = new Audio(), fileAud = new Audio();
-        
-        function draw(analyser, canvasId) {
+        let fSource, fAnalyser;
+
+        function drawWave(analyser, canvasId) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             const data = new Uint8Array(analyser.frequencyBinCount);
             function render() {
                 requestAnimationFrame(render);
                 analyser.getByteTimeDomainData(data);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#000"; ctx.fillRect(0,0,canvas.width,canvas.height);
                 ctx.lineWidth = 3; ctx.strokeStyle = "#d4ff00";
                 ctx.beginPath();
                 let x = 0, slice = canvas.width / data.length;
@@ -133,7 +131,7 @@
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const analyser = audioCtx.createAnalyser();
             audioCtx.createMediaStreamSource(stream).connect(analyser);
-            draw(analyser, 'c1');
+            drawWave(analyser, 'c1');
             recorder = new MediaRecorder(stream);
             chunks = [];
             recorder.ondataavailable = e => chunks.push(e.data);
@@ -154,10 +152,12 @@
                 document.getElementById('p2').style.display = 'block';
                 document.getElementById('b2').style.display = 'block';
                 if(!audioCtx) audioCtx = new AudioContext();
-                const source = audioCtx.createMediaElementSource(fileAud);
-                const analyser = audioCtx.createAnalyser();
-                source.connect(analyser); analyser.connect(audioCtx.destination);
-                draw(analyser, 'c2');
+                if(!fSource) {
+                    fSource = audioCtx.createMediaElementSource(fileAud);
+                    fAnalyser = audioCtx.createAnalyser();
+                    fSource.connect(fAnalyser); fAnalyser.connect(audioCtx.destination);
+                }
+                drawWave(fAnalyser, 'c2');
             }
         };
 
