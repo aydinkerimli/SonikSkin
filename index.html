@@ -1,26 +1,25 @@
-class SporTakip:
-    def __init__(self, kullanici_adi):
-        self.kullanici = kullanici_adi
-        self.egzersizler = []
+class SporYonetimi:
+    def __init__(self):
+        self.aktiviteler = []
 
-    def egzersiz_ekle(self, isim, sure, kalori):
-        # Gereksiz tüm komutlar ve notlar silindi.
-        yeni_kayit = {
-            "egzersiz": isim,
-            "sure_dk": sure,
-            "yakilan_kalori": kalori
-        }
-        self.egzersizler.append(yeni_kayit)
-        return f"{isim} başarıyla eklendi."
+    def aktivite_kaydet(self, ad, dakika, kalori):
+        self.aktiviteler.append({
+            "ad": ad,
+            "sure": dakika,
+            "kalori": kalori
+        })
+        print(f"{ad} kaydedildi.")
 
-    def ozet_goster(self):
-        print(f"--- {self.kullanici} İçin Spor Özeti ---")
-        for e in self.egzersizler:
-            print(f"- {e['egzersiz']}: {e['sure_dk']} dk, {e['yakilan_kalori']} kcal")
+    def rapor_olustur(self):
+        print("\n--- SPOR ÖZETİ ---")
+        toplam = 0
+        for a in self.aktiviteler:
+            print(f"{a['ad']}: {a['sure']} dk - {a['kalori']} kcal")
+            toplam += a['kalori']
+        print(f"Toplam: {toplam} kcal\n")
 
-# Kullanım:
-sporcu = SporTakip("Mert")
-sporcu.egzersiz_ekle("Koşu", 30, 300)
-sporcu.egzersiz_ekle("Yüzme", 45, 500)
-
-sporcu.ozet_goster()
+# Çalıştırma
+takip = SporYonetimi()
+takip.aktivite_kaydet("Kardiyo", 40, 400)
+takip.aktivite_kaydet("Ağırlık", 50, 250)
+takip.rapor_olustur()
