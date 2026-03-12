@@ -4,51 +4,88 @@
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonikSkin | Global</title>
+    <title>SonikSkin v3</title>
     <style>
-        :root { --neon: #00ffcc; --bg: #0a0a0a; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
-        nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 10px; border-bottom: 1px solid #222; }
-        .logo { font-weight: bold; color: var(--neon); font-size: 20px; }
-        .lang-btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .container { max-width: 500px; margin: 0 auto; }
-        h1 { font-size: 28px; margin-bottom: 10px; }
-        #status { color: var(--neon); margin: 20px 0; font-weight: bold; height: 24px; }
-        .btn { padding: 20px; width: 100%; font-size: 18px; border-radius: 15px; border: none; cursor: pointer; margin-bottom: 15px; font-weight: bold; transition: 0.3s; text-transform: uppercase; }
-        #recordBtn { background: #ff4757; color: white; box-shadow: 0 5px 15px rgba(255,71,87,0.3); }
-        #debug { color: #555; font-size: 11px; margin-top: 40px; border-top: 1px solid #222; padding-top: 10px; }
+        body { background: #0a0a0a; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .lang-bar { margin-bottom: 30px; display: flex; justify-content: center; gap: 10px; }
+        .l-btn { background: none; border: 2px solid #00ffcc; color: #00ffcc; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .main-btn { 
+            background: #ff4757; color: white; border: none; padding: 25px; 
+            width: 90%; max-width: 400px; font-size: 20px; font-weight: bold; 
+            border-radius: 15px; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+        }
+        #status { color: #00ffcc; margin: 20px; font-size: 18px; height: 30px; }
+        .info { color: #555; font-size: 12px; margin-top: 50px; }
     </style>
 </head>
 <body class="notranslate">
 
-    <nav>
-        <div class="logo">SONIKSKIN</div>
-        <div>
-            <button class="lang-btn" onclick="updateUI('TR')">TR</button>
-            <button class="lang-btn" onclick="updateUI('EN')">EN</button>
-            <button class="lang-btn" onclick="updateUI('RU')">RU</button>
-        </div>
-    </nav>
-
-    <div class="container">
-        <h1 id="title">Sesini Sanata Dönüştür</h1>
-        <p id="subtitle">Dövmen için ses kaydı yapmaya hazır mısın?</p>
-        
-        <div id="status">Durum: Bekleniyor...</div>
-
-        <button id="recordBtn" class="btn">KAYDA BAŞLA</button>
-        
-        <div id="debug">Sistem: Hazır.</div>
+    <div class="lang-bar">
+        <button class="l-btn" onclick="degistir('TR')">TR</button>
+        <button class="l-btn" onclick="degistir('EN')">EN</button>
+        <button class="l-btn" onclick="degistir('RU')">RU</button>
     </div>
 
-    <script>
-        let currentLang = 'TR';
-        const recordBtn = document.getElementById('recordBtn');
-        const statusDisplay = document.getElementById('status');
-        const titleText = document.getElementById('title');
-        const subtitleText = document.getElementById('subtitle');
+    <h1 id="baslik">Sesini Sanata Dönüştür</h1>
+    <p id="altbaslik">Dövmen için ses kaydı yapmaya hazır mısın?</p>
 
-        const langData = {
-            'TR': { title: 'Sesini Sanata Dönüştür', sub: 'Ses kaydı yapmaya hazır mısın?', start: 'KAYDA BAŞLA', stop: 'KAYDI DURDUR', ready: 'İzin Verildi!', wait: 'Mikrofon Aranıyor...' },
-            'EN': { title: 'Turn Voice into Art', sub: 'Ready to record your voice?', start: 'START RECORDING', stop: 'STOP RECORDING', ready: 'Permission Granted!', wait: 'Finding Mic...' },
-            'RU': { title: 'Голос в Искусство', sub: 'Готовы записать голос?', start: 'НАЧАТЬ ЗА
+    <div id="status">Durum: Hazır</div>
+
+    <button id="anaButon" class="main-btn" onclick="kayitIslemi()">KAYDA BAŞLA</button>
+
+    <div class="info">Sistem Sürümü: 3.0.1 (Anti-Freeze)</div>
+
+    <script>
+        // Dil Verileri
+        const diller = {
+            'TR': { h: "Sesini Sanata Dönüştür", p: "Dövmen için ses kaydı yapmaya hazır mısın?", b: "KAYDA BAŞLA", s: "Kayıt Başladı...", e: "Hata: Mikrofon Kapalı!" },
+            'EN': { h: "Turn Voice into Art", p: "Ready to record your sound?", b: "START RECORDING", s: "Recording...", e: "Error: Mic Blocked!" },
+            'RU': { h: "Голос в Искусство", p: "Готовы записать звук?", b: "НАЧАТЬ ЗАПИСЬ", s: "Запись...", e: "Ошибка микрофона!" }
+        };
+
+        let su ankiDil = 'TR';
+
+        // Dil Değiştirme Fonksiyonu
+        function degistir(lang) {
+            su ankiDil = lang;
+            document.getElementById('baslik').innerText = diller[lang].h;
+            document.getElementById('altbaslik').innerText = diller[lang].p;
+            document.getElementById('anaButon').innerText = diller[lang].b;
+            document.getElementById('status').innerText = "Dil: " + lang;
+            console.log("Dil seçildi: " + lang);
+        }
+
+        // Kayıt ve Mikrofon Fonksiyonu
+        async function kayitIslemi() {
+            const btn = document.getElementById('anaButon');
+            const st = document.getElementById('status');
+            
+            st.innerText = diller[su ankiDil].s;
+            btn.style.background = "#2f3542";
+
+            try {
+                // Mikrofon izni iste
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                st.innerText = "MİKROFON AKTİF - SES ALINIYOR";
+                
+                // 3 saniye sonra testi bitir
+                setTimeout(() => {
+                    stream.getTracks().forEach(t => t.stop());
+                    btn.style.background = "#ff4757";
+                    btn.innerText = diller[su ankiDil].b;
+                    st.innerText = "Kayıt Başarıyla Tamamlandı.";
+                }, 3000);
+
+            } catch (err) {
+                st.innerText = diller[su ankiDil].e;
+                btn.style.background = "red";
+                alert("Lütfen tarayıcı ayarlarından mikrofon izni verin.");
+            }
+        }
+
+        // Sayfa açıldığında otomatik TR yap
+        window.onload = () => { degistir('TR'); };
+    </script>
+</body>
+</html>
