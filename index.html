@@ -29,5 +29,111 @@
 <body>
 
     <div class="navbar">
-        <div class="logo">SONIC
-            
+        <div class="logo">SONIC SKIN</div>
+        <div class="nav-right">
+            <select id="langSel" onchange="degistir(this.value)">
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+                <option value="zh">ZH</option>
+                <option value="de">DE</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+            </select>
+            <button class="btn btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
+            <button class="btn btn-top" style="background:var(--neon); color:#000;" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
+        </div>
+    </div>
+
+    <div id="pop" class="modal">
+        <div class="modal-content">
+            <h3 id="pBaslik">Giriş Yap</h3>
+            <button class="btn" style="background:white; color:black;">Gmail ile Giriş</button>
+            <button class="btn" style="background:black; color:white; border:1px solid #444;">Apple ID ile Giriş</button>
+            <button onclick="kapat()" style="background:none; border:none; color:red; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="panel">
+            <h2 id="h1">CANLI SES DÖVMESİ</h2>
+            <div class="box"><canvas id="cv1"></canvas></div>
+            <button id="bRec" class="btn" style="background:red; color:white;" onclick="kaydet()">🎤 SESİ KAYDET</button>
+            <button id="bP1" class="btn" style="background:#444; color:white; display:none;" onclick="dinle1()">▶️ DİNLE</button>
+            <button id="bS1" class="btn" style="background:var(--neon); color:black; display:none;">SATIN AL</button>
+        </div>
+
+        <div class="panel">
+            <h2 id="h2">DOSYADAN DÖVME YAP</h2>
+            <div class="box"><canvas id="cv2"></canvas></div>
+            <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
+            <button id="bF" class="btn" style="background:#222; color:white;" onclick="document.getElementById('fIn').click()">📁 DOSYA SEÇ</button>
+            <button id="bP2" class="btn" style="background:#444; color:white; display:none;" onclick="dinle2()">▶️ DİNLE</button>
+            <button id="bS2" class="btn" style="background:var(--neon); color:black; display:none;">SATIN AL</button>
+        </div>
+    </div>
+
+    <script>
+        // DİLLER
+        var diller = {
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"SATIN AL"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"BUY DRAFT"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"КУПИТЬ"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"购买草图"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 DATEI WÄHLEN", buy:"KAUFEN"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"COMPRAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"ACHETER"}
+        };
+
+        function degistir(v) {
+            var d = diller[v];
+            document.getElementById('h1').innerText = d.h1;
+            document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec;
+            document.getElementById('bF').innerText = d.f;
+            document.getElementById('bS1').innerText = d.buy;
+            document.getElementById('bS2').innerText = d.buy;
+        }
+
+        // PENCERE AÇ/KAPAT
+        function ac(t) { document.getElementById('pBaslik').innerText = t; document.getElementById('pop').style.display='flex'; }
+        function kapat() { document.getElementById('pop').style.display='none'; }
+
+        // SES İŞLERİ
+        var ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
+
+        function ciz(an, id) {
+            var c = document.getElementById(id), x = c.getContext('2d'), da = new Uint8Array(an.frequencyBinCount);
+            function dur() { requestAnimationFrame(dur); an.getByteTimeDomainData(da); x.fillStyle="#000"; x.fillRect(0,0,c.width,c.height); x.lineWidth=3; x.strokeStyle="#d4ff00"; x.beginPath(); var s=c.width/da.length, curX=0; for(var i=0;i<da.length;i++){ var v=da[i]/128, y=v*c.height/2; if(i==0)x.moveTo(curX,y); else x.lineTo(curX,y); curX+=s; } x.stroke(); } dur();
+        }
+
+        async function kaydet() {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            var an = ctx.createAnalyser(); ctx.createMediaStreamSource(s).connect(an); ciz(an, 'cv1');
+            rec = new MediaRecorder(s); chunks = [];
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                ses1.src = URL.createObjectURL(new Blob(chunks));
+                document.getElementById('bP1').style.display='block';
+                document.getElementById('bS1').style.display='block';
+            };
+            rec.start(); document.getElementById('bRec').innerText = "8sn...";
+            setTimeout(() => { rec.stop(); s.getTracks().forEach(t=>t.stop()); document.getElementById('bRec').style.display='none'; }, 8000);
+        }
+
+        function dosyaSecildi(i) {
+            var f = i.files[0]; if(!f) return;
+            ses2.src = URL.createObjectURL(f);
+            document.getElementById('bP2').style.display='block';
+            document.getElementById('bS2').style.display='block';
+            if(!ctx) ctx = new AudioContext();
+            var src = ctx.createMediaElementSource(ses2), an = ctx.createAnalyser();
+            src.connect(an); an.connect(ctx.destination); ciz(an, 'cv2');
+        }
+
+        function dinle1() { ses1.play(); }
+        function dinle2() { ses2.play(); }
+    </script>
+</body>
+</html>
