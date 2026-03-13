@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Fluid Fill</title>
+    <title>Sonic Skin | Liquid Fill Edition</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 10px; align-items: center; }
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
         .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; }
         canvas { width: 100%; height: 100%; display: block; }
-        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
+        .btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; position: relative; z-index: 10; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
-        .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; font-size: 12px; }
+        .buy-btn { background: var(--neon); color: black; display: none; justify-content: center; align-items: center; text-decoration: none; }
         select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
@@ -63,7 +62,7 @@
             fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER"}
         };
 
-        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
+        let ses1 = new Audio(), ses2 = new Audio(), rec, chunks = [];
         let waveData = { cv1: [], cv2: [] }, staticImg = { cv1: null, cv2: null };
 
         function dilDegistir(v) {
@@ -74,23 +73,24 @@
             document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
         }
 
-        async function sesDalgasiCiz(audioBlob, canvasId) {
+        async function sesDalgasiCiz(blob, canvasId) {
             const c = document.getElementById(canvasId), x = c.getContext('2d'), dpr = 2;
             c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
-            if (!ctx) ctx = new AudioContext();
-            const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
+            
+            const aCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const buffer = await aCtx.decodeAudioData(await blob.arrayBuffer());
             const data = buffer.getChannelData(0);
             const barWidth = 2, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            x.fillStyle = "rgba(212, 255, 0, 0.2)"; // Başlangıçta şişenin boş hali (hafif şeffaf sarı)
+            x.fillStyle = "rgba(212, 255, 0, 0.2)"; // Boş şişe hali
             waveData[canvasId] = [];
 
             for (let i = 0; i < samples; i++) {
                 let min = 1.0, max = -1.0;
                 for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j];
-                    if (datum < min) min = datum; if (datum > max) max = datum;
+                    const d = data[(i * step) + j];
+                    if (d < min) min = d; if (d > max) max = d;
                 }
                 const h = Math.max(6, (max - min) * (c.offsetHeight * 0.8));
                 const xP = i * (barWidth + gap), yP = (c.offsetHeight / 2) - (h / 2);
@@ -102,26 +102,71 @@
 
         function animasyon(audio, id) {
             const c = document.getElementById(id), x = c.getContext('2d');
-            function f() {
+            function render() {
                 if (audio.paused || audio.ended) return;
-                
-                // Arka planı temizle ve boş şişeyi (şeffaf hali) çiz
                 x.putImageData(staticImg[id], 0, 0);
-                
                 const progress = audio.currentTime / audio.duration;
                 const currentIdx = Math.floor(progress * waveData[id].length);
 
-                // --- DOLMA EFEKTİ (SU GİBİ DOLUYOR) ---
                 x.save(); x.scale(2,2);
-                x.shadowBlur = 15; x.shadowColor = "#fff";
-                x.fillStyle = "#fff"; // Dolma rengi: Parlak Beyaz
-
+                // Dolma Efekti
+                x.fillStyle = "#fff"; x.shadowBlur = 15; x.shadowColor = "#fff";
                 for(let i = 0; i <= currentIdx; i++) {
-                    const bar = waveData[id][i];
-                    if(bar) x.fillRect(bar.x, bar.y, bar.w, bar.h);
+                    const b = waveData[id][i];
+                    if(b) x.fillRect(b.x, b.y, b.w, b.h);
                 }
+                // Seken Nokta
+                const h = waveData[id][currentIdx];
+                if(h) {
+                    x.shadowBlur = 30;
+                    x.beginPath(); x.arc(h.x + h.w/2, h.y, 5, 0, Math.PI*2); x.fill();
+                }
+                x.restore();
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        }
 
-                // En uçtaki "su damlası / far" noktası
-                const head = waveData[id][currentIdx];
-                if(head) {
-                    x.shadowBlur =
+        async function kaydet() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                rec = new MediaRecorder(stream); chunks = [];
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/wav' });
+                    ses1.src = URL.createObjectURL(blob);
+                    ses1.onloadedmetadata = () => {
+                        sesDalgasiCiz(blob, 'cv1');
+                        document.getElementById('bP1').style.display='block';
+                        document.getElementById('bS1').style.display='flex';
+                        document.getElementById('bRec').style.display='none';
+                    };
+                };
+                rec.start();
+                let s = 8; const b = document.getElementById('bRec');
+                const t = setInterval(() => { s--; b.innerText = `🛑 DURDUR (${s}s)`; if(s<=0) clearInterval(t); }, 1000);
+                b.onclick = () => { clearInterval(t); rec.stop(); b.onclick = kaydet; };
+                setTimeout(() => { if(rec.state==='recording') rec.stop(); }, 8000);
+            } catch(e) { alert("Mikrofon izni gerekli!"); }
+        }
+
+        function dosyaSecildi(input) {
+            const f = input.files[0]; if(!f) return;
+            ses2.src = URL.createObjectURL(f);
+            ses2.onloadedmetadata = () => {
+                sesDalgasiCiz(f, 'cv2');
+                document.getElementById('bP2').style.display='block';
+                document.getElementById('bS2').style.display='flex';
+            };
+        }
+
+        function dinle1() { ses1.currentTime = 0; ses1.play(); animasyon(ses1, 'cv1'); }
+        function dinle2() { ses2.currentTime = 0; ses2.play(); animasyon(ses2, 'cv2'); }
+        function indir(id) {
+            const c = document.getElementById(id), x = c.getContext('2d');
+            x.putImageData(staticImg[id], 0, 0);
+            const a = document.createElement('a'); a.download = 'sonic-skin.png'; a.href = c.toDataURL(); a.click();
+        }
+    </script>
+</body>
+</html>
