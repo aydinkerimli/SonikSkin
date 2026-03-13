@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Neon Orb</title>
+    <title>Sonic Skin | Perfect Sync</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -12,7 +12,7 @@
         .nav-right { display: flex; gap: 10px; align-items: center; }
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
-        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; position: relative; }
+        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; }
         canvas { width: 100%; height: 100%; display: block; }
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
@@ -60,28 +60,31 @@
             zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆 (下载)", listen:"▶️ 听", stop:"🛑 停止"},
             de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
             es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO (DESCARGAR)", listen:"▶️ ESCUCHAR", stop:"🛑 PARAR"},
-            fr: {h1:"TATUAJE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let waveData = { cv1: [], cv2: [] }; 
-        let staticImg = { cv1: null, cv2: null };
+        let waveData = { cv1: [], cv2: [] }, staticImg = { cv1: null, cv2: null };
 
         function dilDegistir(v) {
-            const d = diller[v] || diller.tr;
-            Object.keys(d).forEach(k => { const el = document.getElementById(k==='h1'?'h1':k==='h2'?'h2':k==='rec'?'bRec':k==='f'?'bF':k==='buy'?'bS1':k==='listen'?'bP1':''); if(el) el.innerText = d[k]; });
-            document.getElementById('bS2').innerText = d.buy; document.getElementById('bP2').innerText = d.listen;
+            const d = diller[v];
+            document.getElementById('h1').innerText = d.h1;
+            document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec;
+            document.getElementById('bF').innerText = d.f;
+            document.getElementById('bS1').innerText = d.buy;
+            document.getElementById('bS2').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen;
+            document.getElementById('bP2').innerText = d.listen;
         }
 
         async function sesDalgasiCiz(audioBlob, canvasId) {
-            const c = document.getElementById(canvasId); const x = c.getContext('2d');
-            const dpr = 2; c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
+            const c = document.getElementById(canvasId), x = c.getContext('2d'), dpr = 2;
+            c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
             if (!ctx) ctx = new AudioContext();
             const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
             const data = buffer.getChannelData(0);
-            const barWidth = 2, gap = 1;
-            const samples = Math.floor(c.offsetWidth / (barWidth + gap));
-            const step = Math.floor(data.length / samples);
+            const barWidth = 2, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
             x.fillStyle = "#d4ff00";
@@ -94,13 +97,68 @@
                     if (datum < min) min = datum; if (datum > max) max = datum;
                 }
                 const h = Math.max(6, (max - min) * (c.offsetHeight * 0.8));
-                const xP = i * (barWidth + gap); const yP = (c.offsetHeight / 2) - (h / 2);
+                const xP = i * (barWidth + gap), yP = (c.offsetHeight / 2) - (h / 2);
                 x.fillRect(xP, yP, barWidth, h);
-                // Dalganın üst koordinatlarını (tepe noktasını) saklıyoruz
-                waveData[canvasId].push({ x: xP + barWidth/2, y: yP, h: h });
+                // Işığın zıplayacağı tepe noktasını kaydediyoruz
+                waveData[canvasId].push({ x: xP + barWidth/2, y: yP });
             }
             staticImg[canvasId] = x.getImageData(0, 0, c.width, c.height);
         }
 
-        function animasyonBaslat(audioElem, canvasId) {
-            const c
+        function animasyon(audio, id) {
+            const c = document.getElementById(id), x = c.getContext('2d');
+            function f() {
+                if (audio.paused || audio.ended) { x.putImageData(staticImg[id], 0, 0); return; }
+                x.putImageData(staticImg[id], 0, 0);
+                const progress = audio.currentTime / audio.duration;
+                const idx = Math.floor(progress * waveData[id].length);
+                const pt = waveData[id][idx];
+                if (pt) {
+                    x.save(); x.scale(2,2);
+                    x.shadowBlur = 20; x.shadowColor = "#fff"; x.fillStyle = "#fff";
+                    x.beginPath(); x.arc(pt.x, pt.y, 4, 0, Math.PI*2); x.fill();
+                    x.restore();
+                }
+                requestAnimationFrame(f);
+            }
+            requestAnimationFrame(f);
+        }
+
+        async function kaydet() {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            rec = new MediaRecorder(s); chunks = [];
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                const b = new Blob(chunks, { type: 'audio/wav' });
+                ses1.src = URL.createObjectURL(b);
+                ses1.onloadedmetadata = () => {
+                    sesDalgasiCiz(b, 'cv1');
+                    document.getElementById('bP1').style.display='block';
+                    document.getElementById('bS1').style.display='flex';
+                    document.getElementById('bRec').style.display='none';
+                };
+            };
+            rec.start(); setTimeout(() => rec.stop(), 8000);
+        }
+
+        function dosyaSecildi(i) {
+            const f = i.files[0]; ses2.src = URL.createObjectURL(f);
+            ses2.onloadedmetadata = () => {
+                sesDalgasiCiz(f, 'cv2');
+                document.getElementById('bP2').style.display='block';
+                document.getElementById('bS2').style.display='flex';
+            };
+        }
+
+        function dinle1() { ses1.currentTime = 0; ses1.play(); animasyon(ses1, 'cv1'); }
+        function dinle2() { ses2.currentTime = 0; ses2.play(); animasyon(ses2, 'cv2'); }
+
+        function indir(id) {
+            const c = document.getElementById(id); const x = c.getContext('2d');
+            x.putImageData(staticImg[id], 0, 0);
+            const link = document.createElement('a'); link.download = 'sonic-skin.png';
+            link.href = c.toDataURL(); link.click();
+        }
+    </script>
+</body>
+</html>
