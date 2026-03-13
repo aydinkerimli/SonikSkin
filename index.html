@@ -56,3 +56,104 @@
             <div class="box"><canvas id="cv1"></canvas></div>
             <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
             <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
+            <button id="bR1" class="btn retry-btn" onclick="location.reload()">🔄 YENİDEN TEKRAR YAP</button>
+            <button id="bS1" class="btn buy-btn" onclick="resimIndir('cv1')">BUNU HATIRAYA DÖNÜŞTÜR</button>
+        </div>
+
+        <div class="panel">
+            <h2 id="h2">DOSYADAN DÖVME YAP</h2>
+            <div class="box"><canvas id="cv2"></canvas></div>
+            <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
+            <button class="btn" style="background:#222; color:#fff;" onclick="document.getElementById('fIn').click()">📁 DOSYA SEÇ</button>
+            <button id="bP2" class="btn play-btn" onclick="dinle2()">▶️ DİNLE</button>
+            <button id="bS2" class="btn buy-btn" onclick="resimIndir('cv2')">BUNU HATIRAYA DÖNÜŞTÜR</button>
+        </div>
+    </div>
+
+    <script>
+        const diller = {
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", buy:"TURN INTO MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", buy:"СОХРАНИТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", buy:"将此转化为记忆", listen:"▶️ 听", retry:"🔄 重试"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", retry:"🔄 WIEDERHOLEN"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", retry:"🔄 REINTENTAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", retry:"🔄 RÉESSAYER"}
+        };
+
+        function dilDegistir(v) {
+            const d = diller[v] || diller.tr;
+            document.getElementById('h1').innerText = d.h1;
+            document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec;
+            document.querySelectorAll('.buy-btn').forEach(b => b.innerText = d.buy);
+            document.querySelectorAll('.play-btn').forEach(b => b.innerText = d.listen);
+            document.getElementById('bR1').innerText = d.retry;
+        }
+
+        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio(), src1, src2;
+
+        function ciz(an, id) {
+            const c = document.getElementById(id), x = c.getContext('2d');
+            an.fftSize = 256;
+            const bLen = an.frequencyBinCount, da = new Uint8Array(bLen);
+            function render() {
+                requestAnimationFrame(render);
+                an.getByteFrequencyData(da);
+                x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); 
+                let bw = (c.width / bLen) * 2.5, curX = 0;
+                for(let i = 0; i < bLen; i++) {
+                    let bh = da[i] * 0.7;
+                    x.fillStyle = "#000"; 
+                    x.fillRect(curX, (c.height - bh)/2.3, bw - 1, bh); // Ana Dalga
+                    x.fillStyle = "rgba(0,0,0,0.1)"; // Profesyonel Yansıma
+                    x.fillRect(curX, c.height * 0.8, bw - 1, bh * 0.3);
+                    curX += bw;
+                }
+            } render();
+        }
+
+        async function kaydet() {
+            try {
+                if(!ctx) ctx = new AudioContext();
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const an = ctx.createAnalyser(); ctx.createMediaStreamSource(s).connect(an);
+                ciz(an, 'cv1');
+                rec = new MediaRecorder(s); chunks = [];
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    ses1.src = URL.createObjectURL(new Blob(chunks));
+                    document.getElementById('bP1').style.display = 'block';
+                    document.getElementById('bR1').style.display = 'block';
+                    document.getElementById('bS1').style.display = 'flex';
+                };
+                rec.start(); document.getElementById('bRec').innerText = "KAYDEDİLİYOR...";
+                setTimeout(() => { rec.stop(); s.getTracks().forEach(t=>t.stop()); document.getElementById('bRec').style.display='none'; }, 6000);
+            } catch(e) { alert("Mikrofon hatası!"); }
+        }
+
+        function dosyaSecildi(i) {
+            if(!ctx) ctx = new AudioContext();
+            ses2.src = URL.createObjectURL(i.files[0]);
+            document.getElementById('bP2').style.display = 'block';
+            document.getElementById('bS2').style.display = 'flex';
+            if(!src2) { src2 = ctx.createMediaElementSource(ses2); let an = ctx.createAnalyser(); src2.connect(an); an.connect(ctx.destination); ciz(an, 'cv2'); }
+            ses2.play();
+        }
+
+        function dinle1() {
+            if(!src1) { src1 = ctx.createMediaElementSource(ses1); let an = ctx.createAnalyser(); src1.connect(an); an.connect(ctx.destination); ciz(an, 'cv1'); }
+            ses1.play();
+        }
+
+        function dinle2() { ses2.play(); }
+
+        function resimIndir(id) {
+            const link = document.createElement('a');
+            link.download = 'sonic-skin-dovme.png';
+            link.href = document.getElementById(id).toDataURL("image/png");
+            link.click();
+        }
+    </script>
+</body>
+</html>
