@@ -18,16 +18,15 @@
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 420px; padding: 25px; box-sizing: border-box; text-align: center; }
         
-        .box { width: 100%; aspect-ratio: 1/1; background: #000; border: 1px dashed #333; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
-        canvas { width: 100%; height: 50%; }
+        .box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
+        canvas { width: 100%; height: 100%; display: block; }
 
-        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; }
+        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         
-        /* Önemli: "Bunu Hatıraya Dönüştür" Butonu */
-        .buy-btn { background: var(--neon); color: black; display: none; text-decoration: none; display: none; justify-content: center; align-items: center; }
+        .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
@@ -87,17 +86,17 @@
 
     <script>
         const diller = {
-            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY / RECORD AGAIN"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆", listen:"▶️ 听", retry:"🔄 重试"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", retry:"🔄 WIEDERHOLEN"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", retry:"🔄 REINTENTAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", retry:"🔄 RÉESSAYER"}
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", retry:"🔄 YENİDEN TEKRAR YAP", recording:"🛑 DURDUR"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", retry:"🔄 RETRY", recording:"🛑 STOP"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", retry:"🔄 ПОВТОРИТЬ", recording:"🛑 СТОП"}
         };
 
+        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
+        let recordingTimeout;
+        const MAX_SURE = 8000; // 8 Saniye
+
         function dilDegistir(v) {
-            const d = diller[v];
+            const d = diller[v] || diller.tr;
             document.getElementById('h1').innerText = d.h1;
             document.getElementById('h2').innerText = d.h2;
             document.getElementById('bRec').innerText = d.rec;
@@ -112,88 +111,100 @@
         function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
         function kapat() { document.getElementById('pop').style.display = 'none'; }
 
-        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let source1, source2;
+        // --- DÖVMECİ DOSTU ÇİZİM FONKSİYONU ---
+        async function sesDalgasiCiz(audioBlob, canvasId) {
+            const c = document.getElementById(canvasId);
+            const x = c.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            c.width = c.offsetWidth * dpr;
+            c.height = c.offsetHeight * dpr;
+            x.scale(dpr, dpr);
 
-        function ciz(an, id) {
-            const c = document.getElementById(id), x = c.getContext('2d'), da = new Uint8Array(an.frequencyBinCount);
-            function render() {
-                requestAnimationFrame(render); an.getByteTimeDomainData(da);
-                x.fillStyle = "#000"; x.fillRect(0,0,c.width,c.height);
-                x.lineWidth = 3; x.strokeStyle = "#d4ff00"; x.beginPath();
-                let s = c.width/da.length, curX = 0;
-                for(let i=0; i<da.length; i++) {
-                    let v = da[i]/128, y = v*c.height/2;
-                    if(i==0) x.moveTo(curX, y); else x.lineTo(curX, y);
-                    curX += s;
-                }
-                x.stroke();
-            } render();
+            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const rawData = audioBuffer.getChannelData(0); 
+
+            // Ayarlar: Çizgi kalınlığı ve boşluğu sanatçı için optimize edildi
+            const barWidth = 4;  
+            const gap = 2;       
+            const samples = Math.floor(c.offsetWidth / (barWidth + gap)); 
+            const blockSize = Math.floor(rawData.length / samples);
+            const filteredData = [];
+
+            for (let i = 0; i < samples; i++) {
+                let blockStart = blockSize * i;
+                let sum = 0;
+                for (let j = 0; j < blockSize; j++) { sum += Math.abs(rawData[blockStart + j]); }
+                filteredData.push(sum / blockSize);
+            }
+
+            x.fillStyle = "#000"; 
+            x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
+            x.fillStyle = "#d4ff00"; 
+            const center = c.offsetHeight / 2;
+            
+            for (let i = 0; i < filteredData.length; i++) {
+                let barHeight = filteredData[i] * c.offsetHeight * 1.5; 
+                if (barHeight < 4) barHeight = 4; // Sessiz yerlerde bile iğne yolu belli olsun
+                const xPos = i * (barWidth + gap);
+                const yPos = center - (barHeight / 2);
+                x.beginPath();
+                x.roundRect(xPos, yPos, barWidth, barHeight, 2);
+                x.fill();
+            }
         }
 
         async function kaydet() {
             try {
-                if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if(!ctx) ctx = new AudioContext();
                 const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const an = ctx.createAnalyser(); 
-                ctx.createMediaStreamSource(s).connect(an);
-                ciz(an, 'cv1'); 
                 rec = new MediaRecorder(s); chunks = [];
+                
                 rec.ondataavailable = e => chunks.push(e.data);
                 rec.onstop = () => {
                     const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
                     ses1.src = URL.createObjectURL(blob);
+                    sesDalgasiCiz(blob, 'cv1');
                     document.getElementById('bP1').style.display = 'block';
                     document.getElementById('bR1').style.display = 'block';
                     document.getElementById('bS1').style.display = 'flex';
+                    document.getElementById('bRec').style.display = 'none';
+                    s.getTracks().forEach(t => t.stop());
                 };
-                rec.start(); document.getElementById('bRec').innerText = "8sn...";
-                setTimeout(() => { rec.stop(); s.getTracks().forEach(t=>t.stop()); document.getElementById('bRec').style.display='none'; }, 8000);
+                
+                rec.start();
+                let sn = MAX_SURE/1000;
+                const b = document.getElementById('bRec');
+                const d = diller[document.getElementById('langSel').value] || diller.tr;
+                
+                b.innerText = `${d.recording} (${sn}s)`;
+                const int = setInterval(() => {
+                    sn--;
+                    if(sn > 0) b.innerText = `${d.recording} (${sn}s)`;
+                    else clearInterval(int);
+                }, 1000);
+
+                recordingTimeout = setTimeout(() => { if(rec.state==="recording") rec.stop(); }, MAX_SURE);
+                b.onclick = () => { clearTimeout(recordingTimeout); clearInterval(int); rec.stop(); };
+
             } catch(e) { alert("Mikrofon hatası!"); }
         }
 
         function tekrarYap() {
-            document.getElementById('bP1').style.display = 'none';
-            document.getElementById('bR1').style.display = 'none';
-            document.getElementById('bS1').style.display = 'none';
-            document.getElementById('bRec').style.display = 'block';
-            document.getElementById('bRec').innerText = diller[document.getElementById('langSel').value].rec;
-            const c = document.getElementById('cv1');
-            const x = c.getContext('2d');
-            x.clearRect(0,0,c.width,c.height);
-            source1 = null; // Kaynağı sıfırla ki yeni kayıtta hata vermesin
+            location.reload(); // En temiz sıfırlama yöntemi
         }
 
-        function dinle1() {
-            if (ctx && ses1.src) {
-                if (!source1) {
-                    source1 = ctx.createMediaElementSource(ses1);
-                    const an = ctx.createAnalyser();
-                    source1.connect(an);
-                    an.connect(ctx.destination);
-                    ciz(an, 'cv1');
-                }
-                ses1.play();
-            }
-        }
+        function dinle1() { ses1.play(); }
+        function dinle2() { ses2.play(); }
 
-        function dosyaSecildi(i) {
+        async function dosyaSecildi(i) {
             const f = i.files[0]; if(!f) return;
             ses2.src = URL.createObjectURL(f);
             document.getElementById('bP2').style.display = 'block';
             document.getElementById('bS2').style.display = 'flex';
-            if(!ctx) ctx = new AudioContext();
-            if (!source2) {
-                source2 = ctx.createMediaElementSource(ses2);
-                const an = ctx.createAnalyser();
-                source2.connect(an);
-                an.connect(ctx.destination);
-                ciz(an, 'cv2');
-            }
-            ses2.play();
+            sesDalgasiCiz(f, 'cv2');
         }
-
-        function dinle2() { ses2.play(); }
     </script>
 </body>
 </html>
