@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Memory Creator</title>
+    <title>Sonic Skin | Neon Master</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -70,7 +70,7 @@
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let waveData = { cv1: [], cv2: [] }; // Dalga boylarını saklamak için
+        let waveData = { cv1: [], cv2: [] }; 
         let staticImg = { cv1: null, cv2: null };
 
         function dilDegistir(v) {
@@ -111,41 +111,76 @@
 
         function animasyonBaslat(audioElem, canvasId) {
             const c = document.getElementById(canvasId); const x = c.getContext('2d');
+            
             function frame() {
                 if (audioElem.paused || audioElem.ended) { x.putImageData(staticImg[canvasId], 0, 0); return; }
+                
                 x.putImageData(staticImg[canvasId], 0, 0);
                 const progress = audioElem.currentTime / audioElem.duration;
+                const beamX = progress * c.offsetWidth;
+
+                x.save();
+                x.scale(2,2);
+
+                // --- GÜÇLÜ NEON IŞIK (FAR) ETKİSİ ---
+                // 1. Etraftaki çubukları aydınlat (Hale etkisi)
+                const grd = x.createLinearGradient(beamX - 20, 0, beamX + 20, 0);
+                grd.addColorStop(0, "rgba(212, 255, 0, 0)");
+                grd.addColorStop(0.5, "rgba(212, 255, 0, 0.5)"); // Geçilen yerleri parlat
+                grd.addColorStop(1, "rgba(212, 255, 0, 0)");
+                x.fillStyle = grd;
+                x.fillRect(beamX - 20, 0, 40, c.offsetHeight);
+
+                // 2. Ana Işık Çizgisi (N11 Farı gibi beyaz/neon çekirdek)
+                x.shadowBlur = 20;
+                x.shadowColor = "#fff";
+                x.strokeStyle = "#fff";
+                x.lineWidth = 2.5;
+                x.beginPath();
+                x.moveTo(beamX, 10);
+                x.lineTo(beamX, c.offsetHeight - 10);
+                x.stroke();
+
+                // 3. O anki dalga boyunu ekstra parlat
                 const currentIdx = Math.floor(progress * waveData[canvasId].length);
                 const bar = waveData[canvasId][currentIdx];
-
-                if (bar) {
-                    x.save(); x.scale(2,2);
-                    x.shadowBlur = 15; x.shadowColor = "#fff";
-                    x.fillStyle = "#fff"; // Işık rengi
-                    // Sadece o anki dalganın boyu kadar ışık çiz
+                if(bar) {
+                    x.fillStyle = "#fff";
+                    x.shadowBlur = 30;
                     x.fillRect(bar.x, bar.y, bar.w, bar.h);
-                    x.restore();
                 }
+
+                x.restore();
                 requestAnimationFrame(frame);
             }
             requestAnimationFrame(frame);
         }
 
         async function kaydet() {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            rec = new MediaRecorder(s); chunks = [];
-            rec.ondataavailable = e => chunks.push(e.data);
-            rec.onstop = () => {
-                const b = new Blob(chunks, { type: 'audio/ogg' });
-                ses1.src = URL.createObjectURL(b); sesDalgasiCiz(b, 'cv1');
-                document.getElementById('bP1').style.display='block'; document.getElementById('bS1').style.display='flex'; document.getElementById('bRec').style.display='none';
-            };
-            rec.start();
-            setTimeout(() => rec.stop(), 8000);
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                rec = new MediaRecorder(s); chunks = [];
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    const b = new Blob(chunks, { type: 'audio/ogg' });
+                    ses1.src = URL.createObjectURL(b); sesDalgasiCiz(b, 'cv1');
+                    document.getElementById('bP1').style.display='block'; document.getElementById('bS1').style.display='flex'; document.getElementById('bRec').style.display='none';
+                };
+                rec.start();
+                let sn = 8;
+                const b = document.getElementById('bRec');
+                const timer = setInterval(() => { 
+                    sn--; b.innerText = `🛑 DURDUR (${sn}s)`; 
+                    if(sn<=0) clearInterval(timer);
+                }, 1000);
+                b.onclick = () => { clearInterval(timer); rec.stop(); };
+                setTimeout(() => { if(rec.state==="recording") rec.stop(); }, 8000);
+            } catch(e) { alert("Mikrofon kapalı!"); }
         }
 
         function dosyaSecildi(i) {
-            const f = i.files[0]; ses2.src = URL.createObjectURL(f);
+            const f = i.files[0]; if(!f) return;
+            ses2.src = URL.createObjectURL(f);
             document.getElementById('bP2').style.display='block'; document.getElementById('bS2').style.display='flex';
             sesDalgasiCiz(f, 'cv2');
         }
