@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Neon Master</title>
+    <title>Sonic Skin | Final Edition</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
         .nav-right { display: flex; gap: 10px; align-items: center; }
-        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .btn-artist { background: var(--neon); color: #000; border: none; }
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
         .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; position: relative; }
@@ -19,9 +17,8 @@
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
-        .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; font-size: 12px; }
-        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; }
+        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -30,11 +27,14 @@
         <div class="logo">SONIC SKIN</div>
         <div class="nav-right">
             <select id="langSel" onchange="dilDegistir(this.value)">
-                <option value="tr">TR</option><option value="en">EN</option><option value="ru">RU</option>
-                <option value="zh">ZH</option><option value="de">DE</option><option value="es">ES</option><option value="fr">FR</option>
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+                <option value="zh">ZH</option>
+                <option value="de">DE</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
             </select>
-            <button class="btn-top">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist">SANATÇI PORTALI</button>
         </div>
     </div>
 
@@ -44,7 +44,6 @@
             <div class="box"><canvas id="cv1"></canvas></div>
             <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
             <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
-            <button id="bR1" class="btn retry-btn" onclick="location.reload()">🔄 YENİDEN TEKRAR YAP</button>
             <button id="bS1" class="btn buy-btn" onclick="indir('cv1')">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
         </div>
 
@@ -64,136 +63,4 @@
             en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY (DOWNLOAD)", listen:"▶️ LISTEN", stop:"🛑 STOP"},
             ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen:"▶️ СЛУШАТЬ", stop:"🛑 СТОП"},
             zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆 (下载)", listen:"▶️ 听", stop:"🛑 停止"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO (DESCARGAR)", listen:"▶️ ESCUCHAR", stop:"🛑 PARAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
-        };
-
-        let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let waveData = { cv1: [], cv2: [] }; 
-        let staticImg = { cv1: null, cv2: null };
-
-        function dilDegistir(v) {
-            const d = diller[v]; if(!d) return;
-            document.getElementById('h1').innerText = d.h1; document.getElementById('h2').innerText = d.h2;
-            document.getElementById('bRec').innerText = d.rec; document.getElementById('bF').innerText = d.f;
-            document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
-            document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
-        }
-
-        async function sesDalgasiCiz(audioBlob, canvasId) {
-            const c = document.getElementById(canvasId); const x = c.getContext('2d');
-            const dpr = 2; c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
-            if (!ctx) ctx = new AudioContext();
-            const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
-            const data = buffer.getChannelData(0);
-            const barWidth = 1.8, gap = 1;
-            const samples = Math.floor(c.offsetWidth / (barWidth + gap));
-            const step = Math.floor(data.length / samples);
-            
-            x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            x.fillStyle = "#d4ff00";
-            waveData[canvasId] = [];
-
-            for (let i = 0; i < samples; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j];
-                    if (datum < min) min = datum; if (datum > max) max = datum;
-                }
-                const h = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
-                const xP = i * (barWidth + gap); const yP = (c.offsetHeight / 2) - (h / 2);
-                x.fillRect(xP, yP, barWidth, h);
-                waveData[canvasId].push({ x: xP, y: yP, w: barWidth, h: h });
-            }
-            staticImg[canvasId] = x.getImageData(0, 0, c.width, c.height);
-        }
-
-        function animasyonBaslat(audioElem, canvasId) {
-            const c = document.getElementById(canvasId); const x = c.getContext('2d');
-            
-            function frame() {
-                if (audioElem.paused || audioElem.ended) { x.putImageData(staticImg[canvasId], 0, 0); return; }
-                
-                x.putImageData(staticImg[canvasId], 0, 0);
-                const progress = audioElem.currentTime / audioElem.duration;
-                const beamX = progress * c.offsetWidth;
-
-                x.save();
-                x.scale(2,2);
-
-                // --- GÜÇLÜ NEON IŞIK (FAR) ETKİSİ ---
-                // 1. Etraftaki çubukları aydınlat (Hale etkisi)
-                const grd = x.createLinearGradient(beamX - 20, 0, beamX + 20, 0);
-                grd.addColorStop(0, "rgba(212, 255, 0, 0)");
-                grd.addColorStop(0.5, "rgba(212, 255, 0, 0.5)"); // Geçilen yerleri parlat
-                grd.addColorStop(1, "rgba(212, 255, 0, 0)");
-                x.fillStyle = grd;
-                x.fillRect(beamX - 20, 0, 40, c.offsetHeight);
-
-                // 2. Ana Işık Çizgisi (N11 Farı gibi beyaz/neon çekirdek)
-                x.shadowBlur = 20;
-                x.shadowColor = "#fff";
-                x.strokeStyle = "#fff";
-                x.lineWidth = 2.5;
-                x.beginPath();
-                x.moveTo(beamX, 10);
-                x.lineTo(beamX, c.offsetHeight - 10);
-                x.stroke();
-
-                // 3. O anki dalga boyunu ekstra parlat
-                const currentIdx = Math.floor(progress * waveData[canvasId].length);
-                const bar = waveData[canvasId][currentIdx];
-                if(bar) {
-                    x.fillStyle = "#fff";
-                    x.shadowBlur = 30;
-                    x.fillRect(bar.x, bar.y, bar.w, bar.h);
-                }
-
-                x.restore();
-                requestAnimationFrame(frame);
-            }
-            requestAnimationFrame(frame);
-        }
-
-        async function kaydet() {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(s); chunks = [];
-                rec.ondataavailable = e => chunks.push(e.data);
-                rec.onstop = () => {
-                    const b = new Blob(chunks, { type: 'audio/ogg' });
-                    ses1.src = URL.createObjectURL(b); sesDalgasiCiz(b, 'cv1');
-                    document.getElementById('bP1').style.display='block'; document.getElementById('bS1').style.display='flex'; document.getElementById('bRec').style.display='none';
-                };
-                rec.start();
-                let sn = 8;
-                const b = document.getElementById('bRec');
-                const timer = setInterval(() => { 
-                    sn--; b.innerText = `🛑 DURDUR (${sn}s)`; 
-                    if(sn<=0) clearInterval(timer);
-                }, 1000);
-                b.onclick = () => { clearInterval(timer); rec.stop(); };
-                setTimeout(() => { if(rec.state==="recording") rec.stop(); }, 8000);
-            } catch(e) { alert("Mikrofon kapalı!"); }
-        }
-
-        function dosyaSecildi(i) {
-            const f = i.files[0]; if(!f) return;
-            ses2.src = URL.createObjectURL(f);
-            document.getElementById('bP2').style.display='block'; document.getElementById('bS2').style.display='flex';
-            sesDalgasiCiz(f, 'cv2');
-        }
-
-        function dinle1() { ses1.play(); animasyonBaslat(ses1, 'cv1'); }
-        function dinle2() { ses2.play(); animasyonBaslat(ses2, 'cv2'); }
-
-        function indir(id) {
-            const c = document.getElementById(id); const x = c.getContext('2d');
-            x.putImageData(staticImg[id], 0, 0);
-            const link = document.createElement('a'); link.download = 'sonic-skin.png';
-            link.href = c.toDataURL(); link.click();
-        }
-    </script>
-</body>
-</html>
+            de: {h1:"LIVE-TÄTOWIERUNG", h
