@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Soundwave Creator</title>
+    <title>Sonic Skin | Memory Creator</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -26,7 +26,6 @@
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         
-        /* Satın Alma / İndirme Butonu */
         .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; }
         .buy-btn:hover { background: #fff; }
 
@@ -46,6 +45,10 @@
                 <option value="tr">TR</option>
                 <option value="en">EN</option>
                 <option value="ru">RU</option>
+                <option value="zh">ZH</option>
+                <option value="de">DE</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
             </select>
             <button class="btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
             <button class="btn-top btn-artist" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
@@ -55,7 +58,7 @@
     <div id="pop" class="modal">
         <div class="modal-content">
             <h3 id="pTitle">Üye Girişi</h3>
-            <p style="font-size: 12px; color: #888;">Anılarını saklamak için giriş yap.</p>
+            <p style="font-size: 12px; color: #888;">Giriş yaparak anılarını güvenle saklayabilirsin.</p>
             <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
             <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
         </div>
@@ -83,29 +86,37 @@
 
     <script>
         const diller = {
-            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", recording:"🛑 DURDUR"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", recording:"🛑 STOP"}
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", stop:"🛑 DURDUR"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", stop:"🛑 STOP"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", stop:"🛑 СТОП"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆", listen:"▶️ 听", stop:"🛑 停止"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", stop:"🛑 PARAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
         const MAX_SURE = 8000;
 
         function dilDegistir(v) {
-            const d = diller[v] || diller.tr;
-            document.getElementById('h1').innerText = d.h1; document.getElementById('h2').innerText = d.h2;
-            document.getElementById('bRec').innerText = d.rec; document.getElementById('bF').innerText = d.f;
-            document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
-            document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
+            const d = diller[v];
+            document.getElementById('h1').innerText = d.h1;
+            document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec;
+            document.getElementById('bF').innerText = d.f;
+            document.getElementById('bS1').innerText = d.buy;
+            document.getElementById('bS2').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen;
+            document.getElementById('bP2').innerText = d.listen;
         }
 
         function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
         function kapat() { document.getElementById('pop').style.display = 'none'; }
 
-        // --- REFERANS GÖRSELİNE UYGUN HASSAS ÇİZİM ---
         async function sesDalgasiCiz(audioBlob, canvasId) {
             const c = document.getElementById(canvasId);
             const x = c.getContext('2d');
-            const dpr = 2; // Yüksek çözünürlük için
+            const dpr = 2; 
             c.width = c.offsetWidth * dpr;
             c.height = c.offsetHeight * dpr;
             x.scale(dpr, dpr);
@@ -114,9 +125,9 @@
             const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
             const data = buffer.getChannelData(0);
 
-            // Çizgi ve Boşluk Ayarları (Referans görselindeki o sık doku için)
-            const barWidth = 2;  // Daha ince barlar
-            const gap = 1;       // Daha dar boşluk
+            // GÖRSEL AYARLAR: Referans fotoğrafındaki gibi sık ve keskin barlar
+            const barWidth = 1.5; // İnce ve sık barlar
+            const gap = 1;       // Minimal boşluk
             const samples = Math.floor(c.offsetWidth / (barWidth + gap));
             const step = Math.floor(data.length / samples);
             
@@ -132,8 +143,8 @@
                     if (datum > max) max = datum;
                 }
                 
-                // Simetrik boyutu referans görseline göre ayarla
-                const height = Math.max(2, (max - min) * (c.offsetHeight * 0.7));
+                // Genlik hesaplama (Referans görselindeki dolgunluğu verir)
+                const height = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
                 const xPos = i * (barWidth + gap);
                 const yPos = (c.offsetHeight / 2) - (height / 2);
                 
@@ -160,12 +171,13 @@
                 rec.start();
                 let sn = 8;
                 const b = document.getElementById('bRec');
-                const t = setInterval(() => { 
-                    sn--; b.innerText = `🛑 DURDUR (${sn}s)`; 
-                    if(sn<=0) clearInterval(t);
+                const tLang = diller[document.getElementById('langSel').value].stop;
+                const timer = setInterval(() => { 
+                    sn--; b.innerText = `${tLang} (${sn}s)`; 
+                    if(sn<=0) clearInterval(timer);
                 }, 1000);
                 setTimeout(() => { if(rec.state==="recording") rec.stop(); }, MAX_SURE);
-                b.onclick = () => { clearInterval(t); rec.stop(); };
+                b.onclick = () => { clearInterval(timer); rec.stop(); };
             } catch(e) { alert("Mikrofon hatası!"); }
         }
 
@@ -180,11 +192,10 @@
         function dinle1() { ses1.play(); }
         function dinle2() { ses2.play(); }
 
-        // --- İNDİRME FONKSİYONU ---
         function indir(id) {
             const c = document.getElementById(id);
             const link = document.createElement('a');
-            link.download = 'sonic-skin-tattoo.png';
+            link.download = 'sonic-skin-pattern.png';
             link.href = c.toDataURL('image/png');
             link.click();
         }
