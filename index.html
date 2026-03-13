@@ -26,7 +26,7 @@
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
         
-        .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; }
+        .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; font-size: 12px; }
         .buy-btn:hover { background: #fff; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
@@ -58,7 +58,6 @@
     <div id="pop" class="modal">
         <div class="modal-content">
             <h3 id="pTitle">Üye Girişi</h3>
-            <p style="font-size: 12px; color: #888;">Giriş yaparak anılarını güvenle saklayabilirsin.</p>
             <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
             <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
         </div>
@@ -96,11 +95,11 @@
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let currentStaticImage = { cv1: null, cv2: null }; // Dalga formunu saklamak için
-        const MAX_SURE = 8000;
+        let currentStaticImage = { cv1: null, cv2: null }; 
 
         function dilDegistir(v) {
             const d = diller[v];
+            if(!d) return;
             document.getElementById('h1').innerText = d.h1;
             document.getElementById('h2').innerText = d.h2;
             document.getElementById('bRec').innerText = d.rec;
@@ -114,7 +113,6 @@
         function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
         function kapat() { document.getElementById('pop').style.display = 'none'; }
 
-        // --- ANA ÇİZİM VE ANALİZ ---
         async function sesDalgasiCiz(audioBlob, canvasId) {
             const c = document.getElementById(canvasId);
             const x = c.getContext('2d');
@@ -133,4 +131,100 @@
             const step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000";
-            x.fillRect(
+            x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
+            x.fillStyle = "#d4ff00";
+
+            for (let i = 0; i < samples; i++) {
+                let min = 1.0, max = -1.0;
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
+                }
+                const height = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
+                const xPos = i * (barWidth + gap);
+                const yPos = (c.offsetHeight / 2) - (height / 2);
+                x.fillRect(xPos, yPos, barWidth, height);
+            }
+            currentStaticImage[canvasId] = x.getImageData(0, 0, c.width, c.height);
+        }
+
+        function animasyonBaslat(audioElem, canvasId) {
+            const c = document.getElementById(canvasId);
+            const x = c.getContext('2d');
+            function frame() {
+                if (audioElem.paused || audioElem.ended) {
+                     x.putImageData(currentStaticImage[canvasId], 0, 0);
+                     return;
+                }
+                x.putImageData(currentStaticImage[canvasId], 0, 0);
+                const progress = audioElem.currentTime / audioElem.duration;
+                const neonX = progress * c.offsetWidth;
+                x.save();
+                x.scale(2,2);
+                x.shadowBlur = 15;
+                x.shadowColor = "#fff";
+                x.strokeStyle = "rgba(255, 255, 255, 0.9)";
+                x.lineWidth = 2;
+                x.beginPath();
+                x.moveTo(neonX, 0);
+                x.lineTo(neonX, c.offsetHeight);
+                x.stroke();
+                x.restore();
+                requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        }
+
+        async function kaydet() {
+            try {
+                if(!ctx) ctx = new AudioContext();
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                rec = new MediaRecorder(s); chunks = [];
+                rec.ondataavailable = e => chunks.push(e.data);
+                rec.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/ogg' });
+                    ses1.src = URL.createObjectURL(blob);
+                    sesDalgasiCiz(blob, 'cv1');
+                    document.getElementById('bP1').style.display = 'block';
+                    document.getElementById('bR1').style.display = 'block';
+                    document.getElementById('bS1').style.display = 'flex';
+                    document.getElementById('bRec').style.display = 'none';
+                    s.getTracks().forEach(t => t.stop());
+                };
+                rec.start();
+                let sn = 8;
+                const b = document.getElementById('bRec');
+                const tLang = diller[document.getElementById('langSel').value].stop;
+                const timer = setInterval(() => { 
+                    sn--; b.innerText = `${tLang} (${sn}s)`; 
+                    if(sn<=0) clearInterval(timer);
+                }, 1000);
+                b.onclick = () => { clearInterval(timer); rec.stop(); };
+                setTimeout(() => { if(rec.state==="recording") rec.stop(); }, 8000);
+            } catch(e) { alert("Mikrofon hatası!"); }
+        }
+
+        function dosyaSecildi(i) {
+            const f = i.files[0]; if(!f) return;
+            ses2.src = URL.createObjectURL(f);
+            document.getElementById('bP2').style.display = 'block';
+            document.getElementById('bS2').style.display = 'flex';
+            sesDalgasiCiz(f, 'cv2');
+        }
+
+        function dinle1() { ses1.play(); animasyonBaslat(ses1, 'cv1'); }
+        function dinle2() { ses2.play(); animasyonBaslat(ses2, 'cv2'); }
+
+        function indir(id) {
+            const c = document.getElementById(id);
+            const x = c.getContext('2d');
+            x.putImageData(currentStaticImage[id], 0, 0);
+            const link = document.createElement('a');
+            link.download = 'sonic-skin.png';
+            link.href = c.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
