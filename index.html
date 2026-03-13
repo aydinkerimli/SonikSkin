@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Liquid Fill Edition</title>
+    <title>Sonic Skin | Perfect Sync Liquid Fill</title>
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
         .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; }
         canvas { width: 100%; height: 100%; display: block; }
-        .btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; position: relative; z-index: 10; }
+        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
         .buy-btn { background: var(--neon); color: black; display: none; justify-content: center; align-items: center; text-decoration: none; }
@@ -83,7 +84,7 @@
             const barWidth = 2, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            x.fillStyle = "rgba(212, 255, 0, 0.2)"; // Boş şişe hali
+            x.fillStyle = "rgba(212, 255, 0, 0.2)"; // Boş şişe hali (şeffaf sarı)
             waveData[canvasId] = [];
 
             for (let i = 0; i < samples; i++) {
@@ -109,23 +110,37 @@
                 const currentIdx = Math.floor(progress * waveData[id].length);
 
                 x.save(); x.scale(2,2);
-                // Dolma Efekti
+
+                // --- DOLMA EFEKTİ (SU GİBİ DOLUYOR) ---
                 x.fillStyle = "#fff"; x.shadowBlur = 15; x.shadowColor = "#fff";
-                for(let i = 0; i <= currentIdx; i++) {
+                for(let i = 0; i < currentIdx; i++) {
                     const b = waveData[id][i];
-                    if(b) x.fillRect(b.x, b.y, b.w, b.h);
+                    if(b) x.fillRect(b.x, b.y, b.w, b.h); // Dolmuş barlar
                 }
-                // Seken Nokta
+                
+                // Tam o anki bar (Hale ve Seken Nokta)
                 const h = waveData[id][currentIdx];
                 if(h) {
+                    // 1. Aşağıdan yukarıya doğru dolma hissi (Kısmi bar çizimi)
+                    // Barın ne kadarının dolu olduğunu hesapla
+                    const localProgress = (audio.currentTime / audio.duration * waveData[id].length) % 1;
+                    const fillHeight = h.h * localProgress;
+                    const fillY = h.y + h.h - fillHeight; // Aşağıdan yukarı dolması için Y koordinatı
+                    x.fillRect(h.x, fillY, h.w, fillHeight); // Kısmi barı çiz
+
+                    // 2. Seken Nokta (Dalga üzerindeki parlak orb)
                     x.shadowBlur = 30;
-                    x.beginPath(); x.arc(h.x + h.w/2, h.y, 5, 0, Math.PI*2); x.fill();
+                    x.beginPath(); x.arc(h.x + h.w/2, fillY, 5, 0, Math.PI*2); x.fill();
                 }
+                
                 x.restore();
                 requestAnimationFrame(render);
             }
-            requestAnimationFrame(render);
+            requestAnimationFrame(frame); // Frame'i başlat
+            render(); // Frame fonksiyonunu çağır
         }
+        
+        // Hata Düzeltme: requestAnimationFrame(render); render(); fonksiyonları yanlış çağrılmıştı.
 
         async function kaydet() {
             try {
@@ -145,7 +160,7 @@
                 rec.start();
                 let s = 8; const b = document.getElementById('bRec');
                 const t = setInterval(() => { s--; b.innerText = `🛑 DURDUR (${s}s)`; if(s<=0) clearInterval(t); }, 1000);
-                b.onclick = () => { clearInterval(t); rec.stop(); b.onclick = kaydet; };
+                b.onclick = () => { clearInterval(t); rec.stop(); };
                 setTimeout(() => { if(rec.state==='recording') rec.stop(); }, 8000);
             } catch(e) { alert("Mikrofon izni gerekli!"); }
         }
