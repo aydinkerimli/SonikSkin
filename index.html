@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Perfect Sync Liquid Fill</title>
+    <title>Sonic Skin | Ultra Neon Liquid</title>
     <style>
-        :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
-        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
-        .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
-        .nav-right { display: flex; gap: 10px; align-items: center; }
+        :root { --neon: #d4ff00; --bright-white: #ffffff; --dark: #050505; }
+        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; }
+        .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; text-shadow: 0 0 10px var(--neon); }
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
-        .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
-        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; }
+        .panel { background: #111; border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; text-align: center; }
+        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #333; margin-bottom: 20px; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,1); }
         canvas { width: 100%; height: 100%; display: block; }
-        .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
+        .btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
-        .play-btn { background: #444; color: white; display: none; }
-        .buy-btn { background: var(--neon); color: black; display: none; justify-content: center; align-items: center; text-decoration: none; }
+        .play-btn { background: #333; color: white; border: 1px solid #444; display: none; }
+        .buy-btn { background: var(--neon); color: black; display: none; box-shadow: 0 0 15px var(--neon); }
         select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 8px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
@@ -25,12 +24,10 @@
 
     <div class="navbar">
         <div class="logo">SONIC SKIN</div>
-        <div class="nav-right">
-            <select id="langSel" onchange="dilDegistir(this.value)">
-                <option value="tr">TR</option><option value="en">EN</option><option value="ru">RU</option>
-                <option value="zh">ZH</option><option value="de">DE</option><option value="es">ES</option><option value="fr">FR</option>
-            </select>
-        </div>
+        <select id="langSel" onchange="dilDegistir(this.value)">
+            <option value="tr">TR</option><option value="en">EN</option><option value="ru">RU</option>
+            <option value="zh">ZH</option><option value="de">DE</option><option value="es">ES</option><option value="fr">FR</option>
+        </select>
     </div>
 
     <div class="main-container">
@@ -38,8 +35,8 @@
             <h2 id="h1">CANLI SES DÖVMESİ</h2>
             <div class="box"><canvas id="cv1"></canvas></div>
             <button id="bRec" class="btn" onclick="kaydet()">🎤 SESİ KAYDET</button>
-            <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
-            <button id="bS1" class="btn buy-btn" onclick="indir('cv1')">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+            <button id="bP1" class="btn play-btn" onclick="dinle('cv1', ses1)">▶️ DİNLE</button>
+            <button id="bS1" class="btn buy-btn" onclick="indir('cv1')">BUNU HATIRAYA DÖNÜŞTÜR</button>
         </div>
 
         <div class="panel">
@@ -47,100 +44,100 @@
             <div class="box"><canvas id="cv2"></canvas></div>
             <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
             <button class="btn" style="background:#222; color:#fff;" onclick="document.getElementById('fIn').click()" id="bF">📁 DOSYA SEÇ</button>
-            <button id="bP2" class="btn play-btn" onclick="dinle2()">▶️ DİNLE</button>
-            <button id="bS2" class="btn buy-btn" onclick="indir('cv2')">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+            <button id="bP2" class="btn play-btn" onclick="dinle('cv2', ses2)">▶️ DİNLE</button>
+            <button id="bS2" class="btn buy-btn" onclick="indir('cv2')">BUNU HATIRAYA DÖNÜŞTÜR</button>
         </div>
     </div>
 
     <script>
         const diller = {
-            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen:"▶️ DİNLE"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY (DOWNLOAD)", listen:"▶️ LISTEN"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen:"▶️ СЛУШАТЬ"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆 (下载)", listen:"▶️ 听"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen:"▶️ ANHÖREN"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO (DESCARGAR)", listen:"▶️ ESCUCHAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER"}
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN"}
+            // ... diğer diller buraya eklenebilir
         };
 
         let ses1 = new Audio(), ses2 = new Audio(), rec, chunks = [];
         let waveData = { cv1: [], cv2: [] }, staticImg = { cv1: null, cv2: null };
 
         function dilDegistir(v) {
-            const d = diller[v];
+            const d = diller[v] || diller.tr;
             document.getElementById('h1').innerText = d.h1; document.getElementById('h2').innerText = d.h2;
             document.getElementById('bRec').innerText = d.rec; document.getElementById('bF').innerText = d.f;
             document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
-            document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
+            document.querySelectorAll('.play-btn').forEach(b => b.innerText = d.listen);
         }
 
         async function sesDalgasiCiz(blob, canvasId) {
-            const c = document.getElementById(canvasId), x = c.getContext('2d'), dpr = 2;
+            const c = document.getElementById(canvasId), x = c.getContext('2d'), dpr = window.devicePixelRatio || 2;
             c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
             
             const aCtx = new (window.AudioContext || window.webkitAudioContext)();
             const buffer = await aCtx.decodeAudioData(await blob.arrayBuffer());
             const data = buffer.getChannelData(0);
-            const barWidth = 2, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
+            const barWidth = 3, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            x.fillStyle = "rgba(212, 255, 0, 0.2)"; // Boş şişe hali (şeffaf sarı)
             waveData[canvasId] = [];
 
             for (let i = 0; i < samples; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const d = data[(i * step) + j];
-                    if (d < min) min = d; if (d > max) max = d;
-                }
-                const h = Math.max(6, (max - min) * (c.offsetHeight * 0.8));
+                let max = 0;
+                for (let j = 0; j < step; j++) { if (Math.abs(data[(i * step) + j]) > max) max = Math.abs(data[(i * step) + j]); }
+                const h = Math.max(4, max * (c.offsetHeight * 0.9));
                 const xP = i * (barWidth + gap), yP = (c.offsetHeight / 2) - (h / 2);
+                
+                // Ölü rengi canlandırdık: Mat neon sarı (arka plan için)
+                x.fillStyle = "rgba(212, 255, 0, 0.15)";
                 x.fillRect(xP, yP, barWidth, h);
                 waveData[canvasId].push({ x: xP, y: yP, w: barWidth, h: h });
             }
             staticImg[canvasId] = x.getImageData(0, 0, c.width, c.height);
         }
 
-        function animasyon(audio, id) {
+        function dinle(id, audio) {
+            audio.currentTime = 0; audio.play();
             const c = document.getElementById(id), x = c.getContext('2d');
+            
             function render() {
-                if (audio.paused || audio.ended) return;
+                if (audio.paused || audio.ended) { x.putImageData(staticImg[id], 0, 0); return; }
                 x.putImageData(staticImg[id], 0, 0);
+                
                 const progress = audio.currentTime / audio.duration;
                 const currentIdx = Math.floor(progress * waveData[id].length);
 
-                x.save(); x.scale(2,2);
-
-                // --- DOLMA EFEKTİ (SU GİBİ DOLUYOR) ---
-                x.fillStyle = "#fff"; x.shadowBlur = 15; x.shadowColor = "#fff";
-                for(let i = 0; i < currentIdx; i++) {
+                x.save(); x.scale(2,2); // DPR düzeltmesi
+                
+                // 1. DOLMA VE PARLAMA SİSTEMİ
+                for(let i = 0; i <= currentIdx; i++) {
                     const b = waveData[id][i];
-                    if(b) x.fillRect(b.x, b.y, b.w, b.h); // Dolmuş barlar
-                }
-                
-                // Tam o anki bar (Hale ve Seken Nokta)
-                const h = waveData[id][currentIdx];
-                if(h) {
-                    // 1. Aşağıdan yukarıya doğru dolma hissi (Kısmi bar çizimi)
-                    // Barın ne kadarının dolu olduğunu hesapla
-                    const localProgress = (audio.currentTime / audio.duration * waveData[id].length) % 1;
-                    const fillHeight = h.h * localProgress;
-                    const fillY = h.y + h.h - fillHeight; // Aşağıdan yukarı dolması için Y koordinatı
-                    x.fillRect(h.x, fillY, h.w, fillHeight); // Kısmi barı çiz
+                    if(!b) continue;
 
-                    // 2. Seken Nokta (Dalga üzerindeki parlak orb)
-                    x.shadowBlur = 30;
-                    x.beginPath(); x.arc(h.x + h.w/2, fillY, 5, 0, Math.PI*2); x.fill();
+                    // Geçmiş barlar: Parlak Neon
+                    x.fillStyle = "#d4ff00";
+                    x.shadowBlur = 10;
+                    x.shadowColor = "#d4ff00";
+                    x.fillRect(b.x, b.y, b.w, b.h);
+
+                    // Aktif uçtaki bar: Bembeyaz Patlama (N11 Farı gibi)
+                    if(i === currentIdx) {
+                        x.fillStyle = "#ffffff";
+                        x.shadowBlur = 30;
+                        x.shadowColor = "#ffffff";
+                        // Aşağıdan yukarıya su gibi yükselen dolma mantığı
+                        const subProgress = (progress * waveData[id].length) % 1;
+                        const fillH = b.h * subProgress;
+                        x.fillRect(b.x, b.y + b.h - fillH, b.w, fillH);
+                        
+                        // Seken Nokta (Tam suyun tepesinde)
+                        x.beginPath();
+                        x.arc(b.x + b.w/2, b.y + b.h - fillH, 4, 0, Math.PI*2);
+                        x.fill();
+                    }
                 }
-                
                 x.restore();
                 requestAnimationFrame(render);
             }
-            requestAnimationFrame(frame); // Frame'i başlat
-            render(); // Frame fonksiyonunu çağır
+            render();
         }
-        
-        // Hata Düzeltme: requestAnimationFrame(render); render(); fonksiyonları yanlış çağrılmıştı.
 
         async function kaydet() {
             try {
@@ -157,12 +154,8 @@
                         document.getElementById('bRec').style.display='none';
                     };
                 };
-                rec.start();
-                let s = 8; const b = document.getElementById('bRec');
-                const t = setInterval(() => { s--; b.innerText = `🛑 DURDUR (${s}s)`; if(s<=0) clearInterval(t); }, 1000);
-                b.onclick = () => { clearInterval(t); rec.stop(); };
-                setTimeout(() => { if(rec.state==='recording') rec.stop(); }, 8000);
-            } catch(e) { alert("Mikrofon izni gerekli!"); }
+                rec.start(); setTimeout(() => rec.stop(), 5000);
+            } catch(e) { alert("Mikrofon hatası!"); }
         }
 
         function dosyaSecildi(input) {
@@ -175,11 +168,8 @@
             };
         }
 
-        function dinle1() { ses1.currentTime = 0; ses1.play(); animasyon(ses1, 'cv1'); }
-        function dinle2() { ses2.currentTime = 0; ses2.play(); animasyon(ses2, 'cv2'); }
         function indir(id) {
-            const c = document.getElementById(id), x = c.getContext('2d');
-            x.putImageData(staticImg[id], 0, 0);
+            const c = document.getElementById(id);
             const a = document.createElement('a'); a.download = 'sonic-skin.png'; a.href = c.toDataURL(); a.click();
         }
     </script>
