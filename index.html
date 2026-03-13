@@ -18,7 +18,7 @@
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
         
-        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; }
+        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; position: relative; }
         canvas { width: 100%; height: 100%; display: block; }
 
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
@@ -86,16 +86,17 @@
 
     <script>
         const diller = {
-            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR", listen:"▶️ DİNLE", stop:"🛑 DURDUR"},
-            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY", listen:"▶️ LISTEN", stop:"🛑 STOP"},
-            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", stop:"🛑 СТОП"},
-            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆", listen:"▶️ 听", stop:"🛑 停止"},
-            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
-            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO", listen:"▶️ ESCUCHAR", stop:"🛑 PARAR"},
-            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
+            tr: {h1:"CANLI SES DÖVMESİ", h2:"DOSYADAN DÖVME YAP", rec:"🎤 SESİ KAYDET", f:"📁 DOSYA SEÇ", buy:"BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen:"▶️ DİNLE", stop:"🛑 DURDUR"},
+            en: {h1:"LIVE VOICE TATTOO", h2:"TATTOO FROM FILE", rec:"🎤 RECORD VOICE", f:"📁 CHOOSE FILE", buy:"TURN THIS INTO A MEMORY (DOWNLOAD)", listen:"▶️ LISTEN", stop:"🛑 STOP"},
+            ru: {h1:"ЖИВАЯ ТАТУ", h2:"ИЗ ФАЙЛА", rec:"🎤 ЗАПИСАТЬ", f:"📁 ВЫБРАТЬ", buy:"ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen:"▶️ СЛУШАТЬ", stop:"🛑 СТОП"},
+            zh: {h1:"现场声音纹身", h2:"从文件制作", rec:"🎤 录制声音", f:"📁 选择文件", buy:"将此转化为记忆 (下载)", listen:"▶️ 听", stop:"🛑 停止"},
+            de: {h1:"LIVE-TÄTOWIERUNG", h2:"VON DATEI", rec:"🎤 AUFNEHMEN", f:"📁 WÄHLEN", buy:"IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
+            es: {h1:"TATUAJE EN VIVO", h2:"DESDE ARCHIVO", rec:"🎤 GRABAR", f:"📁 ELEGIR", buy:"CONVERTIR EN RECUERDO (DESCARGAR)", listen:"▶️ ESCUCHAR", stop:"🛑 PARAR"},
+            fr: {h1:"TATOUAGE VOCAL", h2:"VIA FICHIER", rec:"🎤 ENREGISTRER", f:"📁 CHOISIR", buy:"TRANSFORMER EN SOUVENIR (TÉLÉCHARGER)", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"}
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
+        let currentStaticImage = { cv1: null, cv2: null }; // Dalga formunu saklamak için
         const MAX_SURE = 8000;
 
         function dilDegistir(v) {
@@ -113,6 +114,7 @@
         function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
         function kapat() { document.getElementById('pop').style.display = 'none'; }
 
+        // --- ANA ÇİZİM VE ANALİZ ---
         async function sesDalgasiCiz(audioBlob, canvasId) {
             const c = document.getElementById(canvasId);
             const x = c.getContext('2d');
@@ -125,80 +127,10 @@
             const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
             const data = buffer.getChannelData(0);
 
-            // GÖRSEL AYARLAR: Referans fotoğrafındaki gibi sık ve keskin barlar
-            const barWidth = 1.5; // İnce ve sık barlar
-            const gap = 1;       // Minimal boşluk
+            const barWidth = 1.8; 
+            const gap = 1;       
             const samples = Math.floor(c.offsetWidth / (barWidth + gap));
             const step = Math.floor(data.length / samples);
             
             x.fillStyle = "#000";
-            x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            x.fillStyle = "#d4ff00";
-
-            for (let i = 0; i < samples; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j];
-                    if (datum < min) min = datum;
-                    if (datum > max) max = datum;
-                }
-                
-                // Genlik hesaplama (Referans görselindeki dolgunluğu verir)
-                const height = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
-                const xPos = i * (barWidth + gap);
-                const yPos = (c.offsetHeight / 2) - (height / 2);
-                
-                x.fillRect(xPos, yPos, barWidth, height);
-            }
-        }
-
-        async function kaydet() {
-            try {
-                if(!ctx) ctx = new AudioContext();
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(s); chunks = [];
-                rec.ondataavailable = e => chunks.push(e.data);
-                rec.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg' });
-                    ses1.src = URL.createObjectURL(blob);
-                    sesDalgasiCiz(blob, 'cv1');
-                    document.getElementById('bP1').style.display = 'block';
-                    document.getElementById('bR1').style.display = 'block';
-                    document.getElementById('bS1').style.display = 'flex';
-                    document.getElementById('bRec').style.display = 'none';
-                    s.getTracks().forEach(t => t.stop());
-                };
-                rec.start();
-                let sn = 8;
-                const b = document.getElementById('bRec');
-                const tLang = diller[document.getElementById('langSel').value].stop;
-                const timer = setInterval(() => { 
-                    sn--; b.innerText = `${tLang} (${sn}s)`; 
-                    if(sn<=0) clearInterval(timer);
-                }, 1000);
-                setTimeout(() => { if(rec.state==="recording") rec.stop(); }, MAX_SURE);
-                b.onclick = () => { clearInterval(timer); rec.stop(); };
-            } catch(e) { alert("Mikrofon hatası!"); }
-        }
-
-        function dosyaSecildi(i) {
-            const f = i.files[0]; if(!f) return;
-            ses2.src = URL.createObjectURL(f);
-            document.getElementById('bP2').style.display = 'block';
-            document.getElementById('bS2').style.display = 'flex';
-            sesDalgasiCiz(f, 'cv2');
-        }
-
-        function dinle1() { ses1.play(); }
-        function dinle2() { ses2.play(); }
-
-        function indir(id) {
-            const c = document.getElementById(id);
-            const link = document.createElement('a');
-            link.download = 'sonic-skin-pattern.png';
-            link.href = c.toDataURL('image/png');
-            link.click();
-        }
-    </script>
-</body>
-</html>
+            x.fillRect(
