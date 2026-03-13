@@ -7,33 +7,21 @@
     <style>
         :root { --neon: #d4ff00; --dark: #050505; --panel: #111; }
         body { background: var(--dark); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; }
         .nav-right { display: flex; gap: 10px; align-items: center; }
-
         .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-artist { background: var(--neon); color: #000; border: none; }
-
         .main-container { display: flex; justify-content: center; gap: 20px; padding: 40px 10px; flex-wrap: wrap; }
         .panel { background: var(--panel); border: 2px solid #222; border-radius: 20px; width: 450px; padding: 25px; box-sizing: border-box; text-align: center; }
-        
-        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; display: flex; align-items: center; overflow: hidden; position: relative; }
+        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #222; margin-bottom: 20px; border-radius: 12px; overflow: hidden; position: relative; }
         canvas { width: 100%; height: 100%; display: block; }
-
         .btn { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; display: block; font-size: 14px; transition: 0.3s; }
         #bRec { background: #ff3e3e; color: white; }
         .play-btn { background: #444; color: white; display: none; }
         .retry-btn { background: #222; color: #fff; border: 1px solid #444; display: none; }
-        
         .buy-btn { background: var(--neon); color: black; text-decoration: none; display: none; justify-content: center; align-items: center; font-size: 12px; }
-        .buy-btn:hover { background: #fff; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: #161616; padding: 30px; border-radius: 25px; border: 1px solid #333; width: 300px; text-align: center; }
-        .soc-btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        
-        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; cursor: pointer; }
+        select { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -42,24 +30,11 @@
         <div class="logo">SONIC SKIN</div>
         <div class="nav-right">
             <select id="langSel" onchange="dilDegistir(this.value)">
-                <option value="tr">TR</option>
-                <option value="en">EN</option>
-                <option value="ru">RU</option>
-                <option value="zh">ZH</option>
-                <option value="de">DE</option>
-                <option value="es">ES</option>
-                <option value="fr">FR</option>
+                <option value="tr">TR</option><option value="en">EN</option><option value="ru">RU</option>
+                <option value="zh">ZH</option><option value="de">DE</option><option value="es">ES</option><option value="fr">FR</option>
             </select>
-            <button class="btn-top" onclick="ac('Giriş Yap')">GİRİŞ YAP</button>
-            <button class="btn-top btn-artist" onclick="ac('Sanatçı Portalı')">SANATÇI PORTALI</button>
-        </div>
-    </div>
-
-    <div id="pop" class="modal">
-        <div class="modal-content">
-            <h3 id="pTitle">Üye Girişi</h3>
-            <button class="soc-btn" style="background:white; color:black;">Gmail ile Giriş</button>
-            <button onclick="kapat()" style="background:none; border:none; color:#ff3e3e; margin-top:15px; cursor:pointer; font-weight:bold;">KAPAT</button>
+            <button class="btn-top">GİRİŞ YAP</button>
+            <button class="btn-top btn-artist">SANATÇI PORTALI</button>
         </div>
     </div>
 
@@ -95,121 +70,83 @@
         };
 
         let ctx, rec, chunks = [], ses1 = new Audio(), ses2 = new Audio();
-        let currentStaticImage = { cv1: null, cv2: null }; 
+        let waveData = { cv1: [], cv2: [] }; // Dalga boylarını saklamak için
+        let staticImg = { cv1: null, cv2: null };
 
         function dilDegistir(v) {
-            const d = diller[v];
-            if(!d) return;
-            document.getElementById('h1').innerText = d.h1;
-            document.getElementById('h2').innerText = d.h2;
-            document.getElementById('bRec').innerText = d.rec;
-            document.getElementById('bF').innerText = d.f;
-            document.getElementById('bS1').innerText = d.buy;
-            document.getElementById('bS2').innerText = d.buy;
-            document.getElementById('bP1').innerText = d.listen;
-            document.getElementById('bP2').innerText = d.listen;
+            const d = diller[v]; if(!d) return;
+            document.getElementById('h1').innerText = d.h1; document.getElementById('h2').innerText = d.h2;
+            document.getElementById('bRec').innerText = d.rec; document.getElementById('bF').innerText = d.f;
+            document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen; document.getElementById('bP2').innerText = d.listen;
         }
 
-        function ac(t) { document.getElementById('pTitle').innerText = t; document.getElementById('pop').style.display = 'flex'; }
-        function kapat() { document.getElementById('pop').style.display = 'none'; }
-
         async function sesDalgasiCiz(audioBlob, canvasId) {
-            const c = document.getElementById(canvasId);
-            const x = c.getContext('2d');
-            const dpr = 2; 
-            c.width = c.offsetWidth * dpr;
-            c.height = c.offsetHeight * dpr;
-            x.scale(dpr, dpr);
-
+            const c = document.getElementById(canvasId); const x = c.getContext('2d');
+            const dpr = 2; c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
             if (!ctx) ctx = new AudioContext();
             const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
             const data = buffer.getChannelData(0);
-
-            const barWidth = 1.8; 
-            const gap = 1;       
+            const barWidth = 1.8, gap = 1;
             const samples = Math.floor(c.offsetWidth / (barWidth + gap));
             const step = Math.floor(data.length / samples);
             
-            x.fillStyle = "#000";
-            x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
+            x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
             x.fillStyle = "#d4ff00";
+            waveData[canvasId] = [];
 
             for (let i = 0; i < samples; i++) {
                 let min = 1.0, max = -1.0;
                 for (let j = 0; j < step; j++) {
                     const datum = data[(i * step) + j];
-                    if (datum < min) min = datum;
-                    if (datum > max) max = datum;
+                    if (datum < min) min = datum; if (datum > max) max = datum;
                 }
-                const height = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
-                const xPos = i * (barWidth + gap);
-                const yPos = (c.offsetHeight / 2) - (height / 2);
-                x.fillRect(xPos, yPos, barWidth, height);
+                const h = Math.max(3, (max - min) * (c.offsetHeight * 0.75));
+                const xP = i * (barWidth + gap); const yP = (c.offsetHeight / 2) - (h / 2);
+                x.fillRect(xP, yP, barWidth, h);
+                waveData[canvasId].push({ x: xP, y: yP, w: barWidth, h: h });
             }
-            currentStaticImage[canvasId] = x.getImageData(0, 0, c.width, c.height);
+            staticImg[canvasId] = x.getImageData(0, 0, c.width, c.height);
         }
 
         function animasyonBaslat(audioElem, canvasId) {
-            const c = document.getElementById(canvasId);
-            const x = c.getContext('2d');
+            const c = document.getElementById(canvasId); const x = c.getContext('2d');
             function frame() {
-                if (audioElem.paused || audioElem.ended) {
-                     x.putImageData(currentStaticImage[canvasId], 0, 0);
-                     return;
-                }
-                x.putImageData(currentStaticImage[canvasId], 0, 0);
+                if (audioElem.paused || audioElem.ended) { x.putImageData(staticImg[canvasId], 0, 0); return; }
+                x.putImageData(staticImg[canvasId], 0, 0);
                 const progress = audioElem.currentTime / audioElem.duration;
-                const neonX = progress * c.offsetWidth;
-                x.save();
-                x.scale(2,2);
-                x.shadowBlur = 15;
-                x.shadowColor = "#fff";
-                x.strokeStyle = "rgba(255, 255, 255, 0.9)";
-                x.lineWidth = 2;
-                x.beginPath();
-                x.moveTo(neonX, 0);
-                x.lineTo(neonX, c.offsetHeight);
-                x.stroke();
-                x.restore();
+                const currentIdx = Math.floor(progress * waveData[canvasId].length);
+                const bar = waveData[canvasId][currentIdx];
+
+                if (bar) {
+                    x.save(); x.scale(2,2);
+                    x.shadowBlur = 15; x.shadowColor = "#fff";
+                    x.fillStyle = "#fff"; // Işık rengi
+                    // Sadece o anki dalganın boyu kadar ışık çiz
+                    x.fillRect(bar.x, bar.y, bar.w, bar.h);
+                    x.restore();
+                }
                 requestAnimationFrame(frame);
             }
             requestAnimationFrame(frame);
         }
 
         async function kaydet() {
-            try {
-                if(!ctx) ctx = new AudioContext();
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(s); chunks = [];
-                rec.ondataavailable = e => chunks.push(e.data);
-                rec.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg' });
-                    ses1.src = URL.createObjectURL(blob);
-                    sesDalgasiCiz(blob, 'cv1');
-                    document.getElementById('bP1').style.display = 'block';
-                    document.getElementById('bR1').style.display = 'block';
-                    document.getElementById('bS1').style.display = 'flex';
-                    document.getElementById('bRec').style.display = 'none';
-                    s.getTracks().forEach(t => t.stop());
-                };
-                rec.start();
-                let sn = 8;
-                const b = document.getElementById('bRec');
-                const tLang = diller[document.getElementById('langSel').value].stop;
-                const timer = setInterval(() => { 
-                    sn--; b.innerText = `${tLang} (${sn}s)`; 
-                    if(sn<=0) clearInterval(timer);
-                }, 1000);
-                b.onclick = () => { clearInterval(timer); rec.stop(); };
-                setTimeout(() => { if(rec.state==="recording") rec.stop(); }, 8000);
-            } catch(e) { alert("Mikrofon hatası!"); }
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            rec = new MediaRecorder(s); chunks = [];
+            rec.ondataavailable = e => chunks.push(e.data);
+            rec.onstop = () => {
+                const b = new Blob(chunks, { type: 'audio/ogg' });
+                ses1.src = URL.createObjectURL(b); sesDalgasiCiz(b, 'cv1');
+                document.getElementById('bP1').style.display='block'; document.getElementById('bS1').style.display='flex'; document.getElementById('bRec').style.display='none';
+            };
+            rec.start();
+            setTimeout(() => rec.stop(), 8000);
         }
 
         function dosyaSecildi(i) {
-            const f = i.files[0]; if(!f) return;
-            ses2.src = URL.createObjectURL(f);
-            document.getElementById('bP2').style.display = 'block';
-            document.getElementById('bS2').style.display = 'flex';
+            const f = i.files[0]; ses2.src = URL.createObjectURL(f);
+            document.getElementById('bP2').style.display='block'; document.getElementById('bS2').style.display='flex';
             sesDalgasiCiz(f, 'cv2');
         }
 
@@ -217,13 +154,10 @@
         function dinle2() { ses2.play(); animasyonBaslat(ses2, 'cv2'); }
 
         function indir(id) {
-            const c = document.getElementById(id);
-            const x = c.getContext('2d');
-            x.putImageData(currentStaticImage[id], 0, 0);
-            const link = document.createElement('a');
-            link.download = 'sonic-skin.png';
-            link.href = c.toDataURL('image/png');
-            link.click();
+            const c = document.getElementById(id); const x = c.getContext('2d');
+            x.putImageData(staticImg[id], 0, 0);
+            const link = document.createElement('a'); link.download = 'sonic-skin.png';
+            link.href = c.toDataURL(); link.click();
         }
     </script>
 </body>
