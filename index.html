@@ -50,7 +50,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* KİLİD TƏBƏQƏSİ (BLUR) */
         #lock-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(15px);
@@ -71,7 +70,6 @@
         .btn-main { background: var(--neon); color: #000; }
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -139,7 +137,6 @@
         canvas.height = canvas.offsetHeight;
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
-
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
             overlay.style.display = 'none';
@@ -147,10 +144,21 @@
             document.getElementById('action-area').style.display = 'none';
             if(localStorage.getItem('lastStaticWave')) {
                 staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
-                drawStaticWave();
+                drawStaticWave(true);
             }
         }
     };
+
+    function clearPreviousSession() {
+        // Yeni səs yüklənəndə köhnəni tamamilə sıfırla
+        if (animFrame) cancelAnimationFrame(animFrame);
+        if (audio) { audio.pause(); audio = null; }
+        staticDataArray = [];
+        overlay.style.display = 'none';
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Ekranı tam sil
+        document.getElementById('timer').innerText = "00:00 / 00:08";
+        document.getElementById('btn-play').style.display = 'none';
+    }
 
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
@@ -165,18 +173,33 @@
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
+    function setupStreamAnalyser(streamOrElement) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        let source;
+        if (streamOrElement instanceof MediaStream) {
+            source = audioCtx.createMediaStreamSource(streamOrElement);
+        } else {
+            source = audioCtx.createMediaElementSource(streamOrElement);
+        }
+        source.connect(analyser);
+        if (!(streamOrElement instanceof MediaStream)) analyser.connect(audioCtx.destination);
+        analyser.fftSize = 128;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        drawWave();
+    }
+
     async function processAudioData(data) {
-        overlay.style.display = 'none'; // Proses vaxtı hələ kilid yoxdur
+        overlay.style.display = 'none';
         audioURL = URL.createObjectURL(data);
         audio = new Audio(audioURL);
-        setupAnalyser();
         const arrayBuffer = await data.arrayBuffer();
         const audioCtx = new AudioContext();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
         
         audio.onended = () => {
             cancelAnimationFrame(animFrame);
-            drawStaticWave(); // Səs bitəndə stabil dalğanı çək və kilidlə
+            drawStaticWave();
         };
 
         generateStaticWave(decodedData);
@@ -184,7 +207,7 @@
         document.getElementById('timer').innerText = `00:08 / 00:08`;
     }
 
-    async function generateStaticWave(buffer) {
+    function generateStaticWave(buffer) {
         const rawData = buffer.getChannelData(0);
         const samples = 60; 
         const blockSize = Math.floor((buffer.sampleRate * 8) / samples);
@@ -195,16 +218,11 @@
             staticDataArray.push(sum / blockSize);
         }
         localStorage.setItem('lastStaticWave', JSON.stringify(staticDataArray));
-        drawStaticWave(); // Bu funksiya həm də kilidi aktiv edəcək
+        drawStaticWave();
     }
 
-    function drawStaticWave() {
-        // Stabil dalğa görünəndə kilid gəlir (çünki bu artıq son görüntüdür)
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('status') !== 'success') {
-            overlay.style.display = 'flex'; 
-        }
-
+    function drawStaticWave(isPaid = false) {
+        if (!isPaid) overlay.style.display = 'flex';
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
@@ -218,21 +236,11 @@
         });
     }
 
-    function setupAnalyser() {
-        const audioCtx = new AudioContext();
-        analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaElementSource(audio);
-        source.connect(analyser); analyser.connect(audioCtx.destination);
-        analyser.fftSize = 128;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-    }
-
     function playAudio() {
         if(!audio) return;
-        overlay.style.display = 'none'; // Dinləyəndə kilidi qaldır ki animasiyanı görsünlər
+        overlay.style.display = 'none';
+        setupStreamAnalyser(audio);
         audio.play();
-        if(animFrame) cancelAnimationFrame(animFrame);
-        drawWave();
     }
 
     function drawWave() {
@@ -240,10 +248,8 @@
         animFrame = requestAnimationFrame(drawWave);
         analyser.getByteFrequencyData(dataArray);
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
         const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
         grad.addColorStop(0, '#00c3ff'); grad.addColorStop(0.5, '#ffff1c'); grad.addColorStop(1, '#ff1744');
-        
         ctx.strokeStyle = grad; ctx.lineWidth = 4; ctx.lineCap = 'round';
         ctx.beginPath();
         const barWidth = (canvas.width / dataArray.length) * 2.5;
@@ -256,42 +262,37 @@
         ctx.stroke();
     }
 
-    function handleCheckoutFlow() { 
-        if(staticDataArray.length === 0) return;
-        window.location.href = LEMON_LINK; 
-    }
-
-    function downloadPNG() {
-        overlay.style.display = 'none'; // Yükləyəndə dumanı təmizlə
-        drawStaticWave();
-        const link = document.createElement('a');
-        link.download = 'sonik-skin.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    function handleFile(e) { if(e.target.files[0]) processAudioData(e.target.files[0]); }
-
     async function initMic() {
-        overlay.style.display = 'none'; // Yazanda kilid olmasın
+        clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setupStreamAnalyser(stream);
             recorder = new MediaRecorder(stream);
             recorder.start(); chunks = [];
             let s = 0; 
             const t = setInterval(() => {
                 s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
+                if(s >= 8) { 
+                    clearInterval(t); recorder.stop(); 
+                    stream.getTracks().forEach(tr => tr.stop());
+                    cancelAnimationFrame(animFrame);
+                }
             }, 1000);
             recorder.onstop = () => processAudioData(new Blob(chunks));
             recorder.ondataavailable = e => chunks.push(e.data);
         } catch(e) { alert("Mikrofon hatası!"); }
     }
 
-    function resetPage() {
-        localStorage.removeItem('lastStaticWave');
-        window.location.href = window.location.origin + window.location.pathname;
+    function handleFile(e) { 
+        if(e.target.files[0]) {
+            clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
+            processAudioData(e.target.files[0]);
+        }
     }
+
+    function handleCheckoutFlow() { if(staticDataArray.length === 0) return; window.location.href = LEMON_LINK; }
+    function downloadPNG() { drawStaticWave(true); const link = document.createElement('a'); link.download = 'sonik-skin.png'; link.href = canvas.toDataURL(); link.click(); }
+    function resetPage() { localStorage.removeItem('lastStaticWave'); window.location.href = window.location.origin + window.location.pathname; }
 </script>
 </body>
 </html>
