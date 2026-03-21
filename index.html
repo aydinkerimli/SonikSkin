@@ -2,60 +2,69 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Sonik Skin Premium - Tattoo Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sonik Skin Premium</title>
     <style>
-        :root { --neon: #d4ff00; --dark: #121212; --glass: rgba(255, 255, 255, 0.05); }
+        :root { --neon: #d4ff00; --bg: #050505; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
-            color: white; font-family: 'Inter', sans-serif; margin: 0;
-            display: flex; flex-direction: column; height: 100vh;
+            background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
+            color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
 
-        /* HEADER */
+        /* HEADER - Mobil üçün genişləndirildi */
         header {
-            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
         }
-        .logo { font-weight: 900; letter-spacing: 2px; color: var(--neon); }
-        .nav-right { display: flex; align-items: center; gap: 20px; }
-        .auth-btns span { color: #888; font-size: 13px; cursor: pointer; margin-left: 15px; }
+        .logo { font-weight: 900; letter-spacing: 1px; color: var(--neon); font-size: 1.2rem; }
         
-        /* DİL DROPDOWN */
-        .lang-dropdown { position: relative; display: inline-block; }
-        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .nav-right { display: flex; align-items: center; gap: 15px; }
+        .auth-btns { display: none; } /* Mobildə yer tutmasın deyə gizlətmək olar və ya menyuya salmaq */
+        @media (min-width: 600px) { .auth-btns { display: flex; gap: 15px; font-size: 12px; color: #888; } }
+
+        /* DİL MENYUSU */
+        .lang-dropdown { position: relative; }
+        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
         .lang-content {
-            display: none; position: absolute; right: 0; background: #222;
-            min-width: 80px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); border-radius: 5px; z-index: 1;
+            display: none; position: absolute; right: 0; background: #1a1a1a;
+            min-width: 120px; border: 1px solid #333; border-radius: 10px; z-index: 1000;
         }
-        .lang-content span { color: white; padding: 8px 12px; display: block; cursor: pointer; font-size: 12px; }
-        .lang-content span:hover { background: #333; color: var(--neon); }
+        .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 14px; }
         .lang-dropdown:hover .lang-content { display: block; }
 
-        /* MAIN CARD */
-        .container { flex: 1; display: flex; justify-content: center; align-items: center; }
+        /* ƏSAS PANEL - Telefonda tam görünür */
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
         .card {
-            background: var(--dark); border: 1px solid #222; padding: 30px;
-            border-radius: 25px; width: 380px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            background: #111; border: 1px solid #222; padding: 25px;
+            border-radius: 30px; width: 100%; max-width: 400px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
 
-        /* DİNAMİK DALĞA SAHƏSİ */
+        h2 { font-size: 1.1rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* DALĞA SAHƏSİ */
         .wave-box {
-            background: #000; height: 120px; border-radius: 15px; margin-bottom: 20px;
-            position: relative; display: flex; align-items: center; justify-content: center;
-            border: 1px solid #1a1a1a; overflow: hidden;
+            background: #000; height: 150px; border-radius: 20px; margin-bottom: 20px;
+            position: relative; border: 1px solid #1a1a1a; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
         }
-        #waveCanvas { width: 100%; height: 80px; }
-        #timer { position: absolute; top: 10px; right: 15px; color: var(--neon); font-size: 12px; }
+        canvas { width: 100%; height: 100%; }
+        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
 
-        /* BUTONLAR */
+        /* DÜYMƏLƏR - Mobil üçün toxunma dostu (böyük) */
         .btn {
-            width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 12px; border: none;
-            font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .btn-gray { background: #252525; color: #fff; border: 1px solid #333; }
+        .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
+        .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
         .btn-main { background: var(--neon); color: #000; margin-top: 10px; }
-        #listenBtn { background: #333; color: var(--neon); display: none; }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -64,18 +73,18 @@
     <div class="logo">SONIK SKIN</div>
     <div class="nav-right">
         <div class="auth-btns">
-            <span>USER LOGIN</span>
-            <span>ARTIST LOGIN</span>
+            <span id="u-login">USER LOGIN</span>
+            <span id="a-login">ARTIST LOGIN</span>
         </div>
         <div class="lang-dropdown">
-            <button class="lang-btn" id="activeLang">TR ▾</button>
+            <button class="lang-btn" id="curLang">TR ▾</button>
             <div class="lang-content">
-                <span onclick="setLang('tr')">TR</span>
-                <span onclick="setLang('en')">EN</span>
-                <span onclick="setLang('ru')">RU</span>
-                <span onclick="setLang('fr')">FR</span>
-                <span onclick="setLang('zh')">ZH</span>
-                <span onclick="setLang('de')">DE</span>
+                <span onclick="updateLang('tr')">Türkçe</span>
+                <span onclick="updateLang('en')">English</span>
+                <span onclick="updateLang('ru')">Русский</span>
+                <span onclick="updateLang('fr')">Français</span>
+                <span onclick="updateLang('zh')">中文</span>
+                <span onclick="updateLang('de')">Deutsch</span>
             </div>
         </div>
     </div>
@@ -90,92 +99,100 @@
             <div id="timer">00:00 / 00:08</div>
         </div>
 
-        <button class="btn btn-gray" onclick="startRecording()">🎤 SESİ KAYDET</button>
+        <button class="btn btn-gray" id="btn-rec" onclick="startRec()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
         
-        <input type="file" id="audioInp" hidden onchange="fileChosen()">
-        <button class="btn btn-gray" onclick="document.getElementById('audioInp').click()" id="ui-select">📁 DOSYA SEÇ</button>
+        <input type="file" id="fInp" hidden accept="audio/*" onchange="handleFile(event)">
+        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
 
-        <button class="btn btn-gray" id="listenBtn" onclick="playAudio()">🔊 DİNLE</button>
+        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
-        <button class="btn btn-main" onclick="downloadTattoo()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        <button class="btn btn-main" onclick="downloadPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
 <script>
-    const dictionary = {
-        tr: { t: "DOSYADAN DÖVME YAP", s: "DOSYA SEÇ", d: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", l: "DİNLE" },
-        en: { t: "CREATE TATTOO FROM FILE", s: "CHOOSE FILE", d: "CONVERT TO MEMORY", l: "LISTEN" },
-        ru: { t: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", s: "ВЫБРАТЬ ФАЙЛ", d: "СКАЧАТЬ ПАМЯТЬ", l: "СЛУШАТЬ" },
-        fr: { t: "CRÉER UN TATOUAGE", s: "CHOISIR FICHIER", d: "CONVERTIR", l: "ÉCOUTER" },
-        zh: { t: "制作纹身", s: "选择文件", d: "下载回忆", l: "倾听" },
-        de: { t: "TATTOO AUS DATEI", s: "DATEI WÄHLEN", d: "SPEICHERN", l: "ANHÖREN" }
+    const langs = {
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", u: "GİRİŞ", a: "SANATÇI" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD", u: "LOGIN", a: "ARTIST" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", u: "ВХОД", a: "АРТ" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR", down: "CONVERTIR", listen: "ÉCOUTER", rec: "ENREGISTRER", u: "LOG", a: "ART" },
+        zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音", u: "登录", a: "艺术家" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME", u: "LOG", a: "ARTIST" }
     };
 
-    let audioURL = null;
-    let isPlaying = false;
+    let recorder, chunks = [], audioURL, audio;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
-    function setLang(l) {
-        document.getElementById('ui-title').innerText = dictionary[l].t;
-        document.getElementById('ui-select').innerText = "📁 " + dictionary[l].s;
-        document.getElementById('ui-down').innerText = dictionary[l].d;
-        document.getElementById('listenBtn').innerText = "🔊 " + dictionary[l].l;
-        document.getElementById('activeLang').innerText = l.toUpperCase() + " ▾";
+    function updateLang(l) {
+        document.getElementById('ui-title').innerText = langs[l].title;
+        document.getElementById('ui-select').innerText = langs[l].select;
+        document.getElementById('ui-down').innerText = langs[l].down;
+        document.getElementById('ui-listen').innerText = langs[l].listen;
+        document.getElementById('ui-rec').innerText = langs[l].rec;
+        document.getElementById('u-login').innerText = langs[l].u;
+        document.getElementById('a-login').innerText = langs[l].a;
+        document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    // Statik Tattoo Dalğası Çəkmək (Yüklənəcək PNG üçün)
-    function drawStaticWave() {
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#d4ff00';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        for(let i=0; i<canvas.width; i+=5) {
-            let h = Math.random() * 40 + 10;
-            ctx.moveTo(i, 40 - h/2);
-            ctx.lineTo(i, 40 + h/2);
+    function draw(active = false) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3; ctx.beginPath();
+        for(let i=0; i<canvas.width; i+=6) {
+            let h = active ? Math.random()*80 + 10 : 30;
+            ctx.moveTo(i, canvas.height/2 - h/2); ctx.lineTo(i, canvas.height/2 + h/2);
         }
         ctx.stroke();
     }
-    drawStaticWave();
+    draw();
 
-    function startRecording() {
-        let s = 0;
-        const intv = setInterval(() => {
-            s++;
-            document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-            // Animasiya simulyasiyası
-            drawStaticWave(); 
-            if(s >= 8) {
-                clearInterval(intv);
-                document.getElementById('listenBtn').style.display = 'flex';
-                audioURL = "dummy_path"; // Səs yazıldı simulyasiyası
-            }
-        }, 1000);
+    async function startRec() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            chunks = [];
+            let s = 0;
+            const t = setInterval(() => {
+                s++; draw(true);
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { clearInterval(t); recorder.stop(); draw(false); }
+            }, 1000);
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/mp3' });
+                audioURL = URL.createObjectURL(blob);
+                audio = new Audio(audioURL);
+                document.getElementById('btn-play').style.display = 'flex';
+            };
+            recorder.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { alert("Mikrofon izni gerekli!"); }
     }
 
     function playAudio() {
-        if(!audioURL) return;
-        isPlaying = true;
-        let p = 0;
-        const pInt = setInterval(() => {
-            p++;
-            drawStaticWave(); // Dinləyərkən dalğalar oynayır
-            if(p >= 30) { clearInterval(pInt); isPlaying = false; }
-        }, 100);
+        if(audio) {
+            audio.play();
+            const anim = setInterval(() => {
+                draw(true);
+                if(audio.ended) { clearInterval(anim); draw(false); }
+            }, 100);
+        }
     }
 
-    function fileChosen() {
-        audioURL = "file_loaded";
-        document.getElementById('listenBtn').style.display = 'flex';
-        drawStaticWave();
+    function handleFile(e) {
+        const file = e.target.files[0];
+        if(file) {
+            audioURL = URL.createObjectURL(file);
+            audio = new Audio(audioURL);
+            document.getElementById('btn-play').style.display = 'flex';
+            draw();
+        }
     }
 
-    // PNG OLARAQ YÜKLƏMƏ (Əsl səs dalğası forması)
-    function downloadTattoo() {
+    function downloadPNG() {
         const link = document.createElement('a');
-        link.download = 'tattoo-waveform.png';
-        link.href = canvas.toDataURL("image/png");
+        link.download = 'tattoo.png';
+        link.href = canvas.toDataURL();
         link.click();
     }
 </script>
