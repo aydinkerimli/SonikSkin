@@ -78,7 +78,7 @@
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         
-        <div class="wave-box" id="captureArea">
+        <div class="wave-box" id="captureZone">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
@@ -90,13 +90,13 @@
 
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
-        <button class="btn btn-main" onclick="handleCheckout()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        <button class="btn btn-main" onclick="handleFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
 <script>
-    // Lemon Squeezy Checkout Linki
-    const LEMON_LINK = "https://sonik-skin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
+    // SƏNİN YENİ VƏ İŞLƏK LİNKİN
+    const NEW_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
 
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
@@ -131,30 +131,24 @@
     }
     drawStatic();
 
-    // ÖDƏNİŞ VƏ YÜKLƏMƏ FUNKSİYASI
-    function handleCheckout() {
-        const urlParams = new URLSearchParams(window.location.search);
-        // Əgər ödənişdən qayıdıbsa (URL-də ?status=success varsa)
-        if (urlParams.get('status') === 'success') {
-            downloadPNG();
+    // ÖDƏNİŞ VƏ YÜKLƏMƏ AXINI
+    function handleFlow() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('status') === 'success') {
+            const zone = document.getElementById('captureZone');
+            const timer = document.getElementById('timer');
+            timer.style.opacity = '0'; 
+
+            html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
+                const a = document.createElement('a');
+                a.download = 'sonik-tattoo.png';
+                a.href = c.toDataURL("image/png");
+                a.click();
+                timer.style.opacity = '1';
+            });
         } else {
-            // Ödəniş yoxdursa Lemon Squeezy-yə göndər
-            window.location.href = LEMON_LINK;
+            window.location.href = NEW_LINK;
         }
-    }
-
-    function downloadPNG() {
-        const zone = document.getElementById('captureArea');
-        const timer = document.getElementById('timer');
-        timer.style.opacity = '0'; // Şəkildə taymer görünməsin
-
-        html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
-            const a = document.createElement('a');
-            a.download = 'sonik-skin-tattoo.png';
-            a.href = c.toDataURL("image/png");
-            a.click();
-            timer.style.opacity = '1';
-        });
     }
 
     async function initMic() {
@@ -175,17 +169,13 @@
                     stream.getTracks().forEach(track => track.stop());
                 }
             }, 1000);
-
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: options.mimeType });
-                audioURL = URL.createObjectURL(blob);
+                audioURL = URL.createObjectURL(new Blob(chunks, { type: options.mimeType }));
                 audio = new Audio(audioURL);
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { 
-            alert("Mikrofon izni verilmedi."); 
-        }
+        } catch(e) { alert("Mikrofon hatası!"); }
     }
 
     function handleFile(e) {
@@ -194,7 +184,6 @@
         audioURL = URL.createObjectURL(file);
         audio = new Audio(audioURL);
         document.getElementById('btn-play').style.display = 'flex';
-        document.getElementById('timer').innerText = "00:08 / 00:08";
         drawStatic();
     }
 
@@ -203,10 +192,7 @@
         audio.play();
         animInterval = setInterval(() => {
             drawStatic(true);
-            if(audio.paused || audio.ended) { 
-                clearInterval(animInterval); 
-                drawStatic(false); 
-            }
+            if(audio.paused || audio.ended) { clearInterval(animInterval); drawStatic(false); }
         }, 100);
     }
 </script>
