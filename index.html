@@ -8,19 +8,16 @@
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
         body {
             background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
             color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
-
         header {
             width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; }
-
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
@@ -29,14 +26,12 @@
         }
         .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
         .lang-dropdown:hover .lang-content { display: block; }
-
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
         .card {
             background: #111; border: 1px solid #222; padding: 25px;
             border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
-
         .wave-box {
             background: #000; height: 140px; border-radius: 20px; margin-bottom: 25px;
             position: relative; border: 1px solid #1a1a1a; overflow: hidden;
@@ -44,7 +39,6 @@
         }
         canvas { width: 100%; height: 100%; background: #000; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
-
         .btn {
             width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
             font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
@@ -54,7 +48,12 @@
         .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
         .btn-main { background: var(--neon); color: #000; margin-top: 10px; }
         
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        /* Ödənişdən sonrakı xüsusi düymə stili */
+        #success-btn { 
+            display: none; background: #00c3ff; color: #fff; 
+            animation: pulse 1.5s infinite; border: 2px solid #fff;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -83,10 +82,12 @@
             <div id="timer">00:00 / 00:08</div>
         </div>
 
+        <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ ÖDEME BAŞARILI! TIKLA İNDİR</button>
+
         <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
         
         <input type="file" id="fInp" hidden onchange="handleFile(event)">
-        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
+        <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
 
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
@@ -96,7 +97,6 @@
 
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
-
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD" },
@@ -110,13 +110,15 @@
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
+    // ÖDƏNİŞ YOXLA: Əgər status success-dirsə, yükləmə düyməsini çıxar
     window.onload = function() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
-            setTimeout(() => {
-                downloadPNG();
-                alert("Ödemeniz onaylandı! Dövmeniz indiriliyor...");
-            }, 1500);
+            document.getElementById('success-btn').style.display = 'flex';
+            document.getElementById('btn-rec').style.display = 'none';
+            document.getElementById('btn-file').style.display = 'none';
+            document.getElementById('ui-down').style.display = 'none';
+            alert("Ödeme Onaylandı! Mavi butona basarak dövmenizi indirin.");
         }
     };
 
@@ -129,78 +131,61 @@
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    // ƏN VACİB HİSSƏ: Rəngli dalğanı (Gradient) saytda rəqs etdirmək
     function drawWave(analyser, dataArray) {
         function frame() {
             animFrame = requestAnimationFrame(frame);
             analyser.getByteFrequencyData(dataArray);
-            ctx.fillStyle = '#000000'; // Arxa fon
+            ctx.fillStyle = '#000000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Sənin bəyəndiyin canavar Gradient (göy-sarı-qırmızı)
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, '#00c3ff'); // Göy
-            gradient.addColorStop(0.5, '#ffff1c'); // Sarı
-            gradient.addColorStop(1, '#ff1744'); // Qırmızı
+            gradient.addColorStop(0, '#00c3ff');
+            gradient.addColorStop(0.5, '#ffff1c');
+            gradient.addColorStop(1, '#ff1744');
             
             ctx.strokeStyle = gradient;
-            ctx.lineWidth = 4; // Qalınlıq
+            ctx.lineWidth = 4;
             ctx.lineCap = 'round';
             ctx.beginPath();
 
             const barWidth = (canvas.width / dataArray.length) * 2.5;
             let x = 0;
             for (let i = 0; i < dataArray.length; i++) {
-                const barHeight = dataArray[i] / 2; // Hündürlük
+                const barHeight = dataArray[i] / 2;
                 const yTop = canvas.height / 2 - barHeight / 2;
                 const yBottom = canvas.height / 2 + barHeight / 2;
                 ctx.moveTo(x, yTop);
                 ctx.lineTo(x, yBottom);
-                x += barWidth + 2; // Boşluq
+                x += barWidth + 2;
             }
             ctx.stroke();
         }
         frame();
     }
 
-    // PNG ÜÇÜN XÜSUSİ ENDİRMƏ FUNKSİYASI
     function downloadPNG() {
-        if (!audio || !dataArray) {
-            alert("Lütfen önce bir ses yükleyin veya kaydedin.");
+        if (!dataArray) {
+            alert("Lütfen önce bir ses dinleyin (DİNLE), sonra indirin.");
             return;
         }
 
         const timer = document.getElementById('timer');
-        timer.style.opacity = '0'; // Taymeri gizlət
+        timer.style.opacity = '0';
         
-        // Animasiyanı dondururuq (çəkiliş üçün)
         if(animFrame) cancelAnimationFrame(animFrame);
-
-        // Canvas-ı təmizləyirik (əvvəlki görüntünü silmək üçün)
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // PNG üçün sənin göstərdiyin xüsusi rəng (Göy-Sarı Xətlər)
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
 
         const barWidth = (canvas.width / dataArray.length) * 2.5;
         let x = 0;
-        
-        // Hər xətt üçün ayrıca rəng tənzimləməsi (Göy -> Sarı)
         for (let i = 0; i < dataArray.length; i++) {
             const barHeight = dataArray[i] / 2;
             const yTop = canvas.height / 2 - barHeight / 2;
             const yBottom = canvas.height / 2 + barHeight / 2;
-            
-            // Xəttin rəngini təyin edirik: mərkəzə doğru sarı, kənarlara göy
             const ratio = i / dataArray.length;
-            if (ratio < 0.2 || ratio > 0.8) {
-                ctx.strokeStyle = '#00c3ff'; // Göy kənarlar
-            } else {
-                ctx.strokeStyle = '#ffff1c'; // Sarı mərkəz
-            }
-
+            ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
             ctx.beginPath();
             ctx.moveTo(x, yTop);
             ctx.lineTo(x, yBottom);
@@ -208,30 +193,18 @@
             x += barWidth + 2;
         }
 
-        // Canvas-ın anlıq görüntüsünü götürürük
         const snapshot = canvas.toDataURL("image/png", 1.0);
-        
-        html2canvas(document.getElementById('captureZone'), { 
-            backgroundColor: "#000000",
-            scale: 4, // Yüksək keyfiyyət
-            useCORS: true
-        }).then(c => {
-            const a = document.createElement('a');
-            a.download = 'sonik-skin-tattoo.png';
-            a.href = snapshot; // Xüsusi göy-sarı variantı
-            a.click();
-            timer.style.opacity = '1';
-            // Animasiyanı yenidən başladırıq (məsələn, playAudio() çağırmaqla)
-        });
+        const a = document.createElement('a');
+        a.download = 'sonik-tattoo.png';
+        a.href = snapshot;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        timer.style.opacity = '1';
     }
 
     function handleCheckoutFlow() {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('status') === 'success') {
-            downloadPNG();
-        } else {
-            window.location.href = LEMON_LINK;
-        }
+        window.location.href = LEMON_LINK;
     }
 
     async function initMic() {
@@ -275,7 +248,7 @@
         const source = audioCtx.createMediaElementSource(audio);
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
-        analyser.fftSize = 128; // Xətt sayını təyin edir (az rəqəm = daha qalın xətlər)
+        analyser.fftSize = 128;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         audio.play();
         if(animFrame) cancelAnimationFrame(animFrame);
