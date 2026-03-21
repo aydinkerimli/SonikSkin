@@ -95,7 +95,7 @@
 </div>
 
 <script>
-    // Lemon Squeezy Linkin
+    // Sənin aktiv Lemon Squeezy linkin
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
 
     const langs = {
@@ -111,11 +111,10 @@
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
-    // SAYFA YÜKLENDİĞİNDE OTOMATİK KONTROL
+    // SAYFA YÜKLƏNƏNDƏ ÖDƏNİŞİ YOXLA VƏ AVTOMATİK ENDİR
     window.onload = function() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
-            // Ödeme başarılıysa 1.5 saniye sonra indir
             setTimeout(() => {
                 downloadPNG();
                 alert("Ödemeniz onaylandı! Dövmeniz indiriliyor...");
@@ -143,7 +142,7 @@
     }
     drawStatic();
 
-    // ÖDEME VE İNDİRME AKIŞI
+    // ÖDƏNİŞ VƏ ENDİRMƏ MƏNTİQİ
     function handleCheckoutFlow() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
@@ -153,20 +152,27 @@
         }
     }
 
+    // PROFESSIONAL ŞƏKİL ÇƏKİLİŞİ (DÜZ XƏTT OLMAMASI ÜÇÜN)
     function downloadPNG() {
         const zone = document.getElementById('captureZone');
         const timer = document.getElementById('timer');
         if(!zone) return;
 
-        timer.style.opacity = '0'; // Timer'ı gizle
-        html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
+        timer.style.opacity = '0'; // Taymeri şəkildə gizlət
+        
+        html2canvas(zone, { 
+            backgroundColor: "#000000", 
+            scale: 4, 
+            logging: false,
+            useCORS: true
+        }).then(c => {
             const a = document.createElement('a');
             a.download = 'sonik-skin-tattoo.png';
-            a.href = c.toDataURL("image/png");
+            a.href = c.toDataURL("image/png", 1.0);
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            timer.style.opacity = '1'; // Timer'ı geri getir
+            timer.style.opacity = '1';
         });
     }
 
