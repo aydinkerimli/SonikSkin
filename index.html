@@ -3,199 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Professional Waveform</title>
+    <title>Sonik Skin - Final Build</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root { --neon: #d4ff00; --azure: #00a2ff; --bg: #030a16; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
         body {
             background: radial-gradient(circle at top right, #003366 0%, #050505 100%);
-            color: white; font-family: 'Segoe UI', system-ui, sans-serif;
+            color: white; font-family: 'Segoe UI', sans-serif;
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
+
         header {
             width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: relative; z-index: 9999;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .logo { font-weight: 900; color: white; font-size: 1.4rem; letter-spacing: 2px; }
+
+        .logo { font-weight: 900; font-size: 1.4rem; letter-spacing: 2px; }
         .logo span { color: var(--neon); }
-        .lang-dropdown { position: relative; }
+
+        /* Dil Menyusu Dizaynı */
+        .lang-dropdown { position: relative; cursor: pointer; }
         .lang-btn { 
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); 
-            color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: bold;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 8px 15px; border-radius: 10px; font-weight: bold;
         }
         .lang-content {
-            display: none; position: absolute; right: 0; top: 110%; 
-            background: #0a1a3a; min-width: 140px; border: 1px solid rgba(255,255,255,0.2); 
-            border-radius: 15px; z-index: 10000; box-shadow: 0 15px 40px rgba(0,0,0,0.8); overflow: hidden;
+            display: none; position: absolute; right: 0; top: 40px; 
+            background: #0a1a3a; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+            z-index: 1000; min-width: 120px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .lang-content span { padding: 14px 20px; display: block; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .lang-content span { display: block; padding: 10px 15px; transition: 0.3s; }
         .lang-content span:hover { background: var(--azure); }
-        .lang-dropdown.active .lang-content { display: block; }
+        .lang-dropdown:hover .lang-content { display: block; }
 
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card {
-            background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2); padding: 35px 25px; border-radius: 40px; 
-            width: 100%; max-width: 400px; text-align: center; position: relative;
-        }
-        h2 { font-size: 0.9rem; letter-spacing: 2px; color: white; text-transform: uppercase; margin-bottom: 25px; }
         
-        /* Səs dalğası sahəsi */
+        .card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 35px;
+            width: 100%; max-width: 420px; text-align: center;
+        }
+
         .wave-box {
-            background: #000; height: 160px; border-radius: 25px; margin-bottom: 25px;
-            position: relative; border: 1px solid rgba(0, 162, 255, 0.4); overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
+            background: #000; height: 160px; border-radius: 20px; margin: 20px 0;
+            position: relative; border: 1px solid rgba(0, 162, 255, 0.3);
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         canvas { width: 100%; height: 100%; }
-        #timer { position: absolute; top: 12px; right: 18px; color: var(--neon); font-family: monospace; font-weight: bold; }
+        #timer { position: absolute; top: 10px; right: 15px; color: var(--neon); font-weight: bold; font-family: monospace; }
 
         .btn {
-            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 18px; border: none;
-            font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase;
+            width: 100%; padding: 16px; margin-bottom: 10px; border-radius: 15px; border: none;
+            font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase;
         }
-        .btn-gray { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-listen { background: linear-gradient(135deg, var(--azure), #0055ff); color: white; display: none; }
-        .btn-main { background: var(--neon); color: #000; margin-top: 15px; font-weight: 900; }
-        .btn:active { transform: scale(0.96); }
+        .btn-gray { background: rgba(255,255,255,0.1); color: white; }
+        .btn-listen { background: var(--azure); color: white; display: none; }
+        .btn-main { background: var(--neon); color: black; font-weight: 900; margin-top: 10px; }
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">SONIK <span>SKIN</span></div>
-    <div class="lang-dropdown" id="langDrop">
-        <button class="lang-btn" onclick="toggleLang()">TR ▾</button>
+    <div class="lang-dropdown">
+        <button class="lang-btn" id="langText">TR ▾</button>
         <div class="lang-content">
-            <span onclick="updateLang('tr')">Türkçe</span>
-            <span onclick="updateLang('en')">English</span>
+            <span onclick="setLang('tr')">Türkçe</span>
+            <span onclick="setLang('en')">English</span>
+            <span onclick="setLang('ru')">Русский</span>
         </div>
     </div>
 </header>
 
 <div class="container">
     <div class="card">
-        <h2 id="ui-title">Dosyadan Dövme Yap</h2>
-        <div class="wave-box" id="captureZone">
+        <h2 id="title-text" style="font-size: 1rem; letter-spacing: 1px;">DOSYADAN DÖVME YAP</h2>
+        <div class="wave-box" id="exportArea">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
-        <button class="btn btn-gray" onclick="startRec()">🎤 <span id="ui-rec">Sesi Kaydet</span></button>
-        <input type="file" id="fInp" hidden accept="audio/*" onchange="handleFile(event)">
-        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">Dosya Seç</span></button>
-        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">▶ <span id="ui-listen">Dinle</span></button>
         
-        <button class="btn btn-main" onclick="handleCheckout()">Bunu Hatıraya Dönüştür (İNDİR)</button>
+        <button class="btn btn-gray" onclick="startRecording()">🎤 <span id="rec-text">Sesi Kaydet</span></button>
+        <input type="file" id="fileInput" hidden accept="audio/*" onchange="handleFileSelect(event)">
+        <button class="btn btn-gray" onclick="document.getElementById('fileInput').click()">📁 <span id="select-text">Dosya Seç</span></button>
+        <button class="btn btn-listen" id="playBtn" onclick="playCurrentAudio()">▶ <span id="listen-text">Dinle</span></button>
+        
+        <button class="btn btn-main" onclick="handleMainAction()" id="main-btn-text">Bunu Hatıraya Dönüştür</button>
     </div>
 </div>
 
 <script>
-    function toggleLang() { document.getElementById('langDrop').classList.toggle('active'); }
-    
-    // SƏNİN LEMON SQUEEZY LİNKİN (DÜZƏLDİLDİ)
-    const CHECKOUT_URL = "https://sonik-skin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
+    // --- BURANI DÜZGÜN YAZDIĞINDAN ƏMİN OL ---
+    const LEMON_LINK = "https://sonik-skin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
 
-    function handleCheckout() {
-        const urlParams = new URLSearchParams(window.location.search);
-        // Əgər ödənişdən qayıdıbsa, endir
-        if (urlParams.get('status') === 'success') {
-            downloadWavePNG();
-        } else {
-            // Ödəniş edilməyibsə Lemon Squeezy-yə göndər
-            window.location.href = CHECKOUT_URL;
-        }
+    const translations = {
+        tr: { title: "DOSYADAN DÖVME YAP", rec: "Sesi Kaydet", select: "Dosya Seç", listen: "Dinle", main: "Bunu Hatıraya Dönüştür" },
+        en: { title: "CREATE TATTOO FROM FILE", rec: "Record Voice", select: "Choose File", listen: "Listen", main: "Convert to Memory" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", rec: "Записать голос", select: "Выбрать файл", listen: "Слушать", main: "Сохранить в память" }
+    };
+
+    function setLang(lang) {
+        document.getElementById('langText').innerText = lang.toUpperCase() + " ▾";
+        document.getElementById('title-text').innerText = translations[lang].title;
+        document.getElementById('rec-text').innerText = translations[lang].rec;
+        document.getElementById('select-text').innerText = translations[lang].select;
+        document.getElementById('listen-text').innerText = translations[lang].listen;
+        document.getElementById('main-btn-text').innerText = translations[lang].main;
     }
 
-    function downloadWavePNG() {
-        const zone = document.getElementById('captureZone');
-        const timer = document.getElementById('timer');
-        timer.style.opacity = '0'; // Şəkildə taymer görünməsin
-
-        html2canvas(zone, {
-            backgroundColor: "#000000",
-            scale: 5,
-            borderRadius: 25
-        }).then(canvas => {
-            const a = document.createElement('a');
-            a.download = 'sonik-skin-tattoo.png';
-            a.href = canvas.toDataURL("image/png");
-            a.click();
-            timer.style.opacity = '1';
-        });
-    }
-
-    let recorder, chunks = [], audioObj, anim;
+    let rec, chunks = [], audio, animation;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
-    function drawWave(active = false) {
+    function draw(active = false) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let mid = canvas.height / 2;
-        for (let i = 0; i < canvas.width; i += 9) {
-            let h = active ? Math.random() * 90 + 20 : 40;
-            let grad = ctx.createLinearGradient(0, mid-h/2, 0, mid+h/2);
-            grad.addColorStop(0, '#00a2ff'); grad.addColorStop(0.5, '#d4ff00'); grad.addColorStop(1, '#00a2ff');
-            ctx.fillStyle = grad;
+        for (let i = 0; i < canvas.width; i += 10) {
+            let h = active ? Math.random() * 80 + 20 : 35;
+            let g = ctx.createLinearGradient(0, mid-h/2, 0, mid+h/2);
+            g.addColorStop(0, '#00a2ff'); g.addColorStop(0.5, '#d4ff00'); g.addColorStop(1, '#00a2ff');
+            ctx.fillStyle = g;
             ctx.beginPath();
-            ctx.roundRect(i, mid - h/2, 5, h, 3);
+            ctx.roundRect(i, mid - h/2, 6, h, 4);
             ctx.fill();
         }
     }
-    drawWave();
+    draw();
 
-    async function startRec() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(stream);
-            recorder.start(); chunks = []; let s = 0;
-            const t = setInterval(() => {
-                s++; drawWave(true);
-                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); drawWave(false); stream.getTracks().forEach(tr => tr.stop()); }
-            }, 1000);
-            recorder.onstop = () => { setupAudio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mp3' }))); };
-            recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon icazəsi yoxdur."); }
+    // ÖDƏNİŞ VƏ YÜKLƏMƏ MƏNTİQİ
+    function handleMainAction() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('status') === 'success') {
+            // Ödəniş edilibsə şəkli endir
+            const area = document.getElementById('exportArea');
+            document.getElementById('timer').style.display = 'none';
+            html2canvas(area, { backgroundColor: "#000", scale: 5 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'sonik-skin-tattoo.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                document.getElementById('timer').style.display = 'block';
+            });
+        } else {
+            // Ödəniş edilməyibsə Lemon Squeezy-yə göndər
+            window.location.href = LEMON_LINK;
+        }
     }
 
-    function handleFile(e) {
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            rec = new MediaRecorder(stream);
+            rec.start(); chunks = []; let s = 0;
+            const t = setInterval(() => {
+                s++; draw(true);
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { clearInterval(t); rec.stop(); draw(false); stream.getTracks().forEach(track => track.stop()); }
+            }, 1000);
+            rec.onstop = () => { finalizeAudio(URL.createObjectURL(new Blob(chunks))); };
+            rec.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { alert("Mikrofon xətası!"); }
+    }
+
+    function handleFileSelect(e) {
         const file = e.target.files[0];
         if(file) {
             const reader = new FileReader();
-            reader.onload = (ev) => setupAudio(ev.target.result);
+            reader.onload = (ev) => finalizeAudio(ev.target.result);
             reader.readAsDataURL(file);
         }
     }
 
-    function setupAudio(url) {
-        audioObj = new Audio(url);
-        document.getElementById('btn-play').style.display = 'flex';
+    function finalizeAudio(url) {
+        audio = new Audio(url);
+        document.getElementById('playBtn').style.display = 'flex';
         document.getElementById('timer').innerText = "00:08 / 00:08";
-        drawWave();
+        draw();
     }
 
-    function playAudio() {
-        if(!audioObj) return;
-        audioObj.play();
-        anim = setInterval(() => {
-            drawWave(true);
-            if(audioObj.paused || audioObj.ended) { clearInterval(anim); drawWave(false); }
-        }, 80);
-    }
-
-    function updateLang(l) {
-        const langs = {
-            tr: { title: "Dosyadan Dövme Yap", select: "Dosya Seç", rec: "Sesi Kaydet" },
-            en: { title: "Create Tattoo", select: "Choose File", rec: "Record Voice" }
-        };
-        document.getElementById('ui-title').innerText = langs[l].title;
-        document.getElementById('ui-select').innerText = langs[l].select;
-        document.getElementById('ui-rec').innerText = langs[l].rec;
-        document.querySelector('.lang-btn').innerText = l.toUpperCase() + " ▾";
+    function playCurrentAudio() {
+        if(!audio) return;
+        audio.play();
+        animation = setInterval(() => {
+            draw(true);
+            if(audio.paused || audio.ended) { clearInterval(animation); draw(false); }
+        }, 100);
     }
 </script>
 </body>
