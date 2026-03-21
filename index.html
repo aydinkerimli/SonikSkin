@@ -3,138 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Premium Tattoo</title>
+    <title>Sonik Skin - Universal Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { 
-            --neon: #d4ff00; 
-            --bg: #080808; 
-            --card-bg: rgba(20, 20, 20, 0.8);
-            --border: rgba(255, 255, 255, 0.08);
-        }
-
+        :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
         body {
-            /* Canlı və dərin fon animasiyası */
-            background: radial-gradient(circle at 50% 50%, #151515 0%, #050505 100%);
-            background-attachment: fixed;
-            color: white; 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0; padding: 0; min-height: 100vh; 
-            display: flex; flex-direction: column;
-            overflow-x: hidden;
+            background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
+            color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
-
-        /* Arxa fonda yavaş hərəkət edən işıq effekti */
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            opacity: 0.1; z-index: -1;
-        }
-
         header {
-            width: 100%; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100;
+            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
         }
-
-        .logo { 
-            font-weight: 900; 
-            color: var(--neon); 
-            font-size: 1.4rem; 
-            letter-spacing: 2px; 
-            cursor: pointer; 
-            text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(212, 255, 0, 0.4);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .logo:hover { transform: scale(1.05); opacity: 0.8; }
-        .logo:active { transform: scale(0.95); }
-
-        .lang-btn { 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
-            color: white; padding: 10px 16px; border-radius: 12px; 
-            cursor: pointer; font-size: 13px; font-weight: 600;
-            transition: 0.3s;
-        }
-        .lang-btn:hover { background: rgba(255,255,255,0.1); }
-
+        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
+        .logo:hover { opacity: 0.7; }
         .lang-dropdown { position: relative; }
+        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
-            display: none; position: absolute; right: 0; background: #151515;
-            min-width: 130px; border: 1px solid var(--border); border-radius: 12px; 
-            z-index: 1000; margin-top: 8px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none; position: absolute; right: 0; background: #1a1a1a;
+            min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000;
         }
-        .lang-content span { padding: 14px; display: block; cursor: pointer; transition: 0.2s; font-size: 13px; }
-        .lang-content span:hover { background: var(--neon); color: black; }
+        .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
         .lang-dropdown:hover .lang-content { display: block; }
-
-        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
-
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--border);
-            padding: 35px; border-radius: 40px; 
-            width: 100%; max-width: 420px; text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.7);
-            position: relative;
+            background: #111; border: 1px solid #222; padding: 25px;
+            border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
-
-        h2 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 25px; opacity: 0.8; font-weight: 500; }
-
         .wave-box {
-            background: #000; height: 160px; border-radius: 25px; margin-bottom: 30px;
-            position: relative; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+            background: #000; height: 140px; border-radius: 20px; margin-bottom: 25px;
+            position: relative; border: 1px solid #1a1a1a; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
         }
-        canvas { width: 100%; height: 100%; }
-        
-        #timer { 
-            position: absolute; bottom: 15px; right: 20px; 
-            color: var(--neon); font-family: 'JetBrains Mono', monospace; 
-            font-size: 12px; opacity: 0.7;
-        }
-
+        canvas { width: 100%; height: 100%; background: #000; }
+        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
         .btn {
-            width: 100%; padding: 20px; margin-bottom: 14px; border-radius: 20px; border: none;
-            font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-
-        .btn-gray { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
-        .btn-gray:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-
-        .btn-main { 
-            background: var(--neon); color: #000; margin-top: 10px; 
-            box-shadow: 0 10px 20px rgba(212, 255, 0, 0.15);
-        }
-        .btn-main:hover { 
-            box-shadow: 0 15px 30px rgba(212, 255, 0, 0.3); 
-            transform: translateY(-3px);
-        }
-        .btn-main:active { transform: translateY(0); }
-
-        .btn-listen { background: rgba(212, 255, 0, 0.1); color: var(--neon); display: none; border: 1px solid rgba(212, 255, 0, 0.2); }
-
+        .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
+        .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
+        .btn-main { background: var(--neon); color: #000; margin-top: 10px; }
+        
         #success-btn { 
             display: none; background: #00c3ff; color: #fff; 
-            animation: pulse 2s infinite; border: 2px solid rgba(255,255,255,0.3);
-            box-shadow: 0 0 30px rgba(0, 195, 255, 0.4);
+            animation: pulse 1.5s infinite; border: 2px solid #fff;
         }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-
-        /* Mobil üçün optimallaşdırma */
-        @media (max-width: 480px) {
-            .card { padding: 25px; border-radius: 35px; }
-            .logo { font-size: 1.2rem; }
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -167,7 +86,7 @@
         
         <div id="action-area">
             <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
-            <input type="file" id="fInp" hidden onchange="handleFile(event)" accept="audio/*">
+            <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
             <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
             <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
@@ -178,13 +97,14 @@
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
     
+    // Bütün dillərdə "Bunu xatirəyə çevir" mənasını verən tərcümələr
     const langs = {
-        tr: { title: "SESİNİZİ DÖVMEYE DÖNÜŞTÜRÜN", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR" },
-        en: { title: "TURN YOUR VOICE INTO A TATTOO", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD VOICE", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD" },
-        ru: { title: "ПРЕВРАТИТЕ ГОЛОС В ТАТУ", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСАТЬ ГОЛОС", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ" },
-        fr: { title: "VOTRE VOIX EN TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER" },
-        zh: { title: "将声音变成纹身", select: "选择文件", down: "将其转化为记忆", listen: "倾听", rec: "录音", success: "支付成功！点击下载" },
-        de: { title: "STIMME IN TATTOO VERWANDELN", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! DOWNLOAD" }
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -193,9 +113,8 @@
     const ctx = canvas.getContext('2d');
 
     window.onload = function() {
-        canvas.width = canvas.offsetWidth * 2; // Daha yüksək keyfiyyət
-        canvas.height = canvas.offsetHeight * 2;
-        ctx.scale(2, 2);
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
         
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
@@ -204,6 +123,7 @@
         if (params.get('status') === 'success') {
             document.getElementById('success-btn').style.display = 'flex';
             document.getElementById('action-area').style.display = 'none';
+
             if(localStorage.getItem('lastStaticWave')) {
                 staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
                 drawStaticWave();
@@ -211,6 +131,7 @@
         }
     };
 
+    // Saytı sıfırlayan funksiya (Loqo üçün)
     function resetPage() {
         localStorage.removeItem('lastStaticWave');
         window.location.href = window.location.origin + window.location.pathname;
@@ -231,14 +152,18 @@
         const sampleRate = buffer.sampleRate;
         const maxDuration = 8; 
         const lengthToProcess = Math.min(buffer.length, sampleRate * maxDuration);
+        
         const rawData = buffer.getChannelData(0);
-        const samples = 65; 
+        const samples = 60; 
         const blockSize = Math.floor(lengthToProcess / samples);
         staticDataArray = [];
+        
         for (let i = 0; i < samples; i++) {
             let blockStart = blockSize * i;
             let sum = 0;
-            for (let j = 0; j < blockSize; j++) { sum += Math.abs(rawData[blockStart + j]); }
+            for (let j = 0; j < blockSize; j++) {
+                sum = sum + Math.abs(rawData[blockStart + j]);
+            }
             staticDataArray.push(sum / blockSize);
         }
         localStorage.setItem('lastStaticWave', JSON.stringify(staticDataArray));
@@ -247,43 +172,21 @@
 
     function drawStaticWave() {
         if (staticDataArray.length === 0) return;
-        const w = canvas.width / 2;
-        const h = canvas.height / 2;
-        ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, w, h);
-        const barWidth = w / staticDataArray.length;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
             const x = i * barWidth;
-            const barHeight = Math.max(val * h * 5, 4); // Minimum 4px hündürlük
+            const barHeight = val * canvas.height * 5;
             const ratio = i / staticDataArray.length;
-            ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#d4ff00';
-            ctx.lineWidth = 3; ctx.lineCap = 'round';
+            ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(x + barWidth/2, (h/2) - (barHeight/2));
-            ctx.lineTo(x + barWidth/2, (h/2) + (barHeight/2));
+            ctx.moveTo(x + barWidth/2, (canvas.height/2) - (barHeight/2));
+            ctx.lineTo(x + barWidth/2, (canvas.height/2) + (barHeight/2));
             ctx.stroke();
         });
-    }
-
-    function drawWave() {
-        if (!analyser) return;
-        animFrame = requestAnimationFrame(drawWave);
-        analyser.getByteFrequencyData(dataArray);
-        const w = canvas.width / 2;
-        const h = canvas.height / 2;
-        ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 4; ctx.lineCap = 'round';
-        ctx.beginPath();
-        const barWidth = (w / dataArray.length) * 2.5;
-        let x = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-            const barHeight = dataArray[i] / 1.5;
-            ctx.moveTo(x, h/2 - barHeight/2);
-            ctx.lineTo(x, h/2 + barHeight/2);
-            x += barWidth + 2;
-        }
-        ctx.stroke();
     }
 
     function downloadPNG() {
@@ -294,10 +197,7 @@
         link.click();
     }
 
-    function handleCheckoutFlow() { 
-        if(staticDataArray.length === 0) { alert("Lütfen önce bir ses yükleyin!"); return; }
-        window.location.href = LEMON_LINK; 
-    }
+    function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
 
     async function initMic() {
         try {
@@ -306,24 +206,48 @@
             recorder.start(); chunks = [];
             let s = 0; 
             const t = setInterval(() => {
-                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
+                s++; 
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { 
+                    clearInterval(t); 
+                    recorder.stop(); 
+                    stream.getTracks().forEach(tr => tr.stop()); 
+                }
             }, 1000);
-            recorder.onstop = async () => { const blob = new Blob(chunks); processAudioData(blob); };
+            
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks);
+                processAudioData(blob);
+            };
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon izni gerekli!"); }
+        } catch(e) { alert("Mikrofon hatası!"); }
     }
 
-    async function handleFile(e) { if(e.target.files[0]) { processAudioData(e.target.files[0]); } }
+    async function handleFile(e) {
+        if(e.target.files[0]) {
+            const file = e.target.files[0];
+            processAudioData(file);
+        }
+    }
 
     async function processAudioData(data) {
         audioURL = URL.createObjectURL(data);
         audio = new Audio(audioURL);
         setupAnalyser();
+        
         const arrayBuffer = await data.arrayBuffer();
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
-        audio.addEventListener('timeupdate', () => { if (audio.currentTime >= 8) { audio.pause(); audio.currentTime = 0; cancelAnimationFrame(animFrame); drawStaticWave(); } });
+        
+        audio.addEventListener('timeupdate', () => {
+            if (audio.currentTime >= 8) {
+                audio.pause();
+                audio.currentTime = 0;
+                cancelAnimationFrame(animFrame);
+                drawStaticWave();
+            }
+        });
+
         generateStaticWave(decodedData);
         document.getElementById('btn-play').style.display = 'flex';
         document.getElementById('timer').innerText = `00:08 / 00:08`;
@@ -339,10 +263,32 @@
     }
 
     function playAudio() {
-        if(!audio) return; audio.play();
+        if(!audio) return;
+        audio.play();
         if(animFrame) cancelAnimationFrame(animFrame);
         drawWave();
         audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
+    }
+
+    function drawWave() {
+        if (!analyser) return;
+        animFrame = requestAnimationFrame(drawWave);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, '#00c3ff'); gradient.addColorStop(0.5, '#ffff1c'); gradient.addColorStop(1, '#ff1744');
+        ctx.strokeStyle = gradient; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.beginPath();
+        const barWidth = (canvas.width / dataArray.length) * 2.5;
+        let x = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            const barHeight = dataArray[i] / 2;
+            ctx.moveTo(x, canvas.height/2 - barHeight/2);
+            ctx.lineTo(x, canvas.height/2 + barHeight/2);
+            x += barWidth + 2;
+        }
+        ctx.stroke();
     }
 </script>
 </body>
