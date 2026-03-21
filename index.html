@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Professional Mobile</title>
+    <title>Sonik Skin Premium - All Devices</title>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
-            color: white; font-family: -apple-system, system-ui, sans-serif;
+            color: white; font-family: -apple-system, sans-serif;
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
-            overscroll-behavior: none; /* Mobildə səhifənin aşağı dartılmasını önləyir */
         }
 
         header {
@@ -33,26 +32,27 @@
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
         .card {
             background: #111; border: 1px solid #222; padding: 25px;
-            border-radius: 30px; width: 100%; max-width: 400px; text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,1);
+            border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
 
+        /* DALĞA SAHƏSİ - Şəkil yerinə təmiz qutu */
         .wave-box {
             background: #000; height: 140px; border-radius: 20px; margin-bottom: 25px;
             position: relative; border: 1px solid #1a1a1a; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
         }
-        canvas { width: 100%; height: 100%; }
-        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
+        canvas { width: 100%; height: 100%; background: #000; }
+        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; z-index: 5; }
 
         .btn {
-            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
-            font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 16px; margin-bottom: 10px; border-radius: 12px; border: none;
+            font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
-        .btn-main { background: var(--neon); color: #000; margin-top: 10px; box-shadow: 0 0 20px rgba(212,255,0,0.2); }
+        .btn-main { background: var(--neon); color: #000; margin-top: 10px; }
         
         .btn:active { transform: scale(0.96); opacity: 0.8; }
     </style>
@@ -76,21 +76,21 @@
 
 <div class="container">
     <div class="card">
-        <h2 id="ui-title" style="font-size: 1rem; letter-spacing: 1px; margin-bottom: 20px;">DOSYADAN DÖVME YAP</h2>
+        <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         
         <div class="wave-box">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
 
-        <button class="btn btn-gray" id="btn-rec" onclick="startMobileRec()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
+        <button class="btn btn-gray" id="btn-rec" onclick="handleMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
         
-        <input type="file" id="fInp" hidden accept="audio/*, .mp3, .wav, .m4a, .ogg" onchange="handleMobileFile(event)">
+        <input type="file" id="fInp" hidden accept="audio/*" onchange="handleFile(event)">
         <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
 
-        <button class="btn btn-listen" id="btn-play" onclick="playMobileAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
+        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
-        <button class="btn btn-main" onclick="downloadTattooPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        <button class="btn btn-main" onclick="downloadPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
@@ -104,30 +104,35 @@
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME" }
     };
 
-    let recorder, chunks = [], audioURL, audio, anim;
+    let recorder, chunks = [], audioURL, audio, animInterval;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
     function updateLang(l) {
-        Object.keys(langs[l]).forEach(key => {
-            const el = document.getElementById('ui-' + key);
-            if(el) el.innerText = langs[l][key];
-        });
+        document.getElementById('ui-title').innerText = langs[l].title;
+        document.getElementById('ui-select').innerText = langs[l].select;
+        document.getElementById('ui-down').innerText = langs[l].down;
+        document.getElementById('ui-listen').innerText = langs[l].listen;
+        document.getElementById('ui-rec').innerText = langs[l].rec;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    function drawWave(active = false) {
+    function drawStatic(active = false) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3; ctx.beginPath();
-        for(let i=0; i<canvas.width; i+=7) {
-            let h = active ? Math.random()*80 + 10 : 35;
-            ctx.moveTo(i, canvas.height/2 - h/2); ctx.lineTo(i, canvas.height/2 + h/2);
+        ctx.strokeStyle = '#d4ff00';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        let mid = canvas.height / 2;
+        for (let i = 0; i < canvas.width; i += 6) {
+            let h = active ? Math.random() * 80 + 10 : 30;
+            ctx.moveTo(i, mid - h/2);
+            ctx.lineTo(i, mid + h/2);
         }
         ctx.stroke();
     }
-    drawWave();
+    drawStatic();
 
-    async function startMobileRec() {
+    async function handleMic() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recorder = new MediaRecorder(stream);
@@ -135,12 +140,12 @@
             chunks = [];
             let s = 0;
             const t = setInterval(() => {
-                s++; drawWave(true);
+                s++; drawStatic(true);
                 document.getElementById('timer').innerText = `00:0${s} / 00:08`;
                 if(s >= 8) { 
                     clearInterval(t); 
                     if(recorder.state !== 'inactive') recorder.stop();
-                    drawWave(false);
+                    drawStatic(false);
                 }
             }, 1000);
 
@@ -152,54 +157,45 @@
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { console.log("Mic access denied"); }
+        } catch(e) { console.log("Mic access issue."); }
     }
 
-    function handleMobileFile(e) {
+    function handleFile(e) {
         const file = e.target.files[0];
         if(!file) return;
-        
-        // Bu hissə medianın çökmsəini əngəlləyir
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            if(audioURL) URL.revokeObjectURL(audioURL);
-            audioURL = event.target.result;
-            audio = new Audio(audioURL);
-            document.getElementById('btn-play').style.display = 'flex';
-            document.getElementById('timer').innerText = "00:08 / 00:08";
-            drawWave();
-        };
-        reader.readAsDataURL(file);
+        if(audioURL) URL.revokeObjectURL(audioURL);
+        audioURL = URL.createObjectURL(file);
+        audio = new Audio(audioURL);
+        document.getElementById('btn-play').style.display = 'flex';
+        document.getElementById('timer').innerText = "00:08 / 00:08";
+        drawStatic();
     }
 
-    function playMobileAudio() {
+    function playAudio() {
         if(!audio) return;
         audio.currentTime = 0;
         audio.play();
-        
-        // 8 saniyə sonra tam səssiz kəsim
-        const stopPoint = setTimeout(() => {
+        setTimeout(() => {
             audio.pause();
             audio.currentTime = 0;
-            drawWave(false);
-            if(anim) clearInterval(anim);
+            drawStatic(false);
+            if(animInterval) clearInterval(animInterval);
         }, 8000);
 
-        if(anim) clearInterval(anim);
-        anim = setInterval(() => {
-            drawWave(true);
+        if(animInterval) clearInterval(animInterval);
+        animInterval = setInterval(() => {
+            drawStatic(true);
             if(audio.paused || audio.ended) { 
-                clearInterval(anim); 
-                drawWave(false); 
-                clearTimeout(stopPoint);
+                clearInterval(animInterval); 
+                drawStatic(false); 
             }
         }, 100);
     }
 
-    function downloadTattooPNG() {
+    function downloadPNG() {
         const link = document.createElement('a');
-        link.download = 'sonik-skin-tattoo.png';
-        link.href = canvas.toDataURL("image/png");
+        link.download = 'sonik-tattoo.png';
+        link.href = canvas.toDataURL();
         link.click();
     }
 </script>
