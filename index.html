@@ -2,222 +2,163 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Tattoo Waveform</title>
+    <title>Dovme Yap Premium</title>
     <style>
-        /* PREMİUM DİZAYN (CSS) */
+        /* FON VƏ PREMİUM ATMOSFER */
         body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #080808; /* Tam tünd premium fon */
+            color: white;
+            font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
         }
 
-        .container {
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 25px;
-            width: 380px;
+        .main-card {
+            background: #121212; /* Kartın içi */
+            border: 1px solid #222;
+            padding: 25px;
+            border-radius: 20px;
+            width: 360px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        .lang-selector {
+        /* DİLLƏR - Yuxarıda kiçik və səliqəli */
+        .lang-nav {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .lang-btn {
-            background: none;
-            border: 1px solid #333;
-            color: #888;
-            padding: 5px 10px;
-            border-radius: 5px;
+        .lang-nav span {
+            font-size: 12px;
+            color: #555;
             cursor: pointer;
-            font-size: 11px;
             transition: 0.3s;
         }
-
-        .lang-btn.active {
+        .lang-nav span.active {
             color: #d4ff00;
-            border-color: #d4ff00;
-            background: rgba(212, 255, 0, 0.1);
+            font-weight: bold;
         }
 
         h2 {
-            font-size: 16px;
-            letter-spacing: 2px;
+            font-size: 18px;
             margin-bottom: 20px;
-            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .waveform-box {
+        /* VİZUAL DALĞA SAHƏSİ */
+        .wave-area {
             background: #000;
-            height: 120px;
-            border-radius: 15px;
-            margin-bottom: 25px;
+            height: 130px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
             border: 1px solid #1a1a1a;
-            overflow: hidden;
+            position: relative;
         }
 
-        /* Dalğa animasiyası simulyasiyası */
-        .wave-bar {
-            width: 3px;
-            height: 20px;
-            background: #d4ff00;
-            margin: 0 2px;
-            border-radius: 10px;
-            animation: pulse 1s infinite ease-in-out;
-            display: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { height: 20px; opacity: 0.5; }
-            50% { height: 60px; opacity: 1; }
-        }
-
-        .timer {
+        #timer {
             position: absolute;
-            bottom: 5px;
-            right: 10px;
+            top: 10px;
+            right: 15px;
             font-size: 12px;
-            color: #666;
+            color: #d4ff00;
         }
 
+        /* DÜYMƏLƏR - Sənin istədiyin sıra ilə */
         .btn {
             width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
             border: none;
-            cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
-            transition: 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn-file {
-            background: #1a1a1a;
-            color: #ccc;
-            border: 1px solid #333;
-        }
+        .btn-gray { background: #252525; color: white; }
+        .btn-listen { background: #353535; color: #aaa; display: none; } /* Səs olanda açılır */
+        .btn-main { background: #d4ff00; color: black; margin-top: 10px; }
 
-        .btn-listen {
-            background: #333;
-            color: #fff;
-            display: none; /* Fayl seçilməyənə qədər gizli */
-        }
-
-        .btn-main {
-            background: #d4ff00;
-            color: #000;
-            margin-top: 15px;
-        }
-
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="lang-selector">
-            <button class="lang-btn active" onclick="changeLang('tr')">TR</button>
-            <button class="lang-btn" onclick="changeLang('en')">EN</button>
-            <button class="lang-btn" onclick="changeLang('ru')">RU</button>
-            <button class="lang-btn" onclick="changeLang('fr')">FR</button>
-            <button class="lang-btn" onclick="changeLang('zh')">ZH</button>
-            <button class="lang-btn" onclick="changeLang('de')">DE</button>
-        </div>
-
-        <h2 id="title">DOSYADAN DÖVME YAP</h2>
-
-        <div class="waveform-box" id="waveContainer">
-            <div class="wave-bar" style="animation-delay: 0.1s"></div>
-            <div class="wave-bar" style="animation-delay: 0.3s"></div>
-            <div class="wave-bar" style="animation-delay: 0.5s"></div>
-            <div class="wave-bar" style="animation-delay: 0.2s"></div>
-            <div class="wave-bar" style="animation-delay: 0.4s"></div>
-            <span class="timer" id="timerDisplay">0s / 8s</span>
-        </div>
-
-        <input type="file" id="audioInput" accept="audio/*" style="display: none;" onchange="handleFile(this)">
-        
-        <button class="btn btn-file" onclick="document.getElementById('audioInput').click()" id="selectBtn">
-            📁 DOSYA SEÇ
-        </button>
-
-        <button class="btn btn-listen" id="listenBtn">
-            🔊 DİNLE
-        </button>
-
-        <button class="btn btn-main" id="convertBtn">
-            BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)
-        </button>
+<div class="main-card">
+    <div class="lang-nav">
+        <span class="active" onclick="setLang('tr')">TR</span>
+        <span onclick="setLang('en')">EN</span>
+        <span onclick="setLang('ru')">RU</span>
+        <span onclick="setLang('fr')">FR</span>
+        <span onclick="setLang('zh')">ZH</span>
+        <span onclick="setLang('de')">DE</span>
     </div>
 
-    <script>
-        // LOKALİZASYON DATA
-        const translations = {
-            tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", listen: "DİNLE", convert: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)" },
-            en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", listen: "LISTEN", convert: "CONVERT TO MEMORY (DOWNLOAD)" },
-            ru: { title: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", listen: "СЛУШАТЬ", convert: "СКАЧАТЬ ПАМЯТЬ" },
-            fr: { title: "CRÉER UN TATOUAGE", select: "CHOISIR FICHIER", listen: "ÉCOUTER", convert: "CONVERTIR EN SOUVENIR" },
-            zh: { title: "从文件制作纹身", select: "选择文件", listen: "倾听", convert: "下载回忆" },
-            de: { title: "TATTOO AUS DATEI", select: "DATEI WÄHLEN", listen: "ANHÖREN", convert: "ALS ERINNERUNG SPEICHERN" }
-        };
+    <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
 
-        let currentLang = 'tr';
+    <div class="wave-area">
+        <img src="https://i.imgur.com/8N99U7i.png" width="80%" alt="Waveform">
+        <div id="timer">00:00 / 00:08</div>
+    </div>
 
-        function changeLang(lang) {
-            currentLang = lang;
-            document.getElementById('title').innerText = translations[lang].title;
-            document.getElementById('selectBtn').innerText = "📁 " + translations[lang].select;
-            document.getElementById('listenBtn').innerText = "🔊 " + translations[lang].listen;
-            document.getElementById('convertBtn').innerText = translations[lang].convert;
+    <button class="btn btn-gray" onclick="startRecording()">🎤 SESİ KAYDET</button>
+    
+    <input type="file" id="fileInput" style="display:none" onchange="fileSelected()">
+    <button class="btn btn-gray" onclick="document.getElementById('fileInput').click()" id="ui-select">📁 DOSYA SEÇ</button>
 
-            // Aktiv düymə rəngini dəyiş
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText.toLowerCase() === lang) btn.classList.add('active');
-            });
-        }
+    <button class="btn btn-listen" id="listenBtn">🔊 DİNLE</button>
 
-        function handleFile(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Dinlə düyməsini göstər
-                document.getElementById('listenBtn').style.display = 'block';
-                
-                // Dalğa animasiyasını aktiv et
-                document.querySelectorAll('.wave-bar').forEach(bar => bar.style.display = 'block');
+    <button class="btn btn-main" id="ui-download">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+</div>
 
-                // 8 Saniyəlik Limit Məntiqi (Simulyasiya)
-                let timeLeft = 0;
-                const interval = setInterval(() => {
-                    timeLeft++;
-                    document.getElementById('timerDisplay').innerText = timeLeft + "s / 8s";
-                    if (timeLeft >= 8) {
-                        clearInterval(interval);
-                        alert(currentLang === 'tr' ? "Maksimum 8 saniye sınırı!" : "Limit: 8 seconds!");
-                    }
-                }, 1000);
+<script>
+    const texts = {
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", download: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", download: "CONVERT TO MEMORY (DOWNLOAD)" },
+        ru: { title: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", download: "СКАЧАТЬ ПАМЯТЬ" },
+        fr: { title: "CRÉER UN TATOUAGE", select: "CHOISIR FICHIER", download: "CONVERTIR EN SOUVENIR" },
+        zh: { title: "从文件制作纹身", select: "选择文件", download: "下载回忆" },
+        de: { title: "TATTOO AUS DATEI", select: "DATEI WÄHLEN", download: "ALS ERINNERUNG SPEICHERN" }
+    };
+
+    function setLang(lang) {
+        document.getElementById('ui-title').innerText = texts[lang].title;
+        document.getElementById('ui-select').innerText = "📁 " + texts[lang].select;
+        document.getElementById('ui-download').innerText = texts[lang].download;
+        
+        document.querySelectorAll('.lang-nav span').forEach(s => s.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function startRecording() {
+        let sec = 0;
+        const timerDisplay = document.getElementById('timer');
+        const interval = setInterval(() => {
+            sec++;
+            timerDisplay.innerText = `00:0${sec} / 00:08`;
+            if(sec >= 8) {
+                clearInterval(interval);
+                document.getElementById('listenBtn').style.display = 'flex';
+                alert("8 saniye limitine ulaşıldı!");
             }
-        }
-    </script>
+        }, 1000);
+    }
+
+    function fileSelected() {
+        document.getElementById('listenBtn').style.display = 'flex';
+    }
+</script>
+
 </body>
 </html>
