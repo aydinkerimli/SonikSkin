@@ -2,163 +2,179 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Dovme Yap Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonik Skin - Premium Tattoo</title>
     <style>
-        /* FON VƏ PREMİUM ATMOSFER */
+        /* PREMİUM ARXA FON VƏ ÜMUMİ STİL */
         body {
-            background: #080808; /* Tam tünd premium fon */
-            color: white;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
-        }
-
-        .main-card {
-            background: #121212; /* Kartın içi */
-            border: 1px solid #222;
-            padding: 25px;
-            border-radius: 20px;
-            width: 360px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        /* DİLLƏR - Yuxarıda kiçik və səliqəli */
-        .lang-nav {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
-        .lang-nav span {
-            font-size: 12px;
+
+        /* YUXARI PANEL (HEADER) */
+        header {
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #d4ff00;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+        }
+
+        .nav-links span {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-links span:hover { color: #fff; }
+
+        /* DİL SEÇİMİ YUXARI SAĞDA */
+        .lang-panel {
+            display: flex;
+            gap: 8px;
+            border-left: 1px solid #333;
+            padding-left: 15px;
+        }
+
+        .lang-panel span {
+            font-size: 11px;
             color: #555;
             cursor: pointer;
             transition: 0.3s;
         }
-        .lang-nav span.active {
-            color: #d4ff00;
-            font-weight: bold;
+
+        .lang-panel span.active { color: #d4ff00; font-weight: bold; }
+
+        /* ƏSAS KART */
+        .main-card {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 30px;
+            width: 400px;
+            margin-top: 80px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
         }
 
         h2 {
             font-size: 18px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        /* VİZUAL DALĞA SAHƏSİ */
-        .wave-area {
+        /* DALĞA SAHƏSİ */
+        .wave-container {
             background: #000;
-            height: 130px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            height: 140px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #1a1a1a;
-            position: relative;
+            border: 1px solid #222;
+        }
+
+        .static-wave {
+            width: 80%;
+            height: 60px;
+            background: linear-gradient(90deg, transparent 0%, #d4ff00 50%, transparent 100%);
+            mask-image: url('https://www.svgrepo.com/show/443594/waveform.svg'); /* Təmiz SVG istifadəsi */
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            opacity: 0.6;
         }
 
         #timer {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 12px;
+            top: 15px;
+            right: 20px;
             color: #d4ff00;
+            font-size: 12px;
+            font-family: monospace;
         }
 
-        /* DÜYMƏLƏR - Sənin istədiyin sıra ilə */
+        /* BUTONLAR */
         .btn {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 14px;
             border: none;
             font-weight: bold;
+            font-size: 14px;
             cursor: pointer;
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .btn-gray { background: #252525; color: white; }
-        .btn-listen { background: #353535; color: #aaa; display: none; } /* Səs olanda açılır */
-        .btn-main { background: #d4ff00; color: black; margin-top: 10px; }
+        .btn-gray { background: #2a2a2a; color: #fff; }
+        .btn-gray:hover { background: #333; }
 
-        .btn:hover { opacity: 0.9; }
+        .btn-listen { 
+            background: #1a1a1a; 
+            color: #d4ff00; 
+            border: 1px solid #d4ff0033;
+            display: none; 
+        }
+
+        .btn-premium { 
+            background: #d4ff00; 
+            color: #000; 
+            margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(212, 255, 0, 0.15);
+        }
+
+        .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212, 255, 0, 0.25); }
+
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <div class="lang-nav">
-        <span class="active" onclick="setLang('tr')">TR</span>
-        <span onclick="setLang('en')">EN</span>
-        <span onclick="setLang('ru')">RU</span>
-        <span onclick="setLang('fr')">FR</span>
-        <span onclick="setLang('zh')">ZH</span>
-        <span onclick="setLang('de')">DE</span>
-    </div>
-
-    <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
-
-    <div class="wave-area">
-        <img src="https://i.imgur.com/8N99U7i.png" width="80%" alt="Waveform">
-        <div id="timer">00:00 / 00:08</div>
-    </div>
-
-    <button class="btn btn-gray" onclick="startRecording()">🎤 SESİ KAYDET</button>
-    
-    <input type="file" id="fileInput" style="display:none" onchange="fileSelected()">
-    <button class="btn btn-gray" onclick="document.getElementById('fileInput').click()" id="ui-select">📁 DOSYA SEÇ</button>
-
-    <button class="btn btn-listen" id="listenBtn">🔊 DİNLE</button>
-
-    <button class="btn btn-main" id="ui-download">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
-</div>
-
-<script>
-    const texts = {
-        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", download: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", download: "CONVERT TO MEMORY (DOWNLOAD)" },
-        ru: { title: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", download: "СКАЧАТЬ ПАМЯТЬ" },
-        fr: { title: "CRÉER UN TATOUAGE", select: "CHOISIR FICHIER", download: "CONVERTIR EN SOUVENIR" },
-        zh: { title: "从文件制作纹身", select: "选择文件", download: "下载回忆" },
-        de: { title: "TATTOO AUS DATEI", select: "DATEI WÄHLEN", download: "ALS ERINNERUNG SPEICHERN" }
-    };
-
-    function setLang(lang) {
-        document.getElementById('ui-title').innerText = texts[lang].title;
-        document.getElementById('ui-select').innerText = "📁 " + texts[lang].select;
-        document.getElementById('ui-download').innerText = texts[lang].download;
-        
-        document.querySelectorAll('.lang-nav span').forEach(s => s.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-
-    function startRecording() {
-        let sec = 0;
-        const timerDisplay = document.getElementById('timer');
-        const interval = setInterval(() => {
-            sec++;
-            timerDisplay.innerText = `00:0${sec} / 00:08`;
-            if(sec >= 8) {
-                clearInterval(interval);
-                document.getElementById('listenBtn').style.display = 'flex';
-                alert("8 saniye limitine ulaşıldı!");
-            }
-        }, 1000);
-    }
-
-    function fileSelected() {
-        document.getElementById('listenBtn').style.display = 'flex';
-    }
-</script>
-
-</body>
-</html>
+    <header>
+        <div class="logo">SONIK SKIN</div>
+        <div class="header-right">
+            <div class="nav-links">
+                <span>USER LOGIN</span>
+                <span>ARTIST LOGIN</span>
+            </div>
+            <div class="lang-panel">
+                <span class="active" onclick="setLang('tr', this)">TR</span>
+                <span onclick="setLang('en', this)">EN</span>
+                <span onclick="setLang('
