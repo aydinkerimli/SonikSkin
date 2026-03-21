@@ -102,10 +102,15 @@
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
+    let staticDataArray = []; // Yadda saxlanılan dalğa xəritəsi
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
     window.onload = function() {
+        // Canvas ölçüsünü ekranın sıxlığına görə nizamla (Daha aydın görüntü üçün)
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
         const params = new URLSearchParams(window.location.search);
@@ -114,6 +119,11 @@
             document.getElementById('btn-rec').style.display = 'none';
             document.getElementById('btn-file').style.display = 'none';
             document.getElementById('ui-down').style.display = 'none';
+            // Ödənişdən sonra gələndə səsi yenidən oxumağa ehtiyac yoxdur, birbaşa dalğanı çək
+            if(localStorage.getItem('lastStaticWave')) {
+                staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
+                drawStaticWave();
+            }
         }
     };
 
@@ -126,6 +136,43 @@
         document.getElementById('ui-rec').innerText = langs[l].rec;
         document.getElementById('ui-success').innerText = langs[l].success;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
+    }
+
+    // Səs faylını analiz edib sabit dalğa yaradan funksiya
+    async function generateStaticWave(buffer) {
+        const rawData = buffer.getChannelData(0);
+        const samples = 60; // Dalğa xətlərinin sayı
+        const blockSize = Math.floor(rawData.length / samples);
+        staticDataArray = [];
+        for (let i = 0; i < samples; i++) {
+            let blockStart = blockSize * i;
+            let sum = 0;
+            for (let j = 0; j < blockSize; j++) {
+                sum = sum + Math.abs(rawData[blockStart + j]);
+            }
+            staticDataArray.push(sum / blockSize);
+        }
+        localStorage.setItem('lastStaticWave', JSON.stringify(staticDataArray));
+        drawStaticWave();
+    }
+
+    function drawStaticWave() {
+        if (staticDataArray.length === 0) return;
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = canvas.width / staticDataArray.length;
+        staticDataArray.forEach((val, i) => {
+            const x = i * barWidth;
+            const barHeight = val * canvas.height * 4;
+            const ratio = i / staticDataArray.length;
+            ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x + barWidth/2, (canvas.height/2) - (barHeight/2));
+            ctx.lineTo(x + barWidth/2, (canvas.height/2) + (barHeight/2));
+            ctx.stroke();
+        });
     }
 
     function drawWave() {
@@ -150,33 +197,11 @@
     }
 
     function downloadPNG() {
-        // Əgər səs yazılmayıbsa/yüklənməyibsə, xəta verməsin deyə dummy data yaradırıq
-        const finalArray = dataArray || new Uint8Array(64).fill(50);
-        
-        if(animFrame) cancelAnimationFrame(animFrame);
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 4; ctx.lineCap = 'round';
-
-        const barWidth = (canvas.width / finalArray.length) * 2.5;
-        let x = 0;
-        for (let i = 0; i < finalArray.length; i++) {
-            const barHeight = finalArray[i] / 2;
-            const ratio = i / finalArray.length;
-            ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
-            ctx.beginPath();
-            ctx.moveTo(x, canvas.height/2 - barHeight/2);
-            ctx.lineTo(x, canvas.height/2 + barHeight/2);
-            ctx.stroke();
-            x += barWidth + 2;
-        }
-
+        drawStaticWave(); // Endirməzdən əvvəl sabit dalğanı çək ki, şəkil düzgün çıxsın
         const link = document.createElement('a');
         link.download = 'sonik-skin-tattoo.png';
         link.href = canvas.toDataURL("image/png");
         link.click();
-        
-        if (audio && !audio.paused) drawWave(); // Animasiyanı davam etdir
     }
 
     function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
@@ -190,21 +215,31 @@
                 s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
                 if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
             }, 1000);
-            recorder.onstop = () => {
-                audioURL = URL.createObjectURL(new Blob(chunks));
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks);
+                audioURL = URL.createObjectURL(blob);
                 audio = new Audio(audioURL);
                 setupAnalyser();
+                const arrayBuffer = await blob.arrayBuffer();
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
+                generateStaticWave(decodedData);
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
         } catch(e) { alert("Mikrofon hatası!"); }
     }
 
-    function handleFile(e) {
+    async function handleFile(e) {
         if(e.target.files[0]) {
-            audioURL = URL.createObjectURL(e.target.files[0]);
+            const file = e.target.files[0];
+            audioURL = URL.createObjectURL(file);
             audio = new Audio(audioURL);
             setupAnalyser();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
+            generateStaticWave(decodedData);
             document.getElementById('btn-play').style.display = 'flex';
         }
     }
@@ -223,6 +258,7 @@
         audio.play();
         if(animFrame) cancelAnimationFrame(animFrame);
         drawWave();
+        audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
     }
 </script>
 </body>
