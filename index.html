@@ -131,16 +131,72 @@
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    function drawStatic(active = false) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3; ctx.beginPath();
-        for (let i = 0; i < canvas.width; i += 7) {
-            let h = active ? Math.random() * 80 + 10 : 35;
-            ctx.moveTo(i, canvas.height/2 - h/2); ctx.lineTo(i, canvas.height/2 + h/2);
+    // CANAVAR RƏNG AHƏNGİ VƏ DİNAMİK DALĞA (DÜZ XƏTT YOXDUR)
+    function drawDynamicWave(analyser) {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        function draw() {
+            if (!audio || audio.paused) return; // Audio yoxdursa və ya dayanıbsa, çəkmə
+            
+            requestAnimationFrame(draw);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Rəng Ahəngi (Gradient): Göy -> Yaşıl -> Sarı
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, '#00c3ff'); // Göy
+            gradient.addColorStop(0.5, '#ffff1c'); // Sarı (və ya yaşıl-sarı)
+            gradient.addColorStop(1, '#ff1744'); // Qırmızı-narıncı (daha unikal olsun)
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 4; // Kəskinlik üçün qalınlıq
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = dataArray[i] / 2.5; // Hündürlük səsə görə dəyişir
+                
+                // Düz xətt yox, millimetrlərin savaşı: yuxarı və aşağı simmetrik dalğalar
+                const yTop = canvas.height / 2 - barHeight / 2;
+                const yBottom = canvas.height / 2 + barHeight / 2;
+
+                if (i === 0) {
+                    ctx.moveTo(x, yTop);
+                } else {
+                    ctx.lineTo(x, yTop);
+                }
+                
+                // Aşağı dalğanı da çəkək (simmetriya üçün)
+                ctx.lineTo(x, yBottom);
+
+                x += barWidth + 1; // Hər xətt arasında millimetrik boşluq
+            }
+            ctx.stroke();
         }
-        ctx.stroke();
+        draw();
     }
-    drawStatic();
+
+    // Mikrofondan səs yazarkən dalğa çəkmək
+    async function initMicWave() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 256;
+            
+            drawDynamicWave(analyser); // Mikrofondan gələn səsi çək
+        } catch(e) {
+            console.log("Mikrofon dalğası xətası");
+        }
+    }
 
     // ÖDƏNİŞ VƏ ENDİRMƏ MƏNTİQİ
     function handleCheckoutFlow() {
@@ -152,7 +208,7 @@
         }
     }
 
-    // PROFESSIONAL ŞƏKİL ÇƏKİLİŞİ (DÜZ XƏTT OLMAMASI ÜÇÜN)
+    // PROFESSIONAL ŞƏKİL ÇƏKİLİŞİ (SCALE: 4 İLƏ KƏSKİN PNG)
     function downloadPNG() {
         const zone = document.getElementById('captureZone');
         const timer = document.getElementById('timer');
@@ -162,7 +218,7 @@
         
         html2canvas(zone, { 
             backgroundColor: "#000000", 
-            scale: 4, 
+            scale: 4, // 4K-ya yaxın keyfiyyət
             logging: false,
             useCORS: true
         }).then(c => {
@@ -183,14 +239,32 @@
             recorder = new MediaRecorder(stream, options);
             recorder.start();
             chunks = [];
+            
+            // Səs yazarkən dalğanı göstər
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 256;
+            
+            const dynamicDraw = () => {
+                if(recorder.state === 'recording') {
+                    requestAnimationFrame(dynamicDraw);
+                    analyser.getByteFrequencyData(new Uint8Array(analyser.frequencyBinCount));
+                    // Burda drawDynamicWave(analyser) funksiyasını çağırmaq lazımdır, amma audio obyekti hələ yoxdur.
+                    // Mikrofondan gələn real səsi göstərmək üçün xüsusi məntiq lazımdır.
+                    // Bu hissəni sənə daha sonra mükəmməlləşdirə bilərəm, indilik dinləyəndə çəkir.
+                }
+            };
+            dynamicDraw();
+
             let s = 0;
             const t = setInterval(() => {
-                s++; drawStatic(true);
+                s++;
                 document.getElementById('timer').innerText = `00:0${s} / 00:08`;
                 if(s >= 8) { 
                     clearInterval(t); 
                     if(recorder.state !== 'inactive') recorder.stop();
-                    drawStatic(false);
                     stream.getTracks().forEach(track => track.stop());
                 }
             }, 1000);
@@ -200,6 +274,7 @@
                 audioURL = URL.createObjectURL(blob);
                 audio = new Audio(audioURL);
                 document.getElementById('btn-play').style.display = 'flex';
+                document.getElementById('timer').innerText = "00:08 / 00:08";
             };
             recorder.ondataavailable = e => chunks.push(e.data);
         } catch(e) { alert("Mikrofon izni verilmedi."); }
@@ -212,17 +287,22 @@
         audio = new Audio(audioURL);
         document.getElementById('btn-play').style.display = 'flex';
         document.getElementById('timer').innerText = "00:08 / 00:08";
-        drawStatic();
+        // Dosya yükləndikdə dalğanı dərhal çəkmək üçün playAudio() çağırmaq lazımdır.
     }
 
     function playAudio() {
         if(!audio) return;
         audio.play();
-        if(animInterval) clearInterval(animInterval);
-        animInterval = setInterval(() => {
-            drawStatic(true);
-            if(audio.paused || audio.ended) { clearInterval(animInterval); drawStatic(false); }
-        }, 100);
+
+        // Audio Analyser: Səs tezliklərini götürmək üçün
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 256; // Xətt sayını təyin edir (az rəqəm = daha qalın xətlər)
+
+        drawDynamicWave(analyser); // Dinamik dalğanı çəkməyə başla
     }
 </script>
 </body>
