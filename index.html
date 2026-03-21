@@ -82,22 +82,16 @@
         </div>
 
         <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
-
         <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
-        
         <input type="file" id="fInp" hidden onchange="handleFile(event)">
         <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
-
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
-
         <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
-    
-    // Dillərə endirmə düyməsi üçün mətnlər əlavə olundu
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD" },
@@ -108,123 +102,98 @@
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
-    let currentLang = 'tr'; // Default dil
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
     window.onload = function() {
+        const savedLang = localStorage.getItem('sonikLang') || 'tr';
+        updateLang(savedLang);
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
             document.getElementById('success-btn').style.display = 'flex';
             document.getElementById('btn-rec').style.display = 'none';
             document.getElementById('btn-file').style.display = 'none';
             document.getElementById('ui-down').style.display = 'none';
-            // Dil tənzimləməsini qoru
-            const savedLang = localStorage.getItem('sonikLang') || 'tr';
-            updateLang(savedLang);
         }
     };
 
     function updateLang(l) {
-        currentLang = l;
         localStorage.setItem('sonikLang', l);
         document.getElementById('ui-title').innerText = langs[l].title;
         document.getElementById('ui-select').innerText = langs[l].select;
         document.getElementById('ui-down').innerText = langs[l].down;
         document.getElementById('ui-listen').innerText = langs[l].listen;
         document.getElementById('ui-rec').innerText = langs[l].rec;
-        document.getElementById('ui-success').innerText = langs[l].success; // Mavi düymə dəyişir
+        document.getElementById('ui-success').innerText = langs[l].success;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    function drawWave(analyser, dataArray) {
-        function frame() {
-            animFrame = requestAnimationFrame(frame);
-            analyser.getByteFrequencyData(dataArray);
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, '#00c3ff');
-            gradient.addColorStop(0.5, '#ffff1c');
-            gradient.addColorStop(1, '#ff1744');
-            
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-
-            const barWidth = (canvas.width / dataArray.length) * 2.5;
-            let x = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-                const barHeight = dataArray[i] / 2;
-                const yTop = canvas.height / 2 - barHeight / 2;
-                const yBottom = canvas.height / 2 + barHeight / 2;
-                ctx.moveTo(x, yTop);
-                ctx.lineTo(x, yBottom);
-                x += barWidth + 2;
-            }
-            ctx.stroke();
-        }
-        frame();
-    }
-
-    function downloadPNG() {
-        if (!dataArray) return;
-        const timer = document.getElementById('timer');
-        timer.style.opacity = '0';
-        if(animFrame) cancelAnimationFrame(animFrame);
+    function drawWave() {
+        if (!analyser) return;
+        animFrame = requestAnimationFrame(drawWave);
+        analyser.getByteFrequencyData(dataArray);
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 4;
-        ctx.lineCap = 'round';
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, '#00c3ff'); gradient.addColorStop(0.5, '#ffff1c'); gradient.addColorStop(1, '#ff1744');
+        ctx.strokeStyle = gradient; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.beginPath();
         const barWidth = (canvas.width / dataArray.length) * 2.5;
         let x = 0;
         for (let i = 0; i < dataArray.length; i++) {
             const barHeight = dataArray[i] / 2;
-            const yTop = canvas.height / 2 - barHeight / 2;
-            const yBottom = canvas.height / 2 + barHeight / 2;
-            const ratio = i / dataArray.length;
+            ctx.moveTo(x, canvas.height/2 - barHeight/2);
+            ctx.lineTo(x, canvas.height/2 + barHeight/2);
+            x += barWidth + 2;
+        }
+        ctx.stroke();
+    }
+
+    function downloadPNG() {
+        // Əgər səs yazılmayıbsa/yüklənməyibsə, xəta verməsin deyə dummy data yaradırıq
+        const finalArray = dataArray || new Uint8Array(64).fill(50);
+        
+        if(animFrame) cancelAnimationFrame(animFrame);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 4; ctx.lineCap = 'round';
+
+        const barWidth = (canvas.width / finalArray.length) * 2.5;
+        let x = 0;
+        for (let i = 0; i < finalArray.length; i++) {
+            const barHeight = finalArray[i] / 2;
+            const ratio = i / finalArray.length;
             ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
             ctx.beginPath();
-            ctx.moveTo(x, yTop);
-            ctx.lineTo(x, yBottom);
+            ctx.moveTo(x, canvas.height/2 - barHeight/2);
+            ctx.lineTo(x, canvas.height/2 + barHeight/2);
             ctx.stroke();
             x += barWidth + 2;
         }
-        const snapshot = canvas.toDataURL("image/png", 1.0);
-        const a = document.createElement('a');
-        a.download = 'sonik-tattoo.png';
-        a.href = snapshot;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        timer.style.opacity = '1';
+
+        const link = document.createElement('a');
+        link.download = 'sonik-skin-tattoo.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        
+        if (audio && !audio.paused) drawWave(); // Animasiyanı davam etdir
     }
 
-    function handleCheckoutFlow() {
-        window.location.href = LEMON_LINK;
-    }
+    function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
 
     async function initMic() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recorder = new MediaRecorder(stream);
-            recorder.start();
-            chunks = [];
-            let s = 0;
-            const t = setInterval(() => {
-                s++;
-                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { 
-                    clearInterval(t); 
-                    recorder.stop();
-                    stream.getTracks().forEach(track => track.stop());
-                }
+            recorder.start(); chunks = [];
+            let s = 0; const t = setInterval(() => {
+                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
             }, 1000);
             recorder.onstop = () => {
                 audioURL = URL.createObjectURL(new Blob(chunks));
                 audio = new Audio(audioURL);
+                setupAnalyser();
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
@@ -235,23 +204,25 @@
         if(e.target.files[0]) {
             audioURL = URL.createObjectURL(e.target.files[0]);
             audio = new Audio(audioURL);
+            setupAnalyser();
             document.getElementById('btn-play').style.display = 'flex';
-            document.getElementById('timer').innerText = "00:08 / 00:08";
         }
+    }
+
+    function setupAnalyser() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser); analyser.connect(audioCtx.destination);
+        analyser.fftSize = 128;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
 
     function playAudio() {
         if(!audio) return;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaElementSource(audio);
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-        analyser.fftSize = 128;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
         audio.play();
         if(animFrame) cancelAnimationFrame(animFrame);
-        drawWave(analyser, dataArray);
+        drawWave();
     }
 </script>
 </body>
