@@ -3,209 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Universal Pro</title>
+    <title>Sonik Skin - Premium Tattoo Experience</title>
     <style>
-        :root { --neon: #d4ff00; --bg: #050505; }
+        :root { 
+            --neon: #d4ff00; 
+            --deep-bg: #0a0a0a;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --accent: #1a1a1a;
+        }
+        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
-            color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
+            background: radial-gradient(circle at top right, #1a1f00 0%, var(--deep-bg) 70%);
+            color: white; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; min-height: 100vh; 
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
         }
 
         header {
-            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
+            width: 100%; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); border-bottom: 1px solid #222;
         }
-        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; }
-
-        .lang-dropdown { position: relative; }
-        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .lang-content {
-            display: none; position: absolute; right: 0; background: #1a1a1a;
-            min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000;
+        .logo { 
+            font-weight: 900; color: var(--neon); font-size: 1.4rem; letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(212, 255, 0, 0.4);
         }
-        .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
-        .lang-dropdown:hover .lang-content { display: block; }
 
-        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .lang-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid #333; color: white; 
+            padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 13px;
+            transition: 0.3s;
+        }
+        .lang-btn:hover { background: var(--neon); color: black; }
+
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        
         .card {
-            background: #111; border: 1px solid #222; padding: 25px;
-            border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            background: var(--card-bg); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            padding: 40px 30px;
+            border-radius: 40px; 
+            width: 100%; max-width: 420px; 
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.02);
+            position: relative;
+        }
+
+        .card::before {
+            content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(212,255,0,0.1), transparent);
+            border-radius: 40px; z-index: -1;
+        }
+
+        h2 { 
+            font-size: 0.9rem; letter-spacing: 3px; color: #888; margin-bottom: 30px; 
+            text-transform: uppercase; font-weight: 400;
         }
 
         .wave-box {
-            background: #000; height: 140px; border-radius: 20px; margin-bottom: 25px;
+            background: #000; height: 160px; border-radius: 25px; margin-bottom: 30px;
             position: relative; border: 1px solid #1a1a1a; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
         }
-        canvas { width: 100%; height: 100%; background: #000; }
-        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
+        canvas { width: 100%; height: 100%; }
+        #timer { 
+            position: absolute; top: 15px; right: 20px; 
+            color: var(--neon); font-family: 'Courier New', monospace; 
+            font-size: 14px; font-weight: bold;
+        }
 
         .btn {
-            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
-            font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 20px; margin-bottom: 15px; border-radius: 18px; border: none;
+            font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
-        .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
-        .btn-main { background: var(--neon); color: #000; margin-top: 10px; }
+
+        .btn-gray { 
+            background: #1a1a1a; color: #eee; border: 1px solid #333; 
+        }
+        .btn-gray:hover { background: #252525; border-color: #444; }
+
+        .btn-listen { 
+            background: rgba(212, 255, 0, 0.05); color: var(--neon); 
+            border: 1px solid rgba(212, 255, 0, 0.2); display: none; 
+        }
+
+        .btn-main { 
+            background: var(--neon); color: #000; margin-top: 15px;
+            box-shadow: 0 15px 30px rgba(212, 255, 0, 0.2);
+        }
+        .btn-main:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(212, 255, 0, 0.3);
+        }
         
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        .btn:active { transform: scale(0.97); }
+
+        /* Mobil uyğunluq */
+        @media (max-width: 480px) {
+            .card { padding: 30px 20px; }
+            .logo { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">SONIK SKIN</div>
-    <div class="lang-dropdown">
-        <button class="lang-btn" id="curLang">TR ▾</button>
-        <div class="lang-content">
-            <span onclick="updateLang('tr')">Türkçe</span>
-            <span onclick="updateLang('en')">English</span>
-            <span onclick="updateLang('ru')">Русский</span>
-            <span onclick="updateLang('fr')">Français</span>
-            <span onclick="updateLang('zh')">中文</span>
-            <span onclick="updateLang('de')">Deutsch</span>
-        </div>
-    </div>
+    <button class="lang-btn" id="curLang">TR ▾</button>
 </header>
 
 <div class="container">
     <div class="card">
-        <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
+        <h2 id="ui-title">Dosyadan Dövme Yap</h2>
         
         <div class="wave-box">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
 
-        <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
-        
-        <input type="file" id="fInp" hidden onchange="handleFile(event)">
-        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
-
-        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
-
-        <button class="btn btn-main" onclick="downloadPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
-    </div>
-</div>
-
-<script>
-    const langs = {
-        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR", down: "CONVERTIR", listen: "ÉCOUTER", rec: "ENREGISTRER" },
-        zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME" }
-    };
-
-    let recorder, chunks = [], audioURL, audio, animInterval;
-    const canvas = document.getElementById('waveCanvas');
-    const ctx = canvas.getContext('2d');
-
-    function updateLang(l) {
-        document.getElementById('ui-title').innerText = langs[l].title;
-        document.getElementById('ui-select').innerText = langs[l].select;
-        document.getElementById('ui-down').innerText = langs[l].down;
-        document.getElementById('ui-listen').innerText = langs[l].listen;
-        document.getElementById('ui-rec').innerText = langs[l].rec;
-        document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
-    }
-
-    function drawStatic(active = false) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3; ctx.beginPath();
-        for (let i = 0; i < canvas.width; i += 7) {
-            let h = active ? Math.random() * 80 + 10 : 35;
-            ctx.moveTo(i, canvas.height/2 - h/2); ctx.lineTo(i, canvas.height/2 + h/2);
-        }
-        ctx.stroke();
-    }
-    drawStatic();
-
-    // iPhone-larda səs yazma icazəsini aktivləşdirmək üçün xüsusi funksiya
-    async function initMic() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // iPhone uyğunluğu üçün MimeType yoxlanışı
-            const options = { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4' };
-            recorder = new MediaRecorder(stream, options);
-            
-            recorder.start();
-            chunks = [];
-            let s = 0;
-            const t = setInterval(() => {
-                s++; drawStatic(true);
-                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { 
-                    clearInterval(t); 
-                    if(recorder.state !== 'inactive') recorder.stop();
-                    drawStatic(false);
-                }
-            }, 1000);
-
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: options.mimeType });
-                if(audioURL) URL.revokeObjectURL(audioURL);
-                audioURL = URL.createObjectURL(blob);
-                audio = new Audio(audioURL);
-                document.getElementById('btn-play').style.display = 'flex';
-            };
-            recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { 
-            alert("Mikrofon izni verilmedi (Ayarlar > Safari > Mikrofon bölmesini kontrol edin)"); 
-        }
-    }
-
-    function handleFile(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            if(audioURL) URL.revokeObjectURL(audioURL);
-            audioURL = ev.target.result;
-            audio = new Audio(audioURL);
-            document.getElementById('btn-play').style.display = 'flex';
-            document.getElementById('timer').innerText = "00:08 / 00:08";
-            drawStatic();
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function playAudio() {
-        if(!audio) return;
-        audio.currentTime = 0;
-        audio.play();
-        
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            drawStatic(false);
-            if(animInterval) clearInterval(animInterval);
-        }, 8000);
-
-        if(animInterval) clearInterval(animInterval);
-        animInterval = setInterval(() => {
-            drawStatic(true);
-            if(audio.paused || audio.ended) { 
-                clearInterval(animInterval); 
-                drawStatic(false); 
-            }
-        }, 100);
-    }
-
-    function downloadPNG() {
-        const link = document.createElement('a');
-        link.download = 'sonik-skin.png';
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    }
-</script>
-</body>
-</html>
+        <button class="btn btn-gray" onclick="startPremiumRec()">
+            <span style="color:var(--neon)">●</span> <span id="ui
