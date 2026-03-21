@@ -5,176 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonik Skin - Premium Tattoo</title>
     <style>
-        /* PREMİUM ARXA FON VƏ ÜMUMİ STİL */
+        /* PREMIUM FON */
         body {
-            background: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
-            background-attachment: fixed;
-            color: #ffffff;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #0a0a0a url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
         }
 
-        /* YUXARI PANEL (HEADER) */
-        header {
-            width: 100%;
-            padding: 20px 50px;
+        /* YUXARI PANEL */
+        .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
-            background: rgba(0, 0, 0, 0.3);
+            padding: 20px 50px;
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(10px);
         }
 
-        .logo {
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #d4ff00;
-        }
+        .logo { font-weight: 900; letter-spacing: 2px; color: #d4ff00; font-size: 20px; }
 
-        .header-right {
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+
+        .auth-links { display: flex; gap: 15px; font-size: 13px; color: #bbb; }
+        .auth-links span { cursor: pointer; transition: 0.3s; }
+        .auth-links span:hover { color: #fff; }
+
+        .languages { display: flex; gap: 8px; border-left: 1px solid #333; padding-left: 15px; }
+        .languages span { font-size: 11px; color: #555; cursor: pointer; }
+        .languages span.active { color: #d4ff00; font-weight: bold; }
+
+        /* ORTADAKI PANEL */
+        .main-container {
+            flex: 1;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 25px;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 15px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #888;
-        }
-
-        .nav-links span {
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .nav-links span:hover { color: #fff; }
-
-        /* DİL SEÇİMİ YUXARI SAĞDA */
-        .lang-panel {
-            display: flex;
-            gap: 8px;
-            border-left: 1px solid #333;
-            padding-left: 15px;
-        }
-
-        .lang-panel span {
-            font-size: 11px;
-            color: #555;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .lang-panel span.active { color: #d4ff00; font-weight: bold; }
-
-        /* ƏSAS KART */
-        .main-card {
-            background: rgba(30, 30, 30, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px;
-            border-radius: 30px;
-            width: 400px;
-            margin-top: 80px;
+        .glass-card {
+            background: rgba(25, 25, 25, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 35px;
+            border-radius: 25px;
+            width: 380px;
             text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
         }
 
-        h2 {
-            font-size: 18px;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+        h2 { font-size: 16px; margin-bottom: 25px; letter-spacing: 1px; }
 
-        /* DALĞA SAHƏSİ */
-        .wave-container {
+        .wave-box {
             background: #000;
-            height: 140px;
-            border-radius: 20px;
-            margin-bottom: 25px;
+            height: 120px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #1a1a1a;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #222;
         }
 
-        .static-wave {
-            width: 80%;
-            height: 60px;
-            background: linear-gradient(90deg, transparent 0%, #d4ff00 50%, transparent 100%);
-            mask-image: url('https://www.svgrepo.com/show/443594/waveform.svg'); /* Təmiz SVG istifadəsi */
-            mask-size: contain;
-            mask-repeat: no-repeat;
-            opacity: 0.6;
-        }
+        .wave-img { width: 80%; opacity: 0.6; filter: hue-rotate(45deg); }
 
-        #timer {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            color: #d4ff00;
-            font-size: 12px;
-            font-family: monospace;
-        }
+        #timer { position: absolute; top: 10px; right: 15px; color: #d4ff00; font-size: 12px; }
 
         /* BUTONLAR */
         .btn {
             width: 100%;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-radius: 12px;
             border: none;
             font-weight: bold;
-            font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            transition: 0.3s;
         }
 
-        .btn-gray { background: #2a2a2a; color: #fff; }
-        .btn-gray:hover { background: #333; }
+        .btn-dark { background: #1e1e1e; color: #fff; border: 1px solid #333; }
+        .btn-listen { background: #2a2a2a; color: #d4ff00; display: none; }
+        .btn-main { background: #d4ff00; color: #000; margin-top: 15px; }
 
-        .btn-listen { 
-            background: #1a1a1a; 
-            color: #d4ff00; 
-            border: 1px solid #d4ff0033;
-            display: none; 
-        }
-
-        .btn-premium { 
-            background: #d4ff00; 
-            color: #000; 
-            margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(212, 255, 0, 0.15);
-        }
-
-        .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212, 255, 0, 0.25); }
-
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <header>
+    <div class="top-nav">
         <div class="logo">SONIK SKIN</div>
-        <div class="header-right">
-            <div class="nav-links">
+        <div class="nav-right">
+            <div class="auth-links">
                 <span>USER LOGIN</span>
                 <span>ARTIST LOGIN</span>
             </div>
-            <div class="lang-panel">
+            <div class="languages">
                 <span class="active" onclick="setLang('tr', this)">TR</span>
                 <span onclick="setLang('en', this)">EN</span>
-                <span onclick="setLang('
+                <span onclick="setLang('ru', this)">RU</span>
+                <span onclick="setLang('fr', this)">FR</span>
+                <span onclick="setLang('zh', this)">ZH</span>
+                <span onclick="setLang('de', this)">DE</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="glass-card">
+            <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
+
+            <div class="wave-box">
+                <img src="https://www.svgrepo.com/show/443594/waveform.svg" class="wave-img" alt="Wave">
+                <div id="timer">00:00 / 00:08</div>
+            </div>
+
+            <button class="btn btn-dark" onclick="startRecording()">🎤 SESİ KAYDET</button>
+            
+            <input type="file" id="audioFile" style="display:none" onchange="fileOk()">
+            <button class="btn btn-dark" onclick="document.getElementById('audioFile').click()" id="ui-select">📁 DOSYA SEÇ</button>
+
+            <button class="btn btn-listen" id="listenBtn">🔊 DİNLE</button>
+
+            <button class="btn btn-main" id="ui-download">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        </div>
+    </div>
+
+    <script>
+        const texts = {
+            tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", download: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE" },
+            en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", download: "CONVERT TO MEMORY", listen: "LISTEN" },
+            ru: { title: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", download: "СКАЧАТЬ ПАМЯТЬ", listen: "СЛУШАТЬ" },
+            fr: { title: "CRÉER UN TATOUAGE", select: "CHOISIR FICHIER", download: "CONVERTIR", listen: "ÉCOUTER" },
+            zh: { title: "从文件制作纹身", select: "选择文件", download: "下载回忆", listen: "倾听" },
+            de: { title: "TATTOO AUS DATEI", select: "DATEI WÄHLEN", download: "SPEICHERN", listen: "ANHÖREN" }
+        };
+
+        function setLang(l, el) {
+            document.getElementById('ui-title').innerText = texts[l].title;
+            document.getElementById('ui-select').innerText = "📁 " + texts[l].select;
+            document.getElementById('ui-download').innerText = texts[l].download;
+            document.getElementById('listenBtn').innerText = "🔊 " + texts[l].listen;
+
+            document.querySelectorAll('.languages span').forEach(s => s.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function startRecording() {
+            let s = 0;
+            const timer = document.getElementById('timer');
+            const interval = setInterval(() => {
+                s++;
+                timer.innerText = `00:0${s} / 00:08`;
+                if(s >= 8) {
+                    clearInterval(interval);
+                    document.getElementById('listenBtn').style.display = 'flex';
+                }
+            }, 1000);
+        }
+
+        function fileOk() {
+            document.getElementById('listenBtn').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
