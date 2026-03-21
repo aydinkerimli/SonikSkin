@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Mobile Fixed</title>
+    <title>Sonik Skin - Final Premium</title>
     <style>
         :root { 
             --neon: #d4ff00; 
@@ -22,35 +22,28 @@
         header {
             width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: relative; z-index: 9999; /* Header həmişə üstə */
+            position: relative; z-index: 9999;
         }
         .logo { font-weight: 900; color: white; font-size: 1.4rem; letter-spacing: 2px; }
         .logo span { color: var(--neon); }
 
-        /* MOBİL UYĞUN DİL MENYUSU */
         .lang-dropdown { position: relative; }
         .lang-btn { 
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); 
             color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: bold;
         }
         
-        /* Menyunu önə çıxaran əsas hissə */
         .lang-content {
             display: none; position: absolute; right: 0; top: 110%; 
             background: #0a1a3a; min-width: 140px; 
             border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; 
-            z-index: 10000; /* Kartın üstünə keçməsini təmin edir */
+            z-index: 10000;
             box-shadow: 0 15px 40px rgba(0,0,0,0.8);
-            overflow: hidden;
         }
         .lang-content span { 
             padding: 14px 20px; display: block; cursor: pointer; 
             border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; 
-            transition: 0.2s;
         }
-        .lang-content span:hover, .lang-content span:active { background: var(--azure); color: white; }
-        
-        /* Aktiv olanda göstər */
         .lang-dropdown.active .lang-content { display: block; }
 
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
@@ -59,7 +52,7 @@
             background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2); 
             padding: 35px 25px; border-radius: 40px; width: 100%; max-width: 400px; text-align: center;
-            position: relative; z-index: 1; /* Menyudan daha aşağıda olsun */
+            position: relative; z-index: 1;
         }
 
         h2 { font-size: 0.9rem; letter-spacing: 2px; color: white; text-transform: uppercase; margin-bottom: 25px; }
@@ -82,14 +75,13 @@
         .btn-listen { background: linear-gradient(135deg, var(--azure), #0055ff); color: white; display: none; }
         .btn-main { background: var(--neon); color: #000; margin-top: 15px; font-weight: 900; }
         
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        .btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">SONIK <span>SKIN</span></div>
-    
     <div class="lang-dropdown" id="langDrop">
         <button class="lang-btn" onclick="toggleLang()">TR ▾</button>
         <div class="lang-content">
@@ -114,23 +106,14 @@
         <input type="file" id="fInp" hidden accept="audio/*" onchange="handleFile(event)">
         <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">Dosya Seç</span></button>
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">▶ <span id="ui-listen">Dinle</span></button>
-        <button class="btn btn-main" id="ui-down" onclick="alert('Yönlendiriliyor...')">Bunu Hatıraya Dönüştür</button>
+        
+        <button class="btn btn-main" id="ui-down" onclick="goToCheckout()">Bunu Hatıraya Dönüştür</button>
     </div>
 </div>
 
 <script>
-    // Menyunu açıb-bağlama funksiyası (Mobil üçün vacib)
-    function toggleLang() {
-        document.getElementById('langDrop').classList.toggle('active');
-    }
-
-    // Kənara basanda menyunu bağla
-    window.onclick = function(event) {
-        if (!event.target.matches('.lang-btn')) {
-            let drop = document.getElementById('langDrop');
-            if (drop.classList.contains('active')) drop.classList.remove('active');
-        }
-    }
+    function toggleLang() { document.getElementById('langDrop').classList.toggle('active'); }
+    window.onclick = (e) => { if (!e.target.matches('.lang-btn')) document.getElementById('langDrop').classList.remove('active'); }
 
     const langs = {
         tr: { title: "Dosyadan Dövme Yap", select: "Dosya Seç", down: "Bunu Hatıraya Dönüştür", listen: "Dinle", rec: "Sesi Kaydet" },
@@ -147,11 +130,14 @@
         document.getElementById('ui-down').innerText = langs[l].down;
         document.getElementById('ui-listen').innerText = langs[l].listen;
         document.getElementById('ui-rec').innerText = langs[l].rec;
-        document.getElementById('curLang') ? document.getElementById('curLang').innerText = l.toUpperCase() + " ▾" : null;
         document.querySelector('.lang-btn').innerText = l.toUpperCase() + " ▾";
     }
 
-    // --- Səs və Dalğa Kodları (Stabil saxlanıldı) ---
+    // Lemon Squeezy Yönləndirmə Funksiyası
+    function goToCheckout() {
+        window.location.href = "https://sonikskin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
+    }
+
     let recorder, chunks = [], audioURL, audioObj, anim;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
@@ -178,16 +164,16 @@
                 document.getElementById('timer').innerText = `00:0${s} / 00:08`;
                 if(s >= 8) { clearInterval(t); recorder.stop(); drawWave(false); }
             }, 1000);
-            recorder.onstop = () => { setupAudio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mp3' }))); };
+            recorder.onstop = () => setupAudio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mp3' })));
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mic Access Denied"); }
+        } catch(e) { alert("Mikrofon hatası!"); }
     }
 
     function handleFile(e) {
         const file = e.target.files[0];
         if(!file) return;
         const reader = new FileReader();
-        reader.onload = (event) => setupAudio(event.target.result);
+        reader.onload = (ev) => setupAudio(ev.target.result);
         reader.readAsDataURL(file);
     }
 
