@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin Premium</title>
+    <title>Sonik Skin Premium - Fixed 8s</title>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -14,7 +14,7 @@
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
 
-        /* HEADER - Mobil üçün genişləndirildi */
+        /* HEADER */
         header {
             width: 100%; padding: 20px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
@@ -22,10 +22,10 @@
         .logo { font-weight: 900; letter-spacing: 1px; color: var(--neon); font-size: 1.2rem; }
         
         .nav-right { display: flex; align-items: center; gap: 15px; }
-        .auth-btns { display: none; } /* Mobildə yer tutmasın deyə gizlətmək olar və ya menyuya salmaq */
-        @media (min-width: 600px) { .auth-btns { display: flex; gap: 15px; font-size: 12px; color: #888; } }
+        .auth-btns { display: flex; gap: 15px; font-size: 12px; color: #888; }
+        @media (max-width: 600px) { .auth-btns { display: none; } }
 
-        /* DİL MENYUSU */
+        /* DİL DROPDOWN - Toxunulmadı */
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
         .lang-content {
@@ -35,7 +35,7 @@
         .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 14px; }
         .lang-dropdown:hover .lang-content { display: block; }
 
-        /* ƏSAS PANEL - Telefonda tam görünür */
+        /* ANA PANEL */
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
         .card {
             background: #111; border: 1px solid #222; padding: 25px;
@@ -54,7 +54,7 @@
         canvas { width: 100%; height: 100%; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
 
-        /* DÜYMƏLƏR - Mobil üçün toxunma dostu (böyük) */
+        /* BUTONLAR */
         .btn {
             width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
             font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
@@ -102,7 +102,7 @@
         <button class="btn btn-gray" id="btn-rec" onclick="startRec()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
         
         <input type="file" id="fInp" hidden accept="audio/*" onchange="handleFile(event)">
-        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
+        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()" id="ui-btn-select">📁 <span id="ui-select">DOSYA SEÇ</span></button>
 
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
@@ -112,15 +112,16 @@
 
 <script>
     const langs = {
-        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", u: "GİRİŞ", a: "SANATÇI" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD", u: "LOGIN", a: "ARTIST" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", u: "ВХОД", a: "АРТ" },
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", u: "USER LOGIN", a: "ARTIST LOGIN" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD", u: "USER LOGIN", a: "ARTIST LOGIN" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", u: "ВХОД", a: "АРТ" },
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR", down: "CONVERTIR", listen: "ÉCOUTER", rec: "ENREGISTRER", u: "LOG", a: "ART" },
         zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音", u: "登录", a: "艺术家" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME", u: "LOG", a: "ARTIST" }
     };
 
     let recorder, chunks = [], audioURL, audio;
+    let limitTimer; // 8 saniyəlik dayandırıcı üçün
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -169,12 +170,28 @@
         } catch(e) { alert("Mikrofon izni gerekli!"); }
     }
 
+    // ƏSAS FUNKSİYA: Fayl və ya səs yazısı olmasından asılı olmayaraq 8-ci saniyədə kəsir
     function playAudio() {
         if(audio) {
+            audio.currentTime = 0; // Həmişə başdan başla
             audio.play();
+            
+            // Dinləmə müddətini 8 saniyədə dayandır
+            if(limitTimer) clearTimeout(limitTimer);
+            
+            limitTimer = setTimeout(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                draw(false);
+                alert("8 saniyelik dinleme limiti doldu.");
+            }, 8000);
+
             const anim = setInterval(() => {
                 draw(true);
-                if(audio.ended) { clearInterval(anim); draw(false); }
+                if(audio.paused || audio.ended) { 
+                    clearInterval(anim); 
+                    draw(false); 
+                }
             }, 100);
         }
     }
@@ -186,12 +203,13 @@
             audio = new Audio(audioURL);
             document.getElementById('btn-play').style.display = 'flex';
             draw();
+            document.getElementById('timer').innerText = "00:08 / 00:08"; // Fayl yüklənəndə limit göstərilsin
         }
     }
 
     function downloadPNG() {
         const link = document.createElement('a');
-        link.download = 'tattoo.png';
+        link.download = 'sonik-skin-tattoo.png';
         link.href = canvas.toDataURL();
         link.click();
     }
