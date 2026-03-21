@@ -17,7 +17,8 @@
             width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid #222;
         }
-        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; }
+        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
+        .logo:hover { opacity: 0.7; }
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
@@ -58,7 +59,7 @@
 <body>
 
 <header>
-    <div class="logo">SONIK SKIN</div>
+    <div class="logo" onclick="resetPage()">SONIK SKIN</div>
     <div class="lang-dropdown">
         <button class="lang-btn" id="curLang">TR ▾</button>
         <div class="lang-content">
@@ -95,13 +96,15 @@
 
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
+    
+    // Bütün dillərdə "Bunu xatirəyə çevir" mənasını verən tərcümələr
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR", down: "CONVERTIR", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER" },
-        zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音", success: "支付成功！点击下载" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN" }
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -118,7 +121,6 @@
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
-            // Ödəniş uğurlu olanda digər bütün düymələri yox edirik, yalnız İNDİR qalır
             document.getElementById('success-btn').style.display = 'flex';
             document.getElementById('action-area').style.display = 'none';
 
@@ -128,6 +130,12 @@
             }
         }
     };
+
+    // Saytı sıfırlayan funksiya (Loqo üçün)
+    function resetPage() {
+        localStorage.removeItem('lastStaticWave');
+        window.location.href = window.location.origin + window.location.pathname;
+    }
 
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
@@ -141,7 +149,6 @@
     }
 
     async function generateStaticWave(buffer) {
-        // MAKSİMUM 8 SANİYƏ ANALİZ (Sənin istədiyin limit)
         const sampleRate = buffer.sampleRate;
         const maxDuration = 8; 
         const lengthToProcess = Math.min(buffer.length, sampleRate * maxDuration);
@@ -170,7 +177,7 @@
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
             const x = i * barWidth;
-            const barHeight = val * canvas.height * 5; // Bir az daha dik görünsün deyə 5
+            const barHeight = val * canvas.height * 5;
             const ratio = i / staticDataArray.length;
             ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
             ctx.lineWidth = 3;
@@ -188,7 +195,6 @@
         link.download = 'sonik-skin-tattoo.png';
         link.href = canvas.toDataURL("image/png");
         link.click();
-        // BURADA SIFIRLAMA KODUNU SİLDİM - ARTIQ EKRANDA QALACAQ!
     }
 
     function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
@@ -233,7 +239,6 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
         
-        // 8 saniyədən çoxdursa, "audio" obyektini də 8-ci saniyədə dayandırırıq
         audio.addEventListener('timeupdate', () => {
             if (audio.currentTime >= 8) {
                 audio.pause();
