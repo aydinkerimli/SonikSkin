@@ -10,7 +10,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            /* CANLI ARXA FON */
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f2027);
             background-size: 400% 400%;
             animation: moveGradient 15s ease infinite;
@@ -51,10 +50,10 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* KİLİD TƏBƏQƏSİ */
+        /* KİLİD TƏBƏQƏSİ (BLUR) */
         #lock-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(15px);
             display: none; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10; color: #fff; text-align: center; padding: 10px;
         }
@@ -100,8 +99,8 @@
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
             <div id="lock-overlay">
-                <span id="ui-lock-title" style="font-weight: bold;">🔒 ÖNİZLEME KİLİTLİ</span>
-                <p id="ui-lock-msg" style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Tam sürüm için ödeme yapın</p>
+                <span id="ui-lock-title" style="font-weight: bold; font-size: 16px;">🔒</span>
+                <p id="ui-lock-msg" style="font-size: 11px; margin-top: 5px; opacity: 0.8;"></p>
             </div>
         </div>
 
@@ -167,7 +166,7 @@
     }
 
     async function processAudioData(data) {
-        overlay.style.display = 'flex';
+        overlay.style.display = 'none'; // Proses vaxtı hələ kilid yoxdur
         audioURL = URL.createObjectURL(data);
         audio = new Audio(audioURL);
         setupAnalyser();
@@ -175,12 +174,10 @@
         const audioCtx = new AudioContext();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
         
-        audio.addEventListener('timeupdate', () => {
-            if (audio.currentTime >= 8) {
-                audio.pause(); audio.currentTime = 0;
-                cancelAnimationFrame(animFrame); drawStaticWave();
-            }
-        });
+        audio.onended = () => {
+            cancelAnimationFrame(animFrame);
+            drawStaticWave(); // Səs bitəndə stabil dalğanı çək və kilidlə
+        };
 
         generateStaticWave(decodedData);
         document.getElementById('btn-play').style.display = 'flex';
@@ -198,10 +195,16 @@
             staticDataArray.push(sum / blockSize);
         }
         localStorage.setItem('lastStaticWave', JSON.stringify(staticDataArray));
-        drawStaticWave();
+        drawStaticWave(); // Bu funksiya həm də kilidi aktiv edəcək
     }
 
     function drawStaticWave() {
+        // Stabil dalğa görünəndə kilid gəlir (çünki bu artıq son görüntüdür)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('status') !== 'success') {
+            overlay.style.display = 'flex'; 
+        }
+
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
@@ -226,9 +229,10 @@
 
     function playAudio() {
         if(!audio) return;
+        overlay.style.display = 'none'; // Dinləyəndə kilidi qaldır ki animasiyanı görsünlər
         audio.play();
         if(animFrame) cancelAnimationFrame(animFrame);
-        drawWave(); // CANAVAR ANIMASIYA BAŞLAYIR
+        drawWave();
     }
 
     function drawWave() {
@@ -237,7 +241,6 @@
         analyser.getByteFrequencyData(dataArray);
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // CANAVAR ANIMASIYANIN RƏNGLƏRİ
         const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
         grad.addColorStop(0, '#00c3ff'); grad.addColorStop(0.5, '#ffff1c'); grad.addColorStop(1, '#ff1744');
         
@@ -259,6 +262,8 @@
     }
 
     function downloadPNG() {
+        overlay.style.display = 'none'; // Yükləyəndə dumanı təmizlə
+        drawStaticWave();
         const link = document.createElement('a');
         link.download = 'sonik-skin.png';
         link.href = canvas.toDataURL();
@@ -268,6 +273,7 @@
     function handleFile(e) { if(e.target.files[0]) processAudioData(e.target.files[0]); }
 
     async function initMic() {
+        overlay.style.display = 'none'; // Yazanda kilid olmasın
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             recorder = new MediaRecorder(stream);
