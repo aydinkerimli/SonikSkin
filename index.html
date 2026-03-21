@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin Premium - Mobile Final</title>
+    <title>Sonik Skin Premium - Clean & Silent</title>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
             background: radial-gradient(circle at center, #1a1a1a 0%, var(--bg) 100%);
@@ -21,7 +21,7 @@
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; letter-spacing: 1px; }
 
         .lang-dropdown { position: relative; }
-        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
             display: none; position: absolute; right: 0; background: #1a1a1a;
             min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000;
@@ -58,4 +58,141 @@
 
 <header>
     <div class="logo">SONIK SKIN</div>
-    <div class="lang
+    <div class="lang-dropdown">
+        <button class="lang-btn" id="curLang">TR ▾</button>
+        <div class="lang-content">
+            <span onclick="updateLang('tr')">Türkçe</span>
+            <span onclick="updateLang('en')">English</span>
+            <span onclick="updateLang('ru')">Русский</span>
+            <span onclick="updateLang('fr')">Français</span>
+            <span onclick="updateLang('zh')">中文</span>
+            <span onclick="updateLang('de')">Deutsch</span>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
+        
+        <div class="wave-box">
+            <canvas id="waveCanvas"></canvas>
+            <div id="timer">00:00 / 00:08</div>
+        </div>
+
+        <button class="btn btn-gray" id="btn-rec" onclick="startRecording()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
+        
+        <input type="file" id="fInp" hidden onchange="handleFile(event)">
+        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
+
+        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
+
+        <button class="btn btn-main" onclick="downloadPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+    </div>
+</div>
+
+<script>
+    const langs = {
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "СКАЧАТЬ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR", down: "CONVERTIR", listen: "ÉCOUTER", rec: "ENREGISTRER" },
+        zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "SPEICHERN", listen: "ANHÖREN", rec: "AUFNAHME" }
+    };
+
+    let recorder, chunks = [], audioURL, audio, animInterval;
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function updateLang(l) {
+        document.getElementById('ui-title').innerText = langs[l].title;
+        document.getElementById('ui-select').innerText = langs[l].select;
+        document.getElementById('ui-down').innerText = langs[l].down;
+        document.getElementById('ui-listen').innerText = langs[l].listen;
+        document.getElementById('ui-rec').innerText = langs[l].rec;
+        document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
+    }
+
+    function draw(active = false) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3; ctx.beginPath();
+        for(let i=0; i<canvas.width; i+=6) {
+            let h = active ? Math.random()*80 + 10 : 30;
+            ctx.moveTo(i, canvas.height/2 - h/2); ctx.lineTo(i, canvas.height/2 + h/2);
+        }
+        ctx.stroke();
+    }
+    draw();
+
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            chunks = [];
+            let s = 0;
+            const t = setInterval(() => {
+                s++; draw(true);
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { 
+                    clearInterval(t); 
+                    if(recorder.state !== 'inactive') recorder.stop(); 
+                    draw(false); 
+                }
+            }, 1000);
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/mp3' });
+                if(audioURL) URL.revokeObjectURL(audioURL);
+                audioURL = URL.createObjectURL(blob);
+                audio = new Audio(audioURL);
+                document.getElementById('btn-play').style.display = 'flex';
+            };
+            recorder.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { console.log("Mic Error"); }
+    }
+
+    function handleFile(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        if(audioURL) URL.revokeObjectURL(audioURL);
+        audioURL = URL.createObjectURL(file);
+        audio = new Audio(audioURL);
+        document.getElementById('btn-play').style.display = 'flex';
+        document.getElementById('timer').innerText = "00:08 / 00:08";
+        draw();
+    }
+
+    function playAudio() {
+        if(!audio) return;
+        audio.currentTime = 0;
+        audio.play();
+        
+        // 8 saniyə sonra səssizcə dayandır
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            draw(false);
+            if(animInterval) clearInterval(animInterval);
+        }, 8000);
+
+        if(animInterval) clearInterval(animInterval);
+        animInterval = setInterval(() => {
+            draw(true);
+            if(audio.paused || audio.ended) { 
+                clearInterval(animInterval); 
+                draw(false); 
+            }
+        }, 100);
+    }
+
+    function downloadPNG() {
+        const link = document.createElement('a');
+        link.download = 'sonik-tattoo.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+</script>
+</body>
+</html>
