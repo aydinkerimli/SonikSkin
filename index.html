@@ -1,111 +1,197 @@
-            document.getElementById('bS1').innerText = d.buy; document.getElementById('bS2').innerText = d.buy;
-            document.querySelectorAll('.play-btn').forEach(b => b.innerText = d.listen);
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic Skin | Xatirəni Səsə Çevir</title>
+    <style>
+        :root { --neon: #d4ff00; --dark: #050505; --panel: #111; --gray: #222; }
+        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 50px; background: #000; border-bottom: 1px solid var(--gray); position: sticky; top: 0; z-index: 1000; }
+        .logo { font-weight: 900; color: var(--neon); letter-spacing: 3px; font-size: 24px; cursor: pointer; }
+        .nav-right { display: flex; gap: 15px; align-items: center; }
+
+        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; }
+        .btn-top:hover { border-color: var(--neon); color: var(--neon); }
+        .btn-artist { background: var(--neon); color: #000; border: none; }
+        .btn-artist:hover { background: #fff; color: #000; }
+
+        /* Main Layout */
+        .hero-section { display: flex; justify-content: space-between; align-items: flex-start; padding: 60px 50px; gap: 40px; max-width: 1400px; margin: 0 auto; }
+        
+        /* Sol tərəf: Marketinq Yazısı */
+        .info-side { flex: 1; max-width: 400px; }
+        .info-side h1 { color: var(--neon); font-size: 3rem; margin-bottom: 20px; line-height: 1.1; }
+        .info-side p { color: #aaa; font-size: 1.1rem; line-height: 1.6; }
+        .feature-list { margin-top: 30px; list-style: none; padding: 0; }
+        .feature-list li { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: #eee; }
+        .feature-list li::before { content: "✓"; color: var(--neon); font-weight: bold; }
+
+        /* Orta: Proqram Paneli */
+        .panel { background: var(--panel); border: 2px solid var(--gray); border-radius: 30px; width: 500px; padding: 35px; box-sizing: border-box; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; margin-bottom: 25px; border-radius: 15px; display: flex; align-items: center; overflow: hidden; position: relative; }
+        canvas { width: 100%; height: 100%; display: block; }
+
+        /* Düymələr */
+        .btn { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #bRec { background: #ff3e3e; color: white; }
+        #bRec:hover { background: #d32f2f; transform: scale(1.02); }
+        .play-btn { background: #333; color: white; display: none; }
+        .retry-btn { background: transparent; color: #888; border: 1px solid #333; display: none; font-size: 12px; }
+        
+        .buy-btn { background: var(--neon); color: black; display: none; margin-top: 20px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .buy-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon); }
+
+        select { background: #1a1a1a; color: white; border: 1px solid #444; padding: 8px; border-radius: 8px; cursor: pointer; outline: none; }
+
+        @media (max-width: 1000px) {
+            .hero-section { flex-direction: column; align-items: center; text-align: center; }
+            .info-side { max-width: 100%; }
+            .panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">SONIC SKIN</div>
+        <div class="nav-right">
+            <select id="langSel" onchange="dilDegistir(this.value)">
+                <option value="az">AZ</option>
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="zh">ZH</option>
+            </select>
+            <button class="btn-top" onclick="alert('User Login')">USER LOGIN</button>
+            <button class="btn-top btn-artist" onclick="alert('Artist Login')">ARTIST LOGIN</button>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <div class="info-side">
+            <h1 id="mTitle">Səsin Sənin İmzandır.</h1>
+            <p id="mDesc">Ən özəl anlarını, sevdiklərinin səsini və ya həyat mottonu vizual sənət əsərinə çevir. Sonic Skin ilə səsin bədənində həmişəlik yaşasın.</p>
+            <ul class="feature-list" id="mList">
+                <li>Səs dalğanı anında yarat</li>
+                <li>QR kod ilə istənilən vaxt dinlə</li>
+                <li>Ömürlük rəqəmsal xatirə</li>
+            </ul>
+        </div>
+
+        <div class="panel">
+            <h2 id="h1">SƏSİNİ YAZ</h2>
+            <div class="box"><canvas id="cv1"></canvas></div>
+            
+            <button id="bRec" class="btn" onclick="kaydet()">🎤 QEYD ET</button>
+            <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLE</button>
+            <button id="bR1" class="btn retry-btn" onclick="location.reload()">🔄 YENİDƏN BAŞLA</button>
+            
+            <button id="bS1" class="btn buy-btn" onclick="indir('cv1')">💎 XATİRƏYƏ ÇEVİR (SATIN AL)</button>
+        </div>
+    </div>
+
+    <script>
+        const diller = {
+            az: {mTitle:"Səsin Sənin İmzandır.", mDesc:"Ən özəl anlarını sənət əsərinə çevir. Səsin bədənində həmişəlik yaşasın.", h1:"SƏSİNİ YAZ", rec:"🎤 QEYD ET", buy:"💎 XATİRƏYƏ ÇEVİR (SATIN AL)", listen:"▶️ DİNLE", stop:"🛑 DAYANDIR"},
+            tr: {mTitle:"Sesin Senin İmzan.", mDesc:"En özel anlarını sanat eserine dönüştür. Sesin vücudunda sonsuza dek yaşasın.", h1:"SESİNİ KAYDET", rec:"🎤 KAYDET", buy:"💎 HATIRAYA DÖNÜŞTÜR (SATIN AL)", listen:"▶️ DİNLE", stop:"🛑 DURDUR"},
+            en: {mTitle:"Your Voice is Your Sign.", mDesc:"Turn your most special moments into art. Let your voice live forever on your skin.", h1:"RECORD YOUR VOICE", rec:"🎤 RECORD", buy:"💎 TURN INTO MEMORY (BUY)", listen:"▶️ LISTEN", stop:"🛑 STOP"},
+            ru: {mTitle:"Твой голос — твоя подпись.", mDesc:"Превратите моменты в искусство. Пусть ваш голос живет вечно.", h1:"ЗАПИСЬ ГОЛОСА", rec:"🎤 ЗАПИСАТЬ", buy:"💎 ПРЕВРАТИТЬ В ПАМЯТЬ", listen:"▶️ СЛУШАТЬ", stop:"🛑 СТОП"},
+            fr: {mTitle:"Votre voix est votre signature.", mDesc:"Transformez vos moments en art. Votre voix vit éternellement.", h1:"ENREGISTRER", rec:"🎤 ENREGISTRER", buy:"💎 ACHETER LE SOUVENIR", listen:"▶️ ÉCOUTER", stop:"🛑 ARRÊTER"},
+            de: {mTitle:"Deine Stimme ist dein Zeichen.", mDesc:"Verwandle Momente in Kunst. Deine Stimme lebt ewig.", h1:"STIMME AUFNEHMEN", rec:"🎤 AUFNEHMEN", buy:"💎 ZUR ERINNERUNG MACHEN", listen:"▶️ ANHÖREN", stop:"🛑 STOPP"},
+            zh: {mTitle:"你的声音就是你的签名。", mDesc:"将最特别的时刻转化为艺术。让声音永驻。", h1:"录音", rec:"🎤 录音", buy:"💎 转化为记忆 (购买)", listen:"▶️ 听", stop:"🛑 停止"}
+        };
+
+        let ctx, rec, chunks = [], ses1 = new Audio();
+        let currentStaticImage = { cv1: null }; 
+
+        function dilDegistir(v) {
+            const d = diller[v];
+            if(!d) return;
+            document.getElementById('mTitle').innerText = d.mTitle;
+            document.getElementById('mDesc').innerText = d.mDesc;
+            document.getElementById('h1').innerText = d.h1;
+            document.getElementById('bRec').innerText = d.rec;
+            document.getElementById('bS1').innerText = d.buy;
+            document.getElementById('bP1').innerText = d.listen;
         }
 
-        async function sesDalgasiCiz(blob, canvasId) {
-            const c = document.getElementById(canvasId), x = c.getContext('2d'), dpr = window.devicePixelRatio || 2;
-            c.width = c.offsetWidth * dpr; c.height = c.offsetHeight * dpr; x.scale(dpr, dpr);
-            
-            const aCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const buffer = await aCtx.decodeAudioData(await blob.arrayBuffer());
+        async function sesDalgasiCiz(audioBlob, canvasId) {
+            const c = document.getElementById(canvasId);
+            const x = c.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            c.width = c.offsetWidth * dpr;
+            c.height = c.offsetHeight * dpr;
+            x.scale(dpr, dpr);
+
+            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const buffer = await ctx.decodeAudioData(await audioBlob.arrayBuffer());
             const data = buffer.getChannelData(0);
-            const barWidth = 3, gap = 1, samples = Math.floor(c.offsetWidth / (barWidth + gap)), step = Math.floor(data.length / samples);
+
+            const barWidth = 3; 
+            const gap = 2;       
+            const samples = Math.floor(c.offsetWidth / (barWidth + gap));
+            const step = Math.floor(data.length / samples);
             
-            x.fillStyle = "#000"; x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
-            waveData[canvasId] = [];
+            x.fillStyle = "#000";
+            x.fillRect(0, 0, c.offsetWidth, c.offsetHeight);
+            x.fillStyle = "#d4ff00";
 
             for (let i = 0; i < samples; i++) {
-                let max = 0;
-                for (let j = 0; j < step; j++) { if (Math.abs(data[(i * step) + j]) > max) max = Math.abs(data[(i * step) + j]); }
-                const h = Math.max(4, max * (c.offsetHeight * 0.9));
-                const xP = i * (barWidth + gap), yP = (c.offsetHeight / 2) - (h / 2);
-                
-                // Ölü rengi canlandırdık: Mat neon sarı (arka plan için)
-                x.fillStyle = "rgba(212, 255, 0, 0.15)";
-                x.fillRect(xP, yP, barWidth, h);
-                waveData[canvasId].push({ x: xP, y: yP, w: barWidth, h: h });
-            }
-            staticImg[canvasId] = x.getImageData(0, 0, c.width, c.height);
-        }
-
-        function dinle(id, audio) {
-            audio.currentTime = 0; audio.play();
-            const c = document.getElementById(id), x = c.getContext('2d');
-            
-            function render() {
-                if (audio.paused || audio.ended) { x.putImageData(staticImg[id], 0, 0); return; }
-                x.putImageData(staticImg[id], 0, 0);
-                
-                const progress = audio.currentTime / audio.duration;
-                const currentIdx = Math.floor(progress * waveData[id].length);
-
-                x.save(); x.scale(2,2); // DPR düzeltmesi
-                
-                // 1. DOLMA VE PARLAMA SİSTEMİ
-                for(let i = 0; i <= currentIdx; i++) {
-                    const b = waveData[id][i];
-                    if(!b) continue;
-
-                    // Geçmiş barlar: Parlak Neon
-                    x.fillStyle = "#d4ff00";
-                    x.shadowBlur = 10;
-                    x.shadowColor = "#d4ff00";
-                    x.fillRect(b.x, b.y, b.w, b.h);
-
-                    // Aktif uçtaki bar: Bembeyaz Patlama (N11 Farı gibi)
-                    if(i === currentIdx) {
-                        x.fillStyle = "#ffffff";
-                        x.shadowBlur = 30;
-                        x.shadowColor = "#ffffff";
-                        // Aşağıdan yukarıya su gibi yükselen dolma mantığı
-                        const subProgress = (progress * waveData[id].length) % 1;
-                        const fillH = b.h * subProgress;
-                        x.fillRect(b.x, b.y + b.h - fillH, b.w, fillH);
-                        
-                        // Seken Nokta (Tam suyun tepesinde)
-                        x.beginPath();
-                        x.arc(b.x + b.w/2, b.y + b.h - fillH, 4, 0, Math.PI*2);
-                        x.fill();
-                    }
+                let min = 1.0, max = -1.0;
+                for (let j = 0; j < step; j++) {
+                    const datum = data[(i * step) + j];
+                    if (datum < min) min = datum;
+                    if (datum > max) max = datum;
                 }
-                x.restore();
-                requestAnimationFrame(render);
+                const height = Math.max(4, (max - min) * (c.offsetHeight * 0.8));
+                const xPos = i * (barWidth + gap);
+                const yPos = (c.offsetHeight / 2) - (height / 2);
+                
+                // Gözəl görünməsi üçün küncləri yuvarlaq bar-lar
+                x.beginPath();
+                x.roundRect(xPos, yPos, barWidth, height, 2);
+                x.fill();
             }
-            render();
+            currentStaticImage[canvasId] = x.getImageData(0, 0, c.width, c.height);
         }
 
         async function kaydet() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(stream); chunks = [];
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                rec = new MediaRecorder(s); chunks = [];
                 rec.ondataavailable = e => chunks.push(e.data);
                 rec.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/wav' });
+                    const blob = new Blob(chunks, { type: 'audio/ogg' });
                     ses1.src = URL.createObjectURL(blob);
-                    ses1.onloadedmetadata = () => {
-                        sesDalgasiCiz(blob, 'cv1');
-                        document.getElementById('bP1').style.display='block';
-                        document.getElementById('bS1').style.display='flex';
-                        document.getElementById('bRec').style.display='none';
-                    };
+                    sesDalgasiCiz(blob, 'cv1');
+                    document.getElementById('bP1').style.display = 'flex';
+                    document.getElementById('bR1').style.display = 'block';
+                    document.getElementById('bS1').style.display = 'flex';
+                    document.getElementById('bRec').style.display = 'none';
+                    s.getTracks().forEach(t => t.stop());
                 };
-                rec.start(); setTimeout(() => rec.stop(), 5000);
-            } catch(e) { alert("Mikrofon hatası!"); }
+                rec.start();
+                let sn = 10;
+                const b = document.getElementById('bRec');
+                const tLang = diller[document.getElementById('langSel').value].stop;
+                const timer = setInterval(() => { 
+                    sn--; b.innerText = `${tLang} (${sn}s)`; 
+                    if(sn<=0) { clearInterval(timer); if(rec.state==="recording") rec.stop(); }
+                }, 1000);
+                b.onclick = () => { clearInterval(timer); rec.stop(); };
+            } catch(e) { alert("Mikrofon girişi rədd edildi və ya tapılmadı."); }
         }
 
-        function dosyaSecildi(input) {
-            const f = input.files[0]; if(!f) return;
-            ses2.src = URL.createObjectURL(f);
-            ses2.onloadedmetadata = () => {
-                sesDalgasiCiz(f, 'cv2');
-                document.getElementById('bP2').style.display='block';
-                document.getElementById('bS2').style.display='flex';
-            };
-        }
+        function dinle1() { ses1.play(); }
 
         function indir(id) {
-            const c = document.getElementById(id);
-            const a = document.createElement('a'); a.download = 'sonic-skin.png'; a.href = c.toDataURL(); a.click();
+            alert("Ödəmə sisteminə (Lemon Squeezy) yönləndirilir...");
+            // Burada satınalma linkini əlavə edəcəyik
         }
     </script>
 </body>
