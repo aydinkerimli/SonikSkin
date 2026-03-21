@@ -82,11 +82,14 @@
         </div>
 
         <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
-        <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
-        <input type="file" id="fInp" hidden onchange="handleFile(event)">
-        <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
-        <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
-        <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        
+        <div id="action-area">
+            <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
+            <input type="file" id="fInp" hidden onchange="handleFile(event)">
+            <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
+            <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
+            <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        </div>
     </div>
 </div>
 
@@ -115,11 +118,9 @@
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
+            // Ödəniş uğurlu olanda digər bütün düymələri yox edirik, yalnız İNDİR qalır
             document.getElementById('success-btn').style.display = 'flex';
-            document.getElementById('btn-rec').style.display = 'none';
-            document.getElementById('btn-file').style.display = 'none';
-            document.getElementById('ui-down').style.display = 'none';
-            document.getElementById('btn-play').style.display = 'none';
+            document.getElementById('action-area').style.display = 'none';
 
             if(localStorage.getItem('lastStaticWave')) {
                 staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
@@ -140,10 +141,16 @@
     }
 
     async function generateStaticWave(buffer) {
+        // MAKSİMUM 8 SANİYƏ ANALİZ (Sənin istədiyin limit)
+        const sampleRate = buffer.sampleRate;
+        const maxDuration = 8; 
+        const lengthToProcess = Math.min(buffer.length, sampleRate * maxDuration);
+        
         const rawData = buffer.getChannelData(0);
         const samples = 60; 
-        const blockSize = Math.floor(rawData.length / samples);
+        const blockSize = Math.floor(lengthToProcess / samples);
         staticDataArray = [];
+        
         for (let i = 0; i < samples; i++) {
             let blockStart = blockSize * i;
             let sum = 0;
@@ -163,7 +170,7 @@
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
             const x = i * barWidth;
-            const barHeight = val * canvas.height * 4;
+            const barHeight = val * canvas.height * 5; // Bir az daha dik görünsün deyə 5
             const ratio = i / staticDataArray.length;
             ctx.strokeStyle = (ratio < 0.2 || ratio > 0.8) ? '#00c3ff' : '#ffff1c';
             ctx.lineWidth = 3;
@@ -173,6 +180,89 @@
             ctx.lineTo(x + barWidth/2, (canvas.height/2) + (barHeight/2));
             ctx.stroke();
         });
+    }
+
+    function downloadPNG() {
+        drawStaticWave(); 
+        const link = document.createElement('a');
+        link.download = 'sonik-skin-tattoo.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        // BURADA SIFIRLAMA KODUNU SİLDİM - ARTIQ EKRANDA QALACAQ!
+    }
+
+    function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
+
+    async function initMic() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start(); chunks = [];
+            let s = 0; 
+            const t = setInterval(() => {
+                s++; 
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { 
+                    clearInterval(t); 
+                    recorder.stop(); 
+                    stream.getTracks().forEach(tr => tr.stop()); 
+                }
+            }, 1000);
+            
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks);
+                processAudioData(blob);
+            };
+            recorder.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { alert("Mikrofon hatası!"); }
+    }
+
+    async function handleFile(e) {
+        if(e.target.files[0]) {
+            const file = e.target.files[0];
+            processAudioData(file);
+        }
+    }
+
+    async function processAudioData(data) {
+        audioURL = URL.createObjectURL(data);
+        audio = new Audio(audioURL);
+        setupAnalyser();
+        
+        const arrayBuffer = await data.arrayBuffer();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
+        
+        // 8 saniyədən çoxdursa, "audio" obyektini də 8-ci saniyədə dayandırırıq
+        audio.addEventListener('timeupdate', () => {
+            if (audio.currentTime >= 8) {
+                audio.pause();
+                audio.currentTime = 0;
+                cancelAnimationFrame(animFrame);
+                drawStaticWave();
+            }
+        });
+
+        generateStaticWave(decodedData);
+        document.getElementById('btn-play').style.display = 'flex';
+        document.getElementById('timer').innerText = `00:08 / 00:08`;
+    }
+
+    function setupAnalyser() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser); analyser.connect(audioCtx.destination);
+        analyser.fftSize = 128;
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+    }
+
+    function playAudio() {
+        if(!audio) return;
+        audio.play();
+        if(animFrame) cancelAnimationFrame(animFrame);
+        drawWave();
+        audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
     }
 
     function drawWave() {
@@ -194,76 +284,6 @@
             x += barWidth + 2;
         }
         ctx.stroke();
-    }
-
-    function downloadPNG() {
-        drawStaticWave(); 
-        const link = document.createElement('a');
-        link.download = 'sonik-skin-tattoo.png';
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-        setTimeout(() => {
-            localStorage.removeItem('lastStaticWave');
-            window.location.href = window.location.origin + window.location.pathname; 
-        }, 3000);
-    }
-
-    function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
-
-    async function initMic() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            recorder = new MediaRecorder(stream);
-            recorder.start(); chunks = [];
-            let s = 0; const t = setInterval(() => {
-                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
-            }, 1000);
-            recorder.onstop = async () => {
-                const blob = new Blob(chunks);
-                audioURL = URL.createObjectURL(blob);
-                audio = new Audio(audioURL);
-                setupAnalyser();
-                const arrayBuffer = await blob.arrayBuffer();
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
-                generateStaticWave(decodedData);
-                document.getElementById('btn-play').style.display = 'flex';
-            };
-            recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon hatası!"); }
-    }
-
-    async function handleFile(e) {
-        if(e.target.files[0]) {
-            const file = e.target.files[0];
-            audioURL = URL.createObjectURL(file);
-            audio = new Audio(audioURL);
-            setupAnalyser();
-            const arrayBuffer = await file.arrayBuffer();
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
-            generateStaticWave(decodedData);
-            document.getElementById('btn-play').style.display = 'flex';
-        }
-    }
-
-    function setupAnalyser() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaElementSource(audio);
-        source.connect(analyser); analyser.connect(audioCtx.destination);
-        analyser.fftSize = 128;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-    }
-
-    function playAudio() {
-        if(!audio) return;
-        audio.play();
-        if(animFrame) cancelAnimationFrame(animFrame);
-        drawWave();
-        audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
     }
 </script>
 </body>
