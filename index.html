@@ -3,25 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Mobile Fixed</title>
+    <title>Sonik Skin - Professional Waveform</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        :root { 
-            --neon: #d4ff00; 
-            --azure: #00a2ff; 
-            --bg: #030a16; 
-        }
-        
+        :root { --neon: #d4ff00; --azure: #00a2ff; --bg: #030a16; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
         body {
             background: radial-gradient(circle at top right, #003366 0%, #050505 100%);
             color: white; font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
-
         header {
             width: 100%; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.4); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -29,42 +22,31 @@
         }
         .logo { font-weight: 900; color: white; font-size: 1.4rem; letter-spacing: 2px; }
         .logo span { color: var(--neon); }
-
         .lang-dropdown { position: relative; }
         .lang-btn { 
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); 
             color: white; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: bold;
         }
-        
         .lang-content {
             display: none; position: absolute; right: 0; top: 110%; 
-            background: #0a1a3a; min-width: 140px; 
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; 
-            z-index: 10000;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
-            overflow: hidden;
+            background: #0a1a3a; min-width: 140px; border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 15px; z-index: 10000; box-shadow: 0 15px 40px rgba(0,0,0,0.8); overflow: hidden;
         }
-        .lang-content span { 
-            padding: 14px 20px; display: block; cursor: pointer; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; 
-            transition: 0.2s;
-        }
-        .lang-content span:hover, .lang-content span:active { background: var(--azure); color: white; }
+        .lang-content span { padding: 14px 20px; display: block; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .lang-content span:hover { background: var(--azure); }
         .lang-dropdown.active .lang-content { display: block; }
 
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        
         .card {
             background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2); 
-            padding: 35px 25px; border-radius: 40px; width: 100%; max-width: 400px; text-align: center;
-            position: relative; z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 35px 25px; border-radius: 40px; 
+            width: 100%; max-width: 400px; text-align: center; position: relative;
         }
-
         h2 { font-size: 0.9rem; letter-spacing: 2px; color: white; text-transform: uppercase; margin-bottom: 25px; }
-
+        
+        /* Səs dalğası sahəsi */
         .wave-box {
-            background: rgba(0,0,0,0.6); height: 140px; border-radius: 25px; margin-bottom: 25px;
+            background: #000; height: 160px; border-radius: 25px; margin-bottom: 25px;
             position: relative; border: 1px solid rgba(0, 162, 255, 0.4); overflow: hidden;
             display: flex; align-items: center; justify-content: center;
         }
@@ -74,14 +56,12 @@
         .btn {
             width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 18px; border: none;
             font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase;
         }
         .btn-gray { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.1); }
         .btn-listen { background: linear-gradient(135deg, var(--azure), #0055ff); color: white; display: none; }
         .btn-main { background: var(--neon); color: #000; margin-top: 15px; font-weight: 900; }
-        
-        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        .btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
@@ -93,10 +73,6 @@
         <div class="lang-content">
             <span onclick="updateLang('tr')">Türkçe</span>
             <span onclick="updateLang('en')">English</span>
-            <span onclick="updateLang('ru')">Русский</span>
-            <span onclick="updateLang('fr')">Français</span>
-            <span onclick="updateLang('zh')">中文</span>
-            <span onclick="updateLang('de')">Deutsch</span>
         </div>
     </div>
 </header>
@@ -104,7 +80,7 @@
 <div class="container">
     <div class="card">
         <h2 id="ui-title">Dosyadan Dövme Yap</h2>
-        <div class="wave-box" id="captureArea">
+        <div class="wave-box" id="captureZone">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
@@ -113,33 +89,46 @@
         <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">Dosya Seç</span></button>
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">▶ <span id="ui-listen">Dinle</span></button>
         
-        <button class="btn btn-main" id="ui-down" onclick="handleDownloadClick()">Bunu Hatıraya Dönüştür</button>
+        <button class="btn btn-main" onclick="handleCheckout()">Bunu Hatıraya Dönüştür (İNDİR)</button>
     </div>
 </div>
 
 <script>
     function toggleLang() { document.getElementById('langDrop').classList.toggle('active'); }
-    window.onclick = function(event) { if (!event.target.matches('.lang-btn')) { let drop = document.getElementById('langDrop'); if (drop.classList.contains('active')) drop.classList.remove('active'); } }
+    
+    // SƏNİN LEMON SQUEEZY LİNKİN (DÜZƏLDİLDİ)
+    const CHECKOUT_URL = "https://sonik-skin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
 
-    const langs = {
-        tr: { title: "Dosyadan Dövme Yap", select: "Dosya Seç", down: "Bunu Hatıraya Dönüştür", listen: "Dinle", rec: "Sesi Kaydet" },
-        en: { title: "Create Tattoo From File", select: "Choose File", down: "Convert to Memory", listen: "Listen", rec: "Record" },
-        ru: { title: "Тату из файла", select: "Выбрать файл", down: "В память", listen: "Слушать", rec: "Запись" },
-        fr: { title: "Créer tatouage", select: "Choisir", down: "Convertir", listen: "Écouter", rec: "Enregistrer" },
-        zh: { title: "纹身制作", select: "选择文件", down: "下载", listen: "倾听", rec: "录音" },
-        de: { title: "Tattoo Datei", select: "Wählen", down: "Speichern", listen: "Anhören", rec: "Aufnahme" }
-    };
-
-    function updateLang(l) {
-        document.getElementById('ui-title').innerText = langs[l].title;
-        document.getElementById('ui-select').innerText = langs[l].select;
-        document.getElementById('ui-down').innerText = langs[l].down;
-        document.getElementById('ui-listen').innerText = langs[l].listen;
-        document.getElementById('ui-rec').innerText = langs[l].rec;
-        document.querySelector('.lang-btn').innerText = l.toUpperCase() + " ▾";
+    function handleCheckout() {
+        const urlParams = new URLSearchParams(window.location.search);
+        // Əgər ödənişdən qayıdıbsa, endir
+        if (urlParams.get('status') === 'success') {
+            downloadWavePNG();
+        } else {
+            // Ödəniş edilməyibsə Lemon Squeezy-yə göndər
+            window.location.href = CHECKOUT_URL;
+        }
     }
 
-    let recorder, chunks = [], audioURL, audioObj, anim;
+    function downloadWavePNG() {
+        const zone = document.getElementById('captureZone');
+        const timer = document.getElementById('timer');
+        timer.style.opacity = '0'; // Şəkildə taymer görünməsin
+
+        html2canvas(zone, {
+            backgroundColor: "#000000",
+            scale: 5,
+            borderRadius: 25
+        }).then(canvas => {
+            const a = document.createElement('a');
+            a.download = 'sonik-skin-tattoo.png';
+            a.href = canvas.toDataURL("image/png");
+            a.click();
+            timer.style.opacity = '1';
+        });
+    }
+
+    let recorder, chunks = [], audioObj, anim;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -147,47 +136,17 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let mid = canvas.height / 2;
         for (let i = 0; i < canvas.width; i += 9) {
-            let h = active ? Math.random() * 85 + 15 : 35;
+            let h = active ? Math.random() * 90 + 20 : 40;
             let grad = ctx.createLinearGradient(0, mid-h/2, 0, mid+h/2);
             grad.addColorStop(0, '#00a2ff'); grad.addColorStop(0.5, '#d4ff00'); grad.addColorStop(1, '#00a2ff');
-            ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(i, mid - h/2, 5, h, 3); ctx.fill();
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(i, mid - h/2, 5, h, 3);
+            ctx.fill();
         }
     }
     drawWave();
 
-    // --- ÖDƏNİŞ VƏ YÜKLƏMƏ MƏNTİQİ ---
-    function handleDownloadClick() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const isPaid = urlParams.get('status') === 'success';
-
-        if (isPaid) {
-            // Əgər ödəniş edilibsə, şəkli endir
-            downloadPNG();
-        } else {
-            // Ödəniş edilməyibsə, Limon Squeezy/Shopier linkinə yönləndir
-            // BURANI ÖZ ÖDƏNİŞ LİNKİNLƏ DƏYİŞDİR:
-            window.location.href = "https://sonik-skin.lemonsqueezy.com/checkout/buy/your-id"; 
-        }
-    }
-
-    function downloadPNG() {
-        const area = document.getElementById('captureArea');
-        document.getElementById('timer').style.opacity = '0';
-        
-        html2canvas(area, {
-            backgroundColor: "#000000",
-            scale: 4, // Çox yüksək keyfiyyət üçün
-            borderRadius: 25
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'sonik-skin-design.png';
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            document.getElementById('timer').style.opacity = '1';
-        });
-    }
-
-    // --- SƏS FUNKSİYALARI ---
     async function startRec() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -196,19 +155,20 @@
             const t = setInterval(() => {
                 s++; drawWave(true);
                 document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); drawWave(false); }
+                if(s >= 8) { clearInterval(t); recorder.stop(); drawWave(false); stream.getTracks().forEach(tr => tr.stop()); }
             }, 1000);
             recorder.onstop = () => { setupAudio(URL.createObjectURL(new Blob(chunks, { type: 'audio/mp3' }))); };
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mic Access Denied"); }
+        } catch(e) { alert("Mikrofon icazəsi yoxdur."); }
     }
 
     function handleFile(e) {
         const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => setupAudio(event.target.result);
-        reader.readAsDataURL(file);
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => setupAudio(ev.target.result);
+            reader.readAsDataURL(file);
+        }
     }
 
     function setupAudio(url) {
@@ -220,13 +180,22 @@
 
     function playAudio() {
         if(!audioObj) return;
-        audioObj.currentTime = 0; audioObj.play();
-        const stop = setTimeout(() => { audioObj.pause(); drawWave(false); }, 8000);
-        if(anim) clearInterval(anim);
+        audioObj.play();
         anim = setInterval(() => {
             drawWave(true);
-            if(audioObj.paused || audioObj.ended) { clearInterval(anim); drawWave(false); clearTimeout(stop); }
+            if(audioObj.paused || audioObj.ended) { clearInterval(anim); drawWave(false); }
         }, 80);
+    }
+
+    function updateLang(l) {
+        const langs = {
+            tr: { title: "Dosyadan Dövme Yap", select: "Dosya Seç", rec: "Sesi Kaydet" },
+            en: { title: "Create Tattoo", select: "Choose File", rec: "Record Voice" }
+        };
+        document.getElementById('ui-title').innerText = langs[l].title;
+        document.getElementById('ui-select').innerText = langs[l].select;
+        document.getElementById('ui-rec').innerText = langs[l].rec;
+        document.querySelector('.lang-btn').innerText = l.toUpperCase() + " ▾";
     }
 </script>
 </body>
