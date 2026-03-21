@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sonik Skin - Universal Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -77,7 +78,7 @@
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         
-        <div class="wave-box">
+        <div class="wave-box" id="captureArea">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
@@ -89,11 +90,14 @@
 
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
-        <button class="btn btn-main" onclick="downloadPNG()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        <button class="btn btn-main" onclick="handleCheckout()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
 <script>
+    // Lemon Squeezy Checkout Linki
+    const LEMON_LINK = "https://sonik-skin.lemonsqueezy.com/checkout/buy/ffd068b3-1426-421d-b589-8c612056fd7e";
+
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD" },
@@ -127,15 +131,37 @@
     }
     drawStatic();
 
-    // iPhone-larda səs yazma icazəsini aktivləşdirmək üçün xüsusi funksiya
+    // ÖDƏNİŞ VƏ YÜKLƏMƏ FUNKSİYASI
+    function handleCheckout() {
+        const urlParams = new URLSearchParams(window.location.search);
+        // Əgər ödənişdən qayıdıbsa (URL-də ?status=success varsa)
+        if (urlParams.get('status') === 'success') {
+            downloadPNG();
+        } else {
+            // Ödəniş yoxdursa Lemon Squeezy-yə göndər
+            window.location.href = LEMON_LINK;
+        }
+    }
+
+    function downloadPNG() {
+        const zone = document.getElementById('captureArea');
+        const timer = document.getElementById('timer');
+        timer.style.opacity = '0'; // Şəkildə taymer görünməsin
+
+        html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
+            const a = document.createElement('a');
+            a.download = 'sonik-skin-tattoo.png';
+            a.href = c.toDataURL("image/png");
+            a.click();
+            timer.style.opacity = '1';
+        });
+    }
+
     async function initMic() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // iPhone uyğunluğu üçün MimeType yoxlanışı
             const options = { mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4' };
             recorder = new MediaRecorder(stream, options);
-            
             recorder.start();
             chunks = [];
             let s = 0;
@@ -146,51 +172,35 @@
                     clearInterval(t); 
                     if(recorder.state !== 'inactive') recorder.stop();
                     drawStatic(false);
+                    stream.getTracks().forEach(track => track.stop());
                 }
             }, 1000);
 
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: options.mimeType });
-                if(audioURL) URL.revokeObjectURL(audioURL);
                 audioURL = URL.createObjectURL(blob);
                 audio = new Audio(audioURL);
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
         } catch(e) { 
-            alert("Mikrofon izni verilmedi (Ayarlar > Safari > Mikrofon bölmesini kontrol edin)"); 
+            alert("Mikrofon izni verilmedi."); 
         }
     }
 
     function handleFile(e) {
         const file = e.target.files[0];
         if(!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            if(audioURL) URL.revokeObjectURL(audioURL);
-            audioURL = ev.target.result;
-            audio = new Audio(audioURL);
-            document.getElementById('btn-play').style.display = 'flex';
-            document.getElementById('timer').innerText = "00:08 / 00:08";
-            drawStatic();
-        };
-        reader.readAsDataURL(file);
+        audioURL = URL.createObjectURL(file);
+        audio = new Audio(audioURL);
+        document.getElementById('btn-play').style.display = 'flex';
+        document.getElementById('timer').innerText = "00:08 / 00:08";
+        drawStatic();
     }
 
     function playAudio() {
         if(!audio) return;
-        audio.currentTime = 0;
         audio.play();
-        
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            drawStatic(false);
-            if(animInterval) clearInterval(animInterval);
-        }, 8000);
-
-        if(animInterval) clearInterval(animInterval);
         animInterval = setInterval(() => {
             drawStatic(true);
             if(audio.paused || audio.ended) { 
@@ -198,13 +208,6 @@
                 drawStatic(false); 
             }
         }, 100);
-    }
-
-    function downloadPNG() {
-        const link = document.createElement('a');
-        link.download = 'sonik-skin.png';
-        link.href = canvas.toDataURL("image/png");
-        link.click();
     }
 </script>
 </body>
