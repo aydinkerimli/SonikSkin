@@ -113,7 +113,7 @@
         <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">Dosya Seç</span></button>
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">▶ <span id="ui-listen">Dinle</span></button>
         
-        <button class="btn btn-main" id="ui-down" onclick="downloadWaveform()">Bunu Hatıraya Dönüştür</button>
+        <button class="btn btn-main" id="ui-down" onclick="handleDownloadClick()">Bunu Hatıraya Dönüştür</button>
     </div>
 </div>
 
@@ -155,25 +155,39 @@
     }
     drawWave();
 
-    // ŞƏKİL KİMİ YÜKLƏMƏ FUNKSİYASI (ƏLAVƏ EDİLDİ)
-    function downloadWaveform() {
+    // --- ÖDƏNİŞ VƏ YÜKLƏMƏ MƏNTİQİ ---
+    function handleDownloadClick() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPaid = urlParams.get('status') === 'success';
+
+        if (isPaid) {
+            // Əgər ödəniş edilibsə, şəkli endir
+            downloadPNG();
+        } else {
+            // Ödəniş edilməyibsə, Limon Squeezy/Shopier linkinə yönləndir
+            // BURANI ÖZ ÖDƏNİŞ LİNKİNLƏ DƏYİŞDİR:
+            window.location.href = "https://sonik-skin.lemonsqueezy.com/checkout/buy/your-id"; 
+        }
+    }
+
+    function downloadPNG() {
         const area = document.getElementById('captureArea');
-        // Timeri müvəqqəti gizlədirik ki şəkildə çıxmasın
         document.getElementById('timer').style.opacity = '0';
         
         html2canvas(area, {
             backgroundColor: "#000000",
-            scale: 3, // Döymə ustası üçün yüksək keyfiyyət
+            scale: 4, // Çox yüksək keyfiyyət üçün
             borderRadius: 25
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'sonik-skin-tattoo.png';
+            link.download = 'sonik-skin-design.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
-            document.getElementById('timer').style.opacity = '1'; // Geri qaytarırıq
+            document.getElementById('timer').style.opacity = '1';
         });
     }
 
+    // --- SƏS FUNKSİYALARI ---
     async function startRec() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -212,7 +226,7 @@
         anim = setInterval(() => {
             drawWave(true);
             if(audioObj.paused || audioObj.ended) { clearInterval(anim); drawWave(false); clearTimeout(stop); }
-        }, 1000/15);
+        }, 80);
     }
 </script>
 </body>
