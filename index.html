@@ -1,206 +1,139 @@
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic Skin | Səni Xatirəyə Çevir</title>
-    <style>
-        :root { --neon: #d4ff00; --dark: #050505; --panel: #111; --gray: #222; }
-        body { background: var(--dark); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+// --- KONFİQURASİYA VƏ DİLLƏR ---
+const LANGUAGES = {
+  tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", listen: "DİNLE", convert: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", limit: "Maksimum 8 saniye!" },
+  en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", listen: "LISTEN", convert: "CONVERT TO MEMORY (DOWNLOAD)", limit: "Max 8 seconds!" },
+  ru: { title: "СОЗДАТЬ ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", listen: "СЛУШАТЬ", convert: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", limit: "Макс. 8 секунд!" },
+  fr: { title: "CRÉER UN TATOUAGE", select: "CHOISIR UN FICHIER", listen: "ÉCOUTER", convert: "CONVERTIR EN SOUVENIR", limit: "Max 8 secondes!" },
+  zh: { title: "从文件制作纹身", select: "选择文件", listen: "倾听", convert: "转化为回忆 (下载)", limit: "最多 8 秒!" },
+  de: { title: "TATTOO AUS DATEI ERSTELLEN", select: "DATEI WÄHLEN", listen: "ANHÖREN", convert: "IN ERINNERUNG VERWANDELN", limit: "Max. 8 Sekunden!" }
+};
 
-        /* Navbar */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 1px solid var(--gray); }
-        .logo { font-weight: bold; color: var(--neon); letter-spacing: 2px; font-size: 20px; text-transform: uppercase; }
-        .nav-right { display: flex; gap: 10px; align-items: center; }
+// --- ƏSAS KOMPONENT (MƏNTİQ VƏ DİZAYN) ---
+import React, { useState, useEffect } from 'react';
 
-        .btn-top { background: transparent; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; }
-        .btn-top:hover { border-color: var(--neon); color: var(--neon); }
-        .btn-artist { background: var(--neon); color: #000; border: none; font-weight: bold; }
+const TattooGenerator = () => {
+  const [lang, setLang] = useState('tr'); // Varsayılan dil Türk dili
+  const [audioFile, setAudioFile] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [timer, setTimer] = useState(0);
 
-        /* Main Content */
-        .main-container { display: flex; justify-content: center; padding: 50px 20px; min-height: 80vh; align-items: center; }
-        .panel { background: var(--panel); border: 2px solid var(--gray); border-radius: 25px; width: 100%; max-width: 450px; padding: 30px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.7); }
+  // 8 saniyəlik limit nəzarəti
+  useEffect(() => {
+    let interval;
+    if (isRecording && timer < 8) {
+      interval = setInterval(() => setTimer(prev => prev + 1), 1000);
+    } else if (timer >= 8) {
+      stopRecording(); // 8 saniyə tamamlananda avtomatik dayanır
+    }
+    return () => clearInterval(interval);
+  }, [isRecording, timer]);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    // Burada faylın müddətini yoxlayan funksiya əlavə oluna bilər
+    setAudioFile(file);
+  };
+
+  return (
+    <div style={styles.container}>
+      {/* Dil Seçimi Paneli */}
+      <div style={styles.langBar}>
+        {Object.keys(LANGUAGES).map(l => (
+          <button key={l} onClick={() => setLang(l)} style={lang === l ? styles.activeLang : styles.langBtn}>
+            {l.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Əsas Kart (Premium Görünüş) */}
+      <div style={styles.card}>
+        <h2 style={styles.title}>{LANGUAGES[lang].title}</h2>
         
-        h2 { margin-top: 0; font-size: 18px; color: #ccc; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-
-        .box { width: 100%; aspect-ratio: 2/1; background: #000; border: 1px solid #333; margin-bottom: 20px; border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-        canvas { width: 100%; height: 100%; }
-
-        /* Düymələr */
-        .btn { width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; }
-        
-        #bRec { background: #ff3e3e; color: white; box-shadow: 0 4px 15px rgba(255, 62, 62, 0.3); }
-        #bRec:active { transform: scale(0.98); }
-        
-        .play-btn { background: #222; color: white; border: 1px solid #444; display: none; }
-        .upload-btn { background: transparent; color: #aaa; border: 1px solid #333; font-size: 12px; }
-        .buy-btn { background: var(--neon); color: black; display: none; margin-top: 20px; font-size: 16px; box-shadow: 0 5px 20px rgba(212, 255, 0, 0.4); }
-        
-        .retry-link { color: #666; font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 15px; display: none; transition: 0.3s; }
-        .retry-link:hover { color: #999; }
-        
-        select { background: #000; color: white; border: 1px solid #333; padding: 6px; border-radius: 5px; outline: none; cursor: pointer; }
-
-        /* Recording Animasiyası */
-        .recording { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="navbar">
-        <div class="logo">SONIC SKIN</div>
-        <div class="nav-right">
-            <select id="langSel">
-                <option value="az">AZ</option>
-                <option value="en">EN</option>
-            </select>
-            <button class="btn-top">GİRİŞ</button>
-            <button class="btn-top btn-artist">SƏNƏTKAR</button>
+        {/* Dalğa Forması (Waveform) Vizualı */}
+        <div style={styles.waveformContainer}>
+          <div className="wave-animation">
+            {/* Səs dalğası animasiyası bura gəlir */}
+            <img src="/premium-wave.svg" alt="Waveform" style={styles.waveImg} />
+          </div>
+          {isRecording && <span style={styles.timer}>{timer}s / 8s</span>}
         </div>
-    </div>
 
-    <div class="main-container">
-        <div class="panel">
-            <h2>Səsini Dizayna Çevir</h2>
-            <div class="box"><canvas id="cv1"></canvas></div>
-            
-            <button id="bRec" class="btn" onclick="kaydet()">🎤 SƏSİ YAZ (5 san.)</button>
-            
-            <button id="bP1" class="btn play-btn" onclick="dinle1()">▶️ DİNLƏ</button>
-            
-            <input type="file" id="fIn" hidden accept="audio/*" onchange="dosyaSecildi(this)">
-            <button id="bUp" class="btn upload-btn" onclick="document.getElementById('fIn').click()">📁 FAYLDAN YÜKLƏ</button>
-            
-            <button id="bS1" class="btn buy-btn" onclick="indir()">💎 10$ - XATİRƏNİ ENDİR</button>
-            
-            <div id="bR1" class="retry-link" onclick="location.reload()">Yenidən başla</div>
+        {/* Düymələr */}
+        <div style={styles.buttonGroup}>
+          <label style={styles.fileBtn}>
+            <input type="file" onChange={handleFileUpload} style={{display: 'none'}} accept="audio/*" />
+            📁 {LANGUAGES[lang].select}
+          </label>
+
+          {audioFile && (
+            <button style={styles.listenBtn}>
+              🔊 {LANGUAGES[lang].listen}
+            </button>
+          )}
+
+          <button style={styles.convertBtn}>
+            {LANGUAGES[lang].convert}
+          </button>
         </div>
+      </div>
     </div>
+  );
+};
 
-    <script>
-        let audioCtx, rec, chunks = [], ses1 = new Audio();
-        let currentStaticImage = null;
+// --- PREMİUM DİZAYN STYLE-LARI ---
+const styles = {
+  container: {
+    backgroundColor: '#0a0a0a', // Tünd qara premium fon
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'Inter, sans-serif'
+  },
+  card: {
+    background: 'rgba(255, 255, 255, 0.05)',
+    padding: '40px',
+    borderRadius: '20px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(10px)',
+    textAlign: 'center',
+    width: '350px'
+  },
+  langBar: { marginBottom: '20px', display: 'flex', gap: '10px' },
+  langBtn: { background: 'none', color: '#666', border: 'none', cursor: 'pointer' },
+  activeLang: { background: 'none', color: '#fff', borderBottom: '2px solid #d4ff00', fontWeight: 'bold' },
+  title: { color: '#fff', fontSize: '18px', letterSpacing: '1px', marginBottom: '20px' },
+  waveformContainer: {
+    height: '120px',
+    background: '#000',
+    borderRadius: '10px',
+    marginBottom: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative'
+  },
+  convertBtn: {
+    width: '100%',
+    padding: '15px',
+    borderRadius: '10px',
+    backgroundColor: '#d4ff00', // Neon yaşıl/sarı premium effekt
+    color: '#000',
+    fontWeight: 'bold',
+    border: 'none',
+    cursor: 'pointer',
+    marginTop: '10px'
+  },
+  fileBtn: {
+    display: 'block',
+    padding: '12px',
+    color: '#ccc',
+    border: '1px solid #333',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    marginBottom: '10px'
+  }
+};
 
-        // Səs dalğasını çəkmə funksiyası
-        async function sesDalgasiCiz(audioSource) {
-            const canvas = document.getElementById('cv1');
-            const ctx = canvas.getContext('2d');
-            
-            // Yüksək keyfiyyət üçün ölçülər
-            canvas.width = canvas.offsetWidth * 2;
-            canvas.height = canvas.offsetHeight * 2;
-            ctx.scale(2, 2);
-
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            let arrayBuffer;
-            if (audioSource instanceof Blob) {
-                arrayBuffer = await audioSource.arrayBuffer();
-            } else {
-                // Fayl yüklənibsə
-                arrayBuffer = await audioSource.arrayBuffer();
-            }
-
-            const buffer = await audioCtx.decodeAudioData(arrayBuffer);
-            const data = buffer.getChannelData(0);
-
-            const samples = 60; // Dalğa sayı
-            const step = Math.floor(data.length / samples);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#d4ff00";
-
-            for (let i = 0; i < samples; i++) {
-                let min = 1.0, max = -1.0;
-                for (let j = 0; j < step; j++) {
-                    const datum = data[(i * step) + j];
-                    if (datum < min) min = datum;
-                    if (datum > max) max = datum;
-                }
-                const barHeight = Math.max(6, (max - min) * (canvas.offsetHeight * 0.8));
-                const x = i * (canvas.offsetWidth / samples);
-                const y = (canvas.offsetHeight / 2) - (barHeight / 2);
-                
-                // Yuvarlaq dalğalar çəkirik
-                roundRect(ctx, x, y, 4, barHeight, 2);
-            }
-            currentStaticImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        }
-
-        // Kvadratları yuvarlaqlaşdırmaq üçün köməkçi funksiya
-        function roundRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        async function kaydet() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                rec = new MediaRecorder(stream);
-                chunks = [];
-                
-                const btn = document.getElementById('bRec');
-                btn.innerText = "🛑 YAZILIR...";
-                btn.classList.add('recording');
-
-                rec.ondataavailable = e => chunks.push(e.data);
-                rec.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'audio/ogg' });
-                    ses1.src = URL.createObjectURL(blob);
-                    sesDalgasiCiz(blob);
-                    
-                    document.getElementById('bP1').style.display = 'flex';
-                    document.getElementById('bS1').style.display = 'flex';
-                    document.getElementById('bR1').style.display = 'block';
-                    document.getElementById('bRec').style.display = 'none';
-                    document.getElementById('bUp').style.display = 'none';
-                };
-
-                rec.start();
-                setTimeout(() => { if(rec.state === "recording") rec.stop(); }, 5000);
-            } catch(e) {
-                alert("Mikrofona icazə verilmədi və ya cihaz tapılmadı.");
-            }
-        }
-
-        function dosyaSecildi(input) {
-            const file = input.files[0];
-            if(!file) return;
-            ses1.src = URL.createObjectURL(file);
-            sesDalgasiCiz(file);
-            
-            document.getElementById('bP1').style.display = 'flex';
-            document.getElementById('bS1').style.display = 'flex';
-            document.getElementById('bR1').style.display = 'block';
-            document.getElementById('bRec').style.display = 'none';
-        }
-
-        function dinle1() {
-            if (ses1) ses1.play();
-        }
-
-        function indir() {
-            const canvas = document.getElementById('cv1');
-            const link = document.createElement('a');
-            link.download = 'sonic-skin-dizayn.png';
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            alert("Dizayn endirildi! Bunu döymə ustanıza göstərə bilərsiniz.");
-        }
-    </script>
-</body>
-</html>
+export default TattooGenerator;
