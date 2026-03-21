@@ -15,4 +15,245 @@
         
         body {
             background: radial-gradient(circle at top right, #1a1f00 0%, var(--deep-bg) 60%), radial-gradient(circle at bottom left, #051400 0%, var(--deep-bg) 60%);
-            color: white;
+            color: white; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; min-height: 100vh; 
+            display: flex; flex-direction: column;
+            overflow: hidden; /* Səhifə sürüşməsini önləmək üçün */
+        }
+
+        header {
+            width: 100%; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid #222;
+        }
+        .logo { 
+            font-weight: 900; color: var(--neon); font-size: 1.4rem; letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(212, 255, 0, 0.5);
+        }
+
+        .lang-btn { 
+            background: rgba(255,255,255,0.05); border: 1px solid #333; color: white; 
+            padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 13px;
+            transition: 0.3s;
+        }
+        .lang-btn:hover { background: var(--neon); color: black; }
+
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        
+        .card {
+            background: var(--card-bg); 
+            border: 1px solid rgba(255,255,255,0.03); 
+            padding: 40px 30px;
+            border-radius: 40px; 
+            width: 100%; max-width: 420px; 
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9), inset 0 0 30px rgba(255,255,255,0.02);
+            position: relative;
+        }
+
+        /* Başlıq tünd qaldı */
+        h2 { 
+            font-size: 0.95rem; letter-spacing: 3px; color: #888; margin-bottom: 35px; 
+            text-transform: uppercase; font-weight: 400;
+        }
+
+        /* DALĞA SAHƏSİ - Arxa fon tam qara */
+        .wave-box {
+            background: #000; height: 160px; border-radius: 25px; margin-bottom: 35px;
+            position: relative; border: 1px solid #1a1a1a; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.7);
+        }
+        canvas { width: 100%; height: 100%; }
+        #timer { 
+            position: absolute; top: 15px; right: 20px; 
+            color: var(--neon); font-family: 'Courier New', monospace; 
+            font-size: 15px; font-weight: bold; z-index: 5;
+        }
+
+        /* BUTONLAR - Rənglər düzəldildi */
+        .btn {
+            width: 100%; padding: 20px; margin-bottom: 15px; border-radius: 18px; border: none;
+            font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-gray { 
+            background: #1a1a1a; color: #eee; border: 1px solid #333; 
+        }
+        .btn-gray:hover { background: #2a2a2a; border-color: #444; }
+
+        .btn-listen { 
+            background: rgba(212, 255, 0, 0.05); color: var(--neon); 
+            border: 1px solid rgba(212, 255, 0, 0.2); display: none; 
+        }
+        .btn-listen:hover { background: rgba(212, 255, 0, 0.1); border-color: rgba(212, 255, 0, 0.4); }
+
+        /* Əsas premium yönləndirmə düyməsi */
+        .btn-main { 
+            background: var(--neon); color: #000; margin-top: 15px;
+            box-shadow: 0 15px 30px rgba(212, 255, 0, 0.25);
+        }
+        .btn-main:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(212, 255, 0, 0.35);
+        }
+        
+        .btn:active { transform: scale(0.97); }
+
+        /* Mobil uyğunluq */
+        @media (max-width: 480px) {
+            .card { padding: 30px 20px; }
+            .logo { font-size: 1.25rem; }
+            h2 { font-size: 0.85rem; letter-spacing: 2.5px; }
+            .wave-box { height: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">SONIK SKIN</div>
+    <button class="lang-btn" id="curLang">TR ▾</button>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2 id="ui-title">Dosyadan Dövme Yap</h2>
+        
+        <div class="wave-box">
+            <canvas id="waveCanvas"></canvas>
+            <div id="timer">00:00 / 00:08</div>
+        </div>
+
+        <button class="btn btn-gray" onclick="startPremiumRec()">
+            <span style="color:var(--neon); font-size: 1.2em;">●</span> <span id="ui-rec">SESİ KAYDET</span>
+        </button>
+        
+        <input type="file" id="fInp" hidden onchange="handlePremiumFile(event)">
+        <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">
+            <span style="font-size: 1.1em;">📁</span> <span id="ui-select">DOSYA SEÇ</span>
+        </button>
+
+        <button class="btn btn-listen" id="btn-play" onclick="playPremiumAudio()">
+            <span style="font-size: 1.1em;">▶</span> <span id="ui-listen">DİNLE</span>
+        </button>
+
+        <button class="btn btn-main" onclick="goToLinkTree()" id="ui-down">
+            BUNU HATIRAYA DÖNÜŞTÜR
+        </button>
+    </div>
+</div>
+
+<script>
+    let recorder, chunks = [], audioURL, audio, anim, timeInterval;
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Linktree və ya digər yönləndirmə funksiyası (yerini hazır qoyuram)
+    function goToLinkTree() {
+        // Göndərəcəyin linki bura yerləşdirəcəyik, hələlik nümunə link qoyuram
+        const yourLink = "https://example.com/sənin_hesabın"; 
+        window.location.href = yourLink;
+    }
+
+    function drawWave(active = false) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let mid = canvas.height / 2;
+        
+        // Rəngli dalğa barları
+        for (let i = 0; i < canvas.width; i += 8) {
+            let h = active ? Math.random() * 90 + 10 : 35;
+            
+            // Premium Rəng Qradiyenti (Neon Yaşıl)
+            let grad = ctx.createLinearGradient(0, mid - h/2, 0, mid + h/2);
+            grad.addColorStop(0, 'rgba(212, 255, 0, 0.3)');
+            grad.addColorStop(0.5, 'rgba(212, 255, 0, 1)');
+            grad.addColorStop(1, 'rgba(212, 255, 0, 0.3)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            // Daha səliqəli yumşaq kənarlı barlar
+            ctx.roundRect(i, mid - h/2, 4, h, 2);
+            ctx.fill();
+        }
+    }
+    // İlkin ağ dalğa yerinə birbaşa neon dalğanı çəkirik
+    drawWave();
+
+    async function startPremiumRec() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            chunks = [];
+            let s = 0;
+            // Timer üçün təmizləmə
+            if(timeInterval) clearInterval(timeInterval);
+            document.getElementById('timer').innerText = `00:00 / 00:08`;
+            
+            timeInterval = setInterval(() => {
+                s++; 
+                drawWave(true);
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { 
+                    clearInterval(timeInterval); 
+                    recorder.stop(); 
+                    drawWave(false); 
+                }
+            }, 1000);
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/mp3' });
+                if(audioURL) URL.revokeObjectURL(audioURL); // Yaddaş təmizləmə
+                audioURL = URL.createObjectURL(blob);
+                audio = new Audio(audioURL);
+                document.getElementById('btn-play').style.display = 'flex';
+            };
+            recorder.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { 
+            console.log("Mic access issue:", e);
+        }
+    }
+
+    function handlePremiumFile(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            if(audioURL) URL.revokeObjectURL(audioURL); // Yaddaş təmizləmə
+            audioURL = ev.target.result;
+            audio = new Audio(audioURL);
+            document.getElementById('btn-play').style.display = 'flex';
+            document.getElementById('timer').innerText = "00:08 / 00:08"; // Fayl limitini göstər
+            drawWave();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function playPremiumAudio() {
+        if(!audio) return;
+        audio.currentTime = 0;
+        audio.play();
+        
+        // 8 saniyəlik limit və səssiz dayandırma
+        const stopPoint = setTimeout(() => { 
+            audio.pause(); 
+            drawWave(false); 
+            if(anim) clearInterval(anim);
+        }, 8000);
+        
+        if(anim) clearInterval(anim);
+        anim = setInterval(() => {
+            drawWave(true);
+            if(audio.paused || audio.ended) { 
+                clearInterval(anim); 
+                drawWave(false); 
+                clearTimeout(stopPoint); // Əgər tez bitərsə timer-i təmizlə
+            }
+        }, 100);
+    }
+</script>
+</body>
+</html>
