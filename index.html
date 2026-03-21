@@ -90,13 +90,13 @@
 
         <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
 
-        <button class="btn btn-main" onclick="handleFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
     </div>
 </div>
 
 <script>
-    // SƏNİN YENİ VƏ İŞLƏK LİNKİN
-    const NEW_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
+    // Lemon Squeezy Linkin
+    const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
 
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET" },
@@ -110,6 +110,18 @@
     let recorder, chunks = [], audioURL, audio, animInterval;
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
+
+    // SAYFA YÜKLENDİĞİNDE OTOMATİK KONTROL
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('status') === 'success') {
+            // Ödeme başarılıysa 1.5 saniye sonra indir
+            setTimeout(() => {
+                downloadPNG();
+                alert("Ödemeniz onaylandı! Dövmeniz indiriliyor...");
+            }, 1500);
+        }
+    };
 
     function updateLang(l) {
         document.getElementById('ui-title').innerText = langs[l].title;
@@ -131,24 +143,31 @@
     }
     drawStatic();
 
-    // ÖDƏNİŞ VƏ YÜKLƏMƏ AXINI
-    function handleFlow() {
+    // ÖDEME VE İNDİRME AKIŞI
+    function handleCheckoutFlow() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
-            const zone = document.getElementById('captureZone');
-            const timer = document.getElementById('timer');
-            timer.style.opacity = '0'; 
-
-            html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
-                const a = document.createElement('a');
-                a.download = 'sonik-tattoo.png';
-                a.href = c.toDataURL("image/png");
-                a.click();
-                timer.style.opacity = '1';
-            });
+            downloadPNG();
         } else {
-            window.location.href = NEW_LINK;
+            window.location.href = LEMON_LINK;
         }
+    }
+
+    function downloadPNG() {
+        const zone = document.getElementById('captureZone');
+        const timer = document.getElementById('timer');
+        if(!zone) return;
+
+        timer.style.opacity = '0'; // Timer'ı gizle
+        html2canvas(zone, { backgroundColor: "#000000", scale: 4 }).then(c => {
+            const a = document.createElement('a');
+            a.download = 'sonik-skin-tattoo.png';
+            a.href = c.toDataURL("image/png");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            timer.style.opacity = '1'; // Timer'ı geri getir
+        });
     }
 
     async function initMic() {
@@ -169,13 +188,15 @@
                     stream.getTracks().forEach(track => track.stop());
                 }
             }, 1000);
+
             recorder.onstop = () => {
-                audioURL = URL.createObjectURL(new Blob(chunks, { type: options.mimeType }));
+                const blob = new Blob(chunks, { type: options.mimeType });
+                audioURL = URL.createObjectURL(blob);
                 audio = new Audio(audioURL);
                 document.getElementById('btn-play').style.display = 'flex';
             };
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon hatası!"); }
+        } catch(e) { alert("Mikrofon izni verilmedi."); }
     }
 
     function handleFile(e) {
@@ -184,12 +205,14 @@
         audioURL = URL.createObjectURL(file);
         audio = new Audio(audioURL);
         document.getElementById('btn-play').style.display = 'flex';
+        document.getElementById('timer').innerText = "00:08 / 00:08";
         drawStatic();
     }
 
     function playAudio() {
         if(!audio) return;
         audio.play();
+        if(animInterval) clearInterval(animInterval);
         animInterval = setInterval(() => {
             drawStatic(true);
             if(audio.paused || audio.ended) { clearInterval(animInterval); drawStatic(false); }
