@@ -102,24 +102,25 @@
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
-    let staticDataArray = []; // Yadda saxlanılan dalğa xəritəsi
+    let staticDataArray = []; 
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
     window.onload = function() {
-        // Canvas ölçüsünü ekranın sıxlığına görə nizamla (Daha aydın görüntü üçün)
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
+
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
             document.getElementById('success-btn').style.display = 'flex';
             document.getElementById('btn-rec').style.display = 'none';
             document.getElementById('btn-file').style.display = 'none';
             document.getElementById('ui-down').style.display = 'none';
-            // Ödənişdən sonra gələndə səsi yenidən oxumağa ehtiyac yoxdur, birbaşa dalğanı çək
+            document.getElementById('btn-play').style.display = 'none';
+
             if(localStorage.getItem('lastStaticWave')) {
                 staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
                 drawStaticWave();
@@ -138,10 +139,9 @@
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    // Səs faylını analiz edib sabit dalğa yaradan funksiya
     async function generateStaticWave(buffer) {
         const rawData = buffer.getChannelData(0);
-        const samples = 60; // Dalğa xətlərinin sayı
+        const samples = 60; 
         const blockSize = Math.floor(rawData.length / samples);
         staticDataArray = [];
         for (let i = 0; i < samples; i++) {
@@ -197,11 +197,16 @@
     }
 
     function downloadPNG() {
-        drawStaticWave(); // Endirməzdən əvvəl sabit dalğanı çək ki, şəkil düzgün çıxsın
+        drawStaticWave(); 
         const link = document.createElement('a');
         link.download = 'sonik-skin-tattoo.png';
         link.href = canvas.toDataURL("image/png");
         link.click();
+
+        setTimeout(() => {
+            localStorage.removeItem('lastStaticWave');
+            window.location.href = window.location.origin + window.location.pathname; 
+        }, 3000);
     }
 
     function handleCheckoutFlow() { window.location.href = LEMON_LINK; }
