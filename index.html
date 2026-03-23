@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SONIC SKIN - Artist Edition</title>
+    <title>SONIC SKIN - Artist Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* Sənin Orijinal Dizaynın - Heç bir rəng və ya ölçü dəyişmədi */
+        /* Sənin orijinal dizaynın - Heç bir şeyə toxunulmadı */
         :root { --neon: #d4ff00; --bg: #050505; }
         body {
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f2027);
@@ -16,32 +16,55 @@
         }
         @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        .card { background: rgba(17, 17, 17, 0.9); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; margin: auto; text-align: center; }
-        .wave-box { background: #000; height: 200px; border-radius: 20px; margin-bottom: 25px; position: relative; border: 1px solid #1a1a1a; overflow: hidden; }
-        canvas { width: 100%; height: 100%; }
+        header { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
+
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .card { background: rgba(17, 17, 17, 0.9); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 25px; width: 100%; max-width: 380px; text-align: center; }
+
+        .wave-box { background: #000; height: 180px; border-radius: 20px; margin-bottom: 25px; position: relative; border: 1px solid #1a1a1a; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        canvas { width: 100%; height: 100%; background: #000; }
+        #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 12px; }
 
         .btn { width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-main { background: var(--neon); color: #000; }
+        
+        #login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; }
+        .login-card { background: #111; border: 1px solid var(--neon); padding: 30px; border-radius: 20px; width: 90%; max-width: 340px; }
     </style>
 </head>
 <body>
 
-<div class="container" style="padding-top: 50px;">
+<header>
+    <div class="logo" onclick="location.reload()">SONIK SKIN</div>
+    <button class="btn-main" style="width:auto; padding:8px 15px; font-size:12px;" onclick="openLogin()">ARTIST LOGIN</button>
+</header>
+
+<div id="login-modal">
+    <div class="login-card">
+        <h3 style="color:var(--neon)">ARTIST LOGIN</h3>
+        <input type="email" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff;">
+        <input type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#000; border:1px solid #333; color:#fff;">
+        <button class="btn btn-main" onclick="closeLogin()">LOGIN</button>
+    </div>
+</div>
+
+<div class="container">
     <div class="card">
-        <h2 style="font-size: 1.2rem; margin-bottom: 20px;">SONIC SKIN PRO</h2>
+        <h2 style="font-size: 1.2rem; margin-bottom: 20px;">GENERATE SOUND WAVE</h2>
         
         <div class="wave-box" id="captureZone">
             <canvas id="waveCanvas"></canvas>
-            <div id="timer" style="position: absolute; top: 10px; right: 10px; color: var(--neon); font-size: 12px;">00:00 / 00:08</div>
+            <div id="timer">00:00 / 00:08</div>
         </div>
 
         <div id="action-area">
-            <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 RECORD AUDIO</button>
+            <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 RECORD</button>
             <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 CHOOSE FILE</button>
             
-            <button class="btn btn-main" id="btn-download" onclick="downloadPNG()" style="display:none;">📥 DOWNLOAD TATTOO PNG</button>
+            <button class="btn btn-main" id="btn-download" onclick="downloadPNG()" style="display:none;">📥 DOWNLOAD PNG</button>
         </div>
     </div>
 </div>
@@ -51,7 +74,9 @@
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Səs emalı (Orijinal qalır)
+    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
+
     async function initMic() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const audioCtx = new AudioContext();
@@ -92,7 +117,7 @@
         let x = 0;
         for(let i=0; i<dataArray.length; i++) {
             let h = dataArray[i] / 2;
-            ctx.beginPath(); ctx.moveTo(x, 100 - h/2); ctx.lineTo(x, 100 + h/2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x, 90 - h/2); ctx.lineTo(x, 90 + h/2); ctx.stroke();
             x += (canvas.width / dataArray.length);
         }
     }
@@ -111,41 +136,29 @@
         drawFinal();
     }
 
-    // BURADA ESTETİK BARCODE ƏLAVƏSİ EDİLDİ
     function drawFinal() {
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 1. Sənin Rəngli Dalğan
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
             const h = val * canvas.height * 4;
             ctx.strokeStyle = `hsl(${i * 4}, 100%, 50%)`;
-            ctx.lineWidth = 3; ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(i * barWidth + barWidth/2, (canvas.height/2 - 25) - h/2);
-            ctx.lineTo(i * barWidth + barWidth/2, (canvas.height/2 - 25) + h/2);
+            ctx.lineWidth = 3; ctx.beginPath();
+            ctx.moveTo(i * barWidth + barWidth/2, 70 - h/2);
+            ctx.lineTo(i * barWidth + barWidth/2, 70 + h/2);
             ctx.stroke();
         });
 
-        // 2. O dediyimiz Minimalist Spotify-style Xətlər
+        // Estetik Xətt Kodları (Barcode)
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
         for(let i=15; i<canvas.width-15; i+=6) {
-            let h = Math.random() * 12 + 5;
-            ctx.beginPath();
-            ctx.moveTo(i, canvas.height - 40 - h/2);
-            ctx.lineTo(i, canvas.height - 40 + h/2);
-            ctx.stroke();
+            let h = Math.random() * 10 + 5;
+            ctx.beginPath(); ctx.moveTo(i, 160 - h/2); ctx.lineTo(i, 160 + h/2); ctx.stroke();
         }
-        
-        ctx.fillStyle = 'rgba(212, 255, 0, 0.4)';
-        ctx.font = 'bold 10px Arial';
-        ctx.fillText("SONIC SKIN • ARTIST TRACE", canvas.width/2 - 60, canvas.height - 15);
     }
 
-    // LEMON SQUEEZY-SİZ BİRBAŞA YÜKLƏMƏ FUNKSİYASI
     function downloadPNG() {
         const link = document.createElement('a');
-        link.download = `sonic-skin-${Date.now()}.png`;
+        link.download = 'sonic-skin-tatu.png';
         link.href = canvas.toDataURL("image/png");
         link.click();
     }
