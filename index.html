@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Artist Pro</title>
+    <title>Sonik Skin - Universal Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
@@ -29,14 +29,16 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
+        /* ARTIST LOGIN STYLE */
         .header-right { display: flex; align-items: center; gap: 10px; }
-        
-        /* Artist Login Düyməsi */
-        #artist-p-btn { 
-            background: rgba(255,255,255,0.1); border: 1px solid var(--neon); color: var(--neon); 
-            padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; 
-            font-size: 11px; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(5px);
+        .btn-auth { 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); 
+            padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold;
+            transition: 0.3s; display: flex; align-items: center; gap: 5px;
         }
+        .btn-auth:hover { background: var(--neon); color: #000; }
+        #user-profile { display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px; border: 1px solid #333; cursor: pointer; }
+        #user-name { font-size: 11px; color: #fff; font-weight: bold; }
 
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
@@ -79,11 +81,6 @@
         .btn-main { background: var(--neon); color: #000; }
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
-
-        /* Artist Modal */
-        .artist-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        .artist-card-pro { background: #111; border: 2px solid var(--neon); width: 90%; max-width: 350px; border-radius: 25px; padding: 25px; position: relative; text-align: center; }
     </style>
 </head>
 <body>
@@ -91,10 +88,14 @@
 <header>
     <div class="logo" onclick="resetPage()">SONIK SKIN</div>
     <div class="header-right">
-        <button id="artist-p-btn" onclick="handleGoogleLogin()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="14">
-            <span id="btn-txt">ARTİST LOGİN</span>
-        </button>
+        <div id="auth-area">
+            <button class="btn-auth" id="btn-login" onclick="artistLogin()">👤 <span id="ui-login">ARTIST LOGIN</span></button>
+            <div id="user-profile" onclick="artistLogout()">
+                <span id="user-name"></span>
+                <span style="font-size: 10px; opacity: 0.6;">▼</span>
+            </div>
+        </div>
+        
         <div class="lang-dropdown">
             <button class="lang-btn" id="curLang">TR ▾</button>
             <div class="lang-content">
@@ -134,26 +135,16 @@
     </div>
 </div>
 
-<div class="artist-modal" id="artModal">
-    <div class="artist-card-pro">
-        <span style="position:absolute; right:20px; top:15px; cursor:pointer; font-size:24px; color:#fff;" onclick="toggleArtistModal()">&times;</span>
-        <h3 id="user-display-name" style="color:var(--neon); margin: 10px 0;">ARTİST PROFİLİ</h3>
-        <p id="user-email" style="font-size: 13px; color: #888; margin-bottom: 20px;"></p>
-        <button class="btn btn-main" onclick="toggleArtistModal()">OK</button>
-        <button style="background:none; border:none; color:#ff4444; font-size:12px; margin-top:15px; cursor:pointer;" onclick="logout()">Çıkış Yap</button>
-    </div>
-</div>
-
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
     
     const langs = {
-        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" }
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın", login: "ARTIST LOGIN", logout: "Çıkış Yap", mailPrompt: "Lütfen Gmail adresinizi girin:" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version", login: "ARTIST LOGIN", logout: "Logout", mailPrompt: "Please enter your Gmail address:" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию", login: "ВХОД АРТИСТА", logout: "Выйти", mailPrompt: "Пожалуйста, введите ваш адрес Gmail:" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète", login: "CONNEXION ARTISTE", logout: "Déconnexion", mailPrompt: "Veuillez entrer votre adresse Gmail :" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版", login: "艺术家登录", logout: "登出", mailPrompt: "请输入您的 Gmail 地址：" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen", login: "ARTIST LOGIN", logout: "Abmelden", mailPrompt: "Bitte geben Sie Ihre Gmail-Adresse ein:" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -167,7 +158,10 @@
         canvas.height = canvas.offsetHeight;
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
-        if(localStorage.getItem('user_email')) checkUserSession();
+        
+        // Giriş yoxlaması
+        const savedUser = localStorage.getItem('artistUser');
+        if(savedUser) showUserProfile(savedUser);
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
@@ -181,46 +175,36 @@
         }
     };
 
-    // --- Google Login Funksiyaları ---
-    function handleGoogleLogin() {
-        if(localStorage.getItem('user_email')) {
-            toggleArtistModal();
-        } else {
-            let email = prompt("Gmail Hesabınızı daxil edin:");
-            if(email && email.includes("@")) {
-                localStorage.setItem('user_email', email);
-                localStorage.setItem('user_name', email.split('@')[0]);
-                checkUserSession();
-                toggleArtistModal();
-            }
+    // --- ARTIST LOGIN FUNCTIONS ---
+    function artistLogin() {
+        const currentLang = localStorage.getItem('sonikLang') || 'tr';
+        let email = prompt(langs[currentLang].mailPrompt);
+        if(email && email.includes('@')) {
+            localStorage.setItem('artistUser', email);
+            showUserProfile(email);
         }
     }
 
-    function checkUserSession() {
-        const name = localStorage.getItem('user_name');
-        document.getElementById('btn-txt').innerText = name.toUpperCase();
-        document.getElementById('user-email').innerText = localStorage.getItem('user_email');
-        document.getElementById('user-display-name').innerText = name.toUpperCase();
+    function showUserProfile(email) {
+        document.getElementById('btn-login').style.display = 'none';
+        document.getElementById('user-profile').style.display = 'flex';
+        document.getElementById('user-name').innerText = email.split('@')[0].toUpperCase();
     }
 
-    function toggleArtistModal() {
-        const m = document.getElementById('artModal');
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+    function artistLogout() {
+        if(confirm("Logout?")) {
+            localStorage.removeItem('artistUser');
+            location.reload();
+        }
     }
+    // ------------------------------
 
-    function logout() {
-        localStorage.removeItem('user_email');
-        localStorage.removeItem('user_name');
-        location.reload();
-    }
-
-    // --- Sizin Köhnə Funksiyalarınız (Toxunulmadı) ---
     function clearPreviousSession() {
         if (animFrame) cancelAnimationFrame(animFrame);
         if (audio) { audio.pause(); audio = null; }
         staticDataArray = [];
         overlay.style.display = 'none';
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
         document.getElementById('timer').innerText = "00:00 / 00:08";
         document.getElementById('btn-play').style.display = 'none';
     }
@@ -235,6 +219,7 @@
         document.getElementById('ui-success').innerText = langs[l].success;
         document.getElementById('ui-lock-title').innerText = langs[l].lockT;
         document.getElementById('ui-lock-msg').innerText = langs[l].lockM;
+        document.getElementById('ui-login').innerText = langs[l].login;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
@@ -261,7 +246,12 @@
         const arrayBuffer = await data.arrayBuffer();
         const audioCtx = new AudioContext();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
-        audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
+        
+        audio.onended = () => {
+            cancelAnimationFrame(animFrame);
+            drawStaticWave();
+        };
+
         generateStaticWave(decodedData);
         document.getElementById('btn-play').style.display = 'flex';
         document.getElementById('timer').innerText = `00:08 / 00:08`;
@@ -351,22 +341,7 @@
     }
 
     function handleCheckoutFlow() { if(staticDataArray.length === 0) return; window.location.href = LEMON_LINK; }
-    
-    // iPhone üçün Endirmə Düzəlişi
-    function downloadPNG() { 
-        drawStaticWave(true); 
-        const dataURL = canvas.toDataURL("image/png");
-        if(/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            let win = window.open();
-            win.document.write('<img src="' + dataURL + '" style="width:100%">');
-        } else {
-            const link = document.createElement('a');
-            link.download = 'sonik-skin.png';
-            link.href = dataURL;
-            link.click();
-        }
-    }
-    
+    function downloadPNG() { drawStaticWave(true); const link = document.createElement('a'); link.download = 'sonik-skin.png'; link.href = canvas.toDataURL(); link.click(); }
     function resetPage() { localStorage.removeItem('lastStaticWave'); window.location.href = window.location.origin + window.location.pathname; }
 </script>
 </body>
