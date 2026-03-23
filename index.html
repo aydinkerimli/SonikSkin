@@ -31,14 +31,13 @@
 
         .header-right { display: flex; align-items: center; gap: 12px; }
         
-        /* PROFİL İKONU */
         #user-profile { 
             display: none; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); 
             padding: 5px 15px; border-radius: 30px; border: 1px solid var(--neon); cursor: pointer;
         }
         #user-avatar { width: 25px; height: 25px; background: var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 12px; }
 
-        /* GİRİŞ MODAL (PƏNCƏRƏ) */
+        /* GİRİŞ MODAL */
         #login-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999;
@@ -48,10 +47,18 @@
             background: #111; border: 1px solid var(--neon); padding: 30px; border-radius: 20px;
             width: 90%; max-width: 340px; text-align: center;
         }
+        
+        /* ŞİFRƏ XANASI VƏ GÖZ İŞARƏSİ */
+        .pass-container { position: relative; width: 100%; margin: 10px 0; }
         .login-card input {
-            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #333;
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333;
             background: #000; color: #fff; font-size: 14px;
         }
+        .toggle-pass {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: #888; font-size: 18px; user-select: none;
+        }
+
         .login-card h3 { color: var(--neon); margin-bottom: 20px; }
 
         .lang-dropdown { position: relative; }
@@ -127,7 +134,12 @@
     <div class="login-card">
         <h3 id="ui-login-title">ARTIST LOGIN</h3>
         <input type="email" id="login-email" placeholder="Gmail / Email">
-        <input type="password" id="login-pass" placeholder="Password">
+        
+        <div class="pass-container">
+            <input type="password" id="login-pass" placeholder="Password">
+            <span class="toggle-pass" onclick="togglePassword()">👁️</span>
+        </div>
+
         <button class="btn btn-main" onclick="handleLogin()">DAXİL OL</button>
         <button style="background:none; border:none; color:#888; cursor:pointer; margin-top:10px;" onclick="closeLogin()">Bağla</button>
     </div>
@@ -165,7 +177,7 @@
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın", login: "ARTIST LOGIN" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version", login: "ARTIST LOGIN" },
         ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию", login: "ВХОД АРТИСТА" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète", login: "CONNEXION" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète", login: "LOGIN" },
         zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版", login: "登录" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen", login: "LOGIN" }
     };
@@ -182,7 +194,6 @@
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
 
-        // İstifadəçi daxil olubsa profili göstər
         const user = localStorage.getItem('loggedArtist');
         if(user) showProfile(user);
 
@@ -198,7 +209,19 @@
         }
     };
 
-    // LOGIN MƏNTİQİ
+    // LOGIN & PASSWORD TOGGLE
+    function togglePassword() {
+        const passInp = document.getElementById('login-pass');
+        const eye = document.querySelector('.toggle-pass');
+        if (passInp.type === "password") {
+            passInp.type = "text";
+            eye.innerText = "🙈";
+        } else {
+            passInp.type = "password";
+            eye.innerText = "👁️";
+        }
+    }
+
     function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
     function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
     
