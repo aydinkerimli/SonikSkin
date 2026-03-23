@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SONIC SKIN - Artist Edition</title>
+    <title>SONIC SKIN - Artist Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
@@ -86,14 +86,19 @@
             recorder.start(); chunks = [];
             let s = 0;
             const t = setInterval(() => {
-                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
+                s++; 
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { 
+                    clearInterval(t); 
+                    recorder.stop(); 
+                    stream.getTracks().forEach(tr => tr.stop()); 
+                }
             }, 1000);
 
             recorder.onstop = () => processAudio(new Blob(chunks));
             recorder.ondataavailable = e => chunks.push(e.data);
             drawLive();
-        } catch(e) { alert("Mic access denied!"); }
+        } catch(e) { alert("Mikrofona icazə verilmədi!"); }
     }
 
     function handleFile(e) { if(e.target.files[0]) processAudio(e.target.files[0]); }
@@ -138,21 +143,21 @@
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
         
-        // 1. ÜST TƏRƏF: Səs dalğası (Artist havası)
+        // Səs Dalğası
         staticDataArray.forEach((val, i) => {
             const h = val * canvas.height * 3.5;
             ctx.strokeStyle = `hsl(${i * 4}, 100%, 50%)`;
             ctx.lineWidth = 3; ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(i * barWidth + barWidth/2, (canvas.height/2 - 20) - h/2);
-            ctx.lineTo(i * barWidth + barWidth/2, (canvas.height/2 - 20) + h/2);
+            ctx.moveTo(i * barWidth + barWidth/2, (canvas.height/2 - 25) - h/2);
+            ctx.lineTo(i * barWidth + barWidth/2, (canvas.height/2 - 25) + h/2);
             ctx.stroke();
         });
 
-        // 2. ALT TƏRƏF: Sənin dediyin o balaca skan kodu (Barcode)
+        // BALACA SKAN KODU (Barcode) - Dalğanın altına ehtiyatla əlavə olundu
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
         for(let i=20; i < canvas.width-20; i+=6) {
-            let h = Math.random() * 12 + 4; // Bu xətlər o kameranın oxuyacağı hissədir
+            let h = Math.random() * 10 + 4;
             ctx.beginPath();
             ctx.moveTo(i, canvas.height - 35 - h/2);
             ctx.lineTo(i, canvas.height - 35 + h/2);
@@ -161,7 +166,7 @@
         
         ctx.fillStyle = 'rgba(212, 255, 0, 0.5)';
         ctx.font = 'bold 10px Arial';
-        ctx.fillText("SONIC SKIN • AUDIO CODE", canvas.width/2 - 60, canvas.height - 10);
+        ctx.fillText("SONIC SKIN • AUDIO TRACE", canvas.width/2 - 60, canvas.height - 10);
     }
 
     function downloadPNG() {
