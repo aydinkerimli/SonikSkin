@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Universal Pro</title>
+    <title>Sonik Skin - Artist Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
@@ -29,16 +29,30 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
-        /* ARTIST LOGIN STYLE */
-        .header-right { display: flex; align-items: center; gap: 10px; }
-        .btn-auth { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--neon); color: var(--neon); 
-            padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold;
-            transition: 0.3s; display: flex; align-items: center; gap: 5px;
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        /* PROFİL İKONU */
+        #user-profile { 
+            display: none; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); 
+            padding: 5px 15px; border-radius: 30px; border: 1px solid var(--neon); cursor: pointer;
         }
-        .btn-auth:hover { background: var(--neon); color: #000; }
-        #user-profile { display: none; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px; border: 1px solid #333; cursor: pointer; }
-        #user-name { font-size: 11px; color: #fff; font-weight: bold; }
+        #user-avatar { width: 25px; height: 25px; background: var(--neon); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 12px; }
+
+        /* GİRİŞ MODAL (PƏNCƏRƏ) */
+        #login-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999;
+            justify-content: center; align-items: center;
+        }
+        .login-card {
+            background: #111; border: 1px solid var(--neon); padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 340px; text-align: center;
+        }
+        .login-card input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #333;
+            background: #000; color: #fff; font-size: 14px;
+        }
+        .login-card h3 { color: var(--neon); margin-bottom: 20px; }
 
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
@@ -79,6 +93,7 @@
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
         .btn-main { background: var(--neon); color: #000; }
+        .btn-auth { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; }
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
     </style>
@@ -88,14 +103,12 @@
 <header>
     <div class="logo" onclick="resetPage()">SONIK SKIN</div>
     <div class="header-right">
-        <div id="auth-area">
-            <button class="btn-auth" id="btn-login" onclick="artistLogin()">👤 <span id="ui-login">ARTIST LOGIN</span></button>
-            <div id="user-profile" onclick="artistLogout()">
-                <span id="user-name"></span>
-                <span style="font-size: 10px; opacity: 0.6;">▼</span>
-            </div>
+        <button class="btn-auth" id="btn-login-open" onclick="openLogin()">👤 <span id="ui-login">ARTIST LOGIN</span></button>
+        <div id="user-profile" onclick="artistLogout()">
+            <div id="user-avatar">A</div>
+            <span id="user-name-display">Aydın K.</span>
         </div>
-        
+
         <div class="lang-dropdown">
             <button class="lang-btn" id="curLang">TR ▾</button>
             <div class="lang-content">
@@ -109,6 +122,16 @@
         </div>
     </div>
 </header>
+
+<div id="login-modal">
+    <div class="login-card">
+        <h3 id="ui-login-title">ARTIST LOGIN</h3>
+        <input type="email" id="login-email" placeholder="Gmail / Email">
+        <input type="password" id="login-pass" placeholder="Password">
+        <button class="btn btn-main" onclick="handleLogin()">DAXİL OL</button>
+        <button style="background:none; border:none; color:#888; cursor:pointer; margin-top:10px;" onclick="closeLogin()">Bağla</button>
+    </div>
+</div>
 
 <div class="container">
     <div class="card">
@@ -139,12 +162,12 @@
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
     
     const langs = {
-        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın", login: "ARTIST LOGIN", logout: "Çıkış Yap", mailPrompt: "Lütfen Gmail adresinizi girin:" },
-        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version", login: "ARTIST LOGIN", logout: "Logout", mailPrompt: "Please enter your Gmail address:" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию", login: "ВХОД АРТИСТА", logout: "Выйти", mailPrompt: "Пожалуйста, введите ваш адрес Gmail:" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète", login: "CONNEXION ARTISTE", logout: "Déconnexion", mailPrompt: "Veuillez entrer votre adresse Gmail :" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版", login: "艺术家登录", logout: "登出", mailPrompt: "请输入您的 Gmail 地址：" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen", login: "ARTIST LOGIN", logout: "Abmelden", mailPrompt: "Bitte geben Sie Ihre Gmail-Adresse ein:" }
+        tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın", login: "ARTIST LOGIN" },
+        en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version", login: "ARTIST LOGIN" },
+        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию", login: "ВХОД АРТИСТА" },
+        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète", login: "CONNEXION" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版", login: "登录" },
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen", login: "LOGIN" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -158,10 +181,10 @@
         canvas.height = canvas.offsetHeight;
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
         updateLang(savedLang);
-        
-        // Giriş yoxlaması
-        const savedUser = localStorage.getItem('artistUser');
-        if(savedUser) showUserProfile(savedUser);
+
+        // İstifadəçi daxil olubsa profili göstər
+        const user = localStorage.getItem('loggedArtist');
+        if(user) showProfile(user);
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
@@ -175,29 +198,36 @@
         }
     };
 
-    // --- ARTIST LOGIN FUNCTIONS ---
-    function artistLogin() {
-        const currentLang = localStorage.getItem('sonikLang') || 'tr';
-        let email = prompt(langs[currentLang].mailPrompt);
-        if(email && email.includes('@')) {
-            localStorage.setItem('artistUser', email);
-            showUserProfile(email);
+    // LOGIN MƏNTİQİ
+    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
+    function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
+    
+    function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        if(email && pass) {
+            localStorage.setItem('loggedArtist', email);
+            showProfile(email);
+            closeLogin();
+        } else {
+            alert("Lütfən Gmail və Şifrəni yazın!");
         }
     }
 
-    function showUserProfile(email) {
-        document.getElementById('btn-login').style.display = 'none';
+    function showProfile(email) {
+        document.getElementById('btn-login-open').style.display = 'none';
         document.getElementById('user-profile').style.display = 'flex';
-        document.getElementById('user-name').innerText = email.split('@')[0].toUpperCase();
+        const initial = email.charAt(0).toUpperCase();
+        document.getElementById('user-avatar').innerText = initial;
+        document.getElementById('user-name-display').innerText = email.split('@')[0];
     }
 
     function artistLogout() {
-        if(confirm("Logout?")) {
-            localStorage.removeItem('artistUser');
+        if(confirm("Çıxış edilsin?")) {
+            localStorage.removeItem('loggedArtist');
             location.reload();
         }
     }
-    // ------------------------------
 
     function clearPreviousSession() {
         if (animFrame) cancelAnimationFrame(animFrame);
