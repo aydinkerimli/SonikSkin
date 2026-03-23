@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SONIC SKIN - Artist Pro</title>
+    <title>SONIC SKIN - Artist Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* Sənin orijinal dizaynın - Heç bir şeyə toxunulmadı */
         :root { --neon: #d4ff00; --bg: #050505; }
         body {
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f2027);
@@ -23,10 +22,10 @@
         .card { background: rgba(17, 17, 17, 0.9); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 25px; width: 100%; max-width: 380px; text-align: center; }
 
         .wave-box { background: #000; height: 180px; border-radius: 20px; margin-bottom: 25px; position: relative; border: 1px solid #1a1a1a; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        canvas { width: 100%; height: 100%; background: #000; }
+        canvas { width: 100%; height: 100%; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 12px; }
 
-        .btn { width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn { width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-main { background: var(--neon); color: #000; }
         
@@ -38,7 +37,7 @@
 
 <header>
     <div class="logo" onclick="location.reload()">SONIK SKIN</div>
-    <button class="btn-main" style="width:auto; padding:8px 15px; font-size:12px;" onclick="openLogin()">ARTIST LOGIN</button>
+    <button class="btn-main" style="width:auto; padding:8px 15px; font-size:12px;" onclick="document.getElementById('login-modal').style.display='flex'">ARTIST LOGIN</button>
 </header>
 
 <div id="login-modal">
@@ -46,7 +45,7 @@
         <h3 style="color:var(--neon)">ARTIST LOGIN</h3>
         <input type="email" placeholder="Email" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff;">
         <input type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:15px; background:#000; border:1px solid #333; color:#fff;">
-        <button class="btn btn-main" onclick="closeLogin()">LOGIN</button>
+        <button class="btn btn-main" onclick="document.getElementById('login-modal').style.display='none'">LOGIN</button>
     </div>
 </div>
 
@@ -63,7 +62,6 @@
             <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 RECORD</button>
             <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 CHOOSE FILE</button>
-            
             <button class="btn btn-main" id="btn-download" onclick="downloadPNG()" style="display:none;">📥 DOWNLOAD PNG</button>
         </div>
     </div>
@@ -74,36 +72,35 @@
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
 
-    function openLogin() { document.getElementById('login-modal').style.display = 'flex'; }
-    function closeLogin() { document.getElementById('login-modal').style.display = 'none'; }
-
     async function initMic() {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioCtx = new AudioContext();
-        analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser);
-        analyser.fftSize = 64;
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        
-        recorder = new MediaRecorder(stream);
-        recorder.start(); chunks = [];
-        let s = 0;
-        const t = setInterval(() => {
-            s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-            if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
-        }, 1000);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            const source = audioCtx.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyser.fftSize = 64;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            recorder = new MediaRecorder(stream);
+            recorder.start(); chunks = [];
+            let s = 0;
+            const t = setInterval(() => {
+                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
+            }, 1000);
 
-        recorder.onstop = () => processAudio(new Blob(chunks));
-        recorder.ondataavailable = e => chunks.push(e.data);
-        drawLive();
+            recorder.onstop = () => processAudio(new Blob(chunks));
+            recorder.ondataavailable = e => chunks.push(e.data);
+            drawLive();
+        } catch(e) { alert("Mic access denied!"); }
     }
 
     function handleFile(e) { if(e.target.files[0]) processAudio(e.target.files[0]); }
 
     async function processAudio(blob) {
         const arrayBuffer = await blob.arrayBuffer();
-        const audioCtx = new AudioContext();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const decoded = await audioCtx.decodeAudioData(arrayBuffer);
         generateWave(decoded);
         document.getElementById('btn-download').style.display = 'flex';
@@ -115,10 +112,11 @@
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 3;
         let x = 0;
+        const slice = canvas.width / dataArray.length;
         for(let i=0; i<dataArray.length; i++) {
-            let h = dataArray[i] / 2;
-            ctx.beginPath(); ctx.moveTo(x, 90 - h/2); ctx.lineTo(x, 90 + h/2); ctx.stroke();
-            x += (canvas.width / dataArray.length);
+            let h = (dataArray[i] / 255) * (canvas.height * 0.7);
+            ctx.beginPath(); ctx.moveTo(x, canvas.height/2 - h/2); ctx.lineTo(x, canvas.height/2 + h/2); ctx.stroke();
+            x += slice;
         }
     }
 
@@ -139,26 +137,36 @@
     function drawFinal() {
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
+        
+        // 1. ÜST TƏRƏF: Səs dalğası (Artist havası)
         staticDataArray.forEach((val, i) => {
-            const h = val * canvas.height * 4;
+            const h = val * canvas.height * 3.5;
             ctx.strokeStyle = `hsl(${i * 4}, 100%, 50%)`;
-            ctx.lineWidth = 3; ctx.beginPath();
-            ctx.moveTo(i * barWidth + barWidth/2, 70 - h/2);
-            ctx.lineTo(i * barWidth + barWidth/2, 70 + h/2);
+            ctx.lineWidth = 3; ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(i * barWidth + barWidth/2, (canvas.height/2 - 20) - h/2);
+            ctx.lineTo(i * barWidth + barWidth/2, (canvas.height/2 - 20) + h/2);
             ctx.stroke();
         });
 
-        // Estetik Xətt Kodları (Barcode)
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
-        for(let i=15; i<canvas.width-15; i+=6) {
-            let h = Math.random() * 10 + 5;
-            ctx.beginPath(); ctx.moveTo(i, 160 - h/2); ctx.lineTo(i, 160 + h/2); ctx.stroke();
+        // 2. ALT TƏRƏF: Sənin dediyin o balaca skan kodu (Barcode)
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+        for(let i=20; i < canvas.width-20; i+=6) {
+            let h = Math.random() * 12 + 4; // Bu xətlər o kameranın oxuyacağı hissədir
+            ctx.beginPath();
+            ctx.moveTo(i, canvas.height - 35 - h/2);
+            ctx.lineTo(i, canvas.height - 35 + h/2);
+            ctx.stroke();
         }
+        
+        ctx.fillStyle = 'rgba(212, 255, 0, 0.5)';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText("SONIC SKIN • AUDIO CODE", canvas.width/2 - 60, canvas.height - 10);
     }
 
     function downloadPNG() {
         const link = document.createElement('a');
-        link.download = 'sonic-skin-tatu.png';
+        link.download = `sonic-skin-${Date.now()}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
     }
