@@ -1,30 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>Kamera Test</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sonik Skin - Real Fix</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #ui { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; }
+        .btn { padding: 20px 40px; background: #d4ff00; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; }
+        #ar-screen { display: none; position: fixed; inset: 0; z-index: 200; }
+        /* KAMERA BURADADIR */
+        video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        a-scene { position: absolute; inset: 0; z-index: 2; }
+        .mindar-ui-overlay, .mindar-ui-loading { display: none !important; }
+    </style>
 </head>
-<body style="background:#000; color:#fff; text-align:center;">
-    <h2>Kamera Testi</h2>
-    <video id="v" autoplay playsinline style="width:100%; max-width:400px; border:2px solid lime;"></video>
-    <p id="status">Kamera gözlənilir...</p>
-    <button onclick="test()" style="padding:20px; font-size:20px;">KAMERANI AÇ</button>
+<body>
 
-    <script>
-        async function test() {
-            const v = document.getElementById('v');
-            const s = document.getElementById('status');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                v.srcObject = stream;
-                s.innerText = "Kamera İŞLƏYİR!";
-                s.style.color = "lime";
-            } catch (err) {
-                s.innerText = "XƏTA: " + err.name;
-                s.style.color = "red";
-                alert("Xəta: " + err.message);
-            }
+<div id="ui">
+    <h1 style="color:#d4ff00">SONIK SKIN</h1>
+    <p>Kameranı açmaq üçün aşağıdakı düyməyə bas:</p>
+    <button class="btn" onclick="startNow()">🔍 SCANET (KAMERA)</button>
+</div>
+
+<div id="ar-screen">
+    <video id="v" autoplay playsinline muted></video>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane position="0 0 0" height="0.5" width="0.5" color="red" opacity="0.5"></a-plane>
+        </a-entity>
+    </a-scene>
+</div>
+
+<script>
+    async function startNow() {
+        const video = document.getElementById('v');
+        try {
+            // Sənə yalan demirəm qardaş, bu kod brauzerin ana qapısını döyür:
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = stream;
+            
+            document.getElementById('ui').style.display = 'none';
+            document.getElementById('ar-screen').style.display = 'block';
+
+            const sceneEl = document.querySelector('a-scene');
+            sceneEl.systems['mindar-image-system'].start();
+        } catch (e) {
+            alert("Kamera xətası: " + e.message + "\nZəhmət olmasa Safari-dən kameraya icazə verin.");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
