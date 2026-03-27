@@ -3,52 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Fixed Pro</title>
+    <title>Sonik Skin - Final AR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f2027);
             background-size: 400% 400%; animation: moveGradient 15s ease infinite;
             color: white; font-family: sans-serif; margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden;
         }
+
         @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        
-        /* O FIRLANAN DAİRƏNİ VƏ AR YÜKLƏNMƏ EKRANINI LƏĞV EDİRİK */
-        .mindar-ui-loading, .mindar-ui-compatibility, .mindar-ui-overlay { display: none !important; }
 
-        header { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); position: relative; z-index: 1000; }
-        .logo { font-weight: 900; color: var(--neon); font-size: 1.2rem; cursor: pointer; }
+        header {
+            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); position: relative; z-index: 1000;
+        }
+        .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
-        /* SKAN DÜYMƏSİ - SOLDA, LOGO ALTI */
-        .scan-trigger-box { position: absolute; top: 70px; left: 20px; z-index: 999; }
-        .btn-scan-trigger {
-            background: rgba(212, 255, 0, 0.1); color: var(--neon); border: 1px solid var(--neon); 
+        /* SKAN DÜYMƏSİ - LOGO ALTI, SOL TƏRƏF */
+        .scan-container { position: absolute; top: 70px; left: 20px; z-index: 999; }
+        .btn-scan {
+            background: rgba(212, 255, 0, 0.1); color: var(--neon); border: 1px solid var(--neon);
             padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer;
         }
 
         .lang-dropdown { position: relative; }
-        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .lang-content { display: none; position: absolute; right: 0; background: #1a1a1a; min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000; }
+        .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        .lang-content {
+            display: none; position: absolute; right: 0; background: #1a1a1a;
+            min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000;
+        }
         .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
         .lang-dropdown:hover .lang-content { display: block; }
 
-        .container { display: flex; flex-direction: column; align-items: center; padding: 110px 20px 20px 20px; }
-        .card { background: rgba(17, 17, 17, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 100px 15px 15px; }
+        .card {
+            background: rgba(17, 17, 17, 0.9); border: 1px solid rgba(255,255,255,0.1); padding: 25px;
+            border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
+        }
 
-        .wave-box { background: #000; height: 160px; border-radius: 20px; margin-bottom: 25px; position: relative; border: 1px solid #1a1a1a; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        canvas { width: 100%; height: 100%; display: block; }
+        .wave-box {
+            background: #000; height: 160px; border-radius: 20px; margin-bottom: 25px;
+            position: relative; border: 1px solid #1a1a1a; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        canvas { width: 100%; height: 100%; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; }
-        
-        .btn { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .btn { width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-main { background: var(--neon); color: #000; }
 
-        /* AR EKRANI - YALNIZ DÜYMƏ İLƏ AÇILIR */
+        /* AR EKRANI */
         #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: #000; }
         .close-ar { position: absolute; top: 30px; right: 30px; background: red; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3001; cursor: pointer; }
+        
+        /* MindAR UI Gizlətmək */
+        .mindar-ui-overlay, .mindar-ui-loading { display: none !important; }
     </style>
 </head>
 <body>
@@ -61,23 +77,23 @@
     </div>
 </header>
 
-<div class="scan-trigger-box">
-    <button class="btn-scan-trigger" onclick="startAR()" id="ui-scan">🔍 TARAMA</button>
+<div class="scan-container">
+    <button class="btn-scan" onclick="startAR()" id="ui-scan">🔍 SCANET</button>
 </div>
 
 <div class="container">
     <div class="card">
-        <h2 id="ui-title" style="font-size: 18px; margin-bottom: 20px;">DOSYADAN DÖVME YAP</h2>
+        <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         <div class="wave-box">
-            <canvas id="waveCanvas" width="350" height="160"></canvas>
+            <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
         </div>
         <div id="action-area">
-            <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
+            <button class="btn btn-gray" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
             <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
-            <button class="btn btn-gray" id="btn-play" style="display:none;" onclick="handlePlayToggle()">🔊 <span id="ui-listen">DİNLE</span></button>
-            <button class="btn btn-main" onclick="alert('Ödeme Paneli')" id="ui-down">HATIRAYA DÖNÜŞTÜR</button>
+            <button class="btn btn-gray" id="btn-play" style="display:none;" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
+            <button class="btn btn-main" onclick="alert('Checkout')" id="ui-down">HATIRAYA DÖNÜŞTÜR</button>
         </div>
     </div>
 </div>
@@ -86,71 +102,72 @@
     <div class="close-ar" onclick="stopAR()">X</div>
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-plane position="0 0 0" height="0.5" width="0.5" material="transparent: true; opacity: 0.8; src: #wave-img"></a-plane>
+        <a-entity mindar-image-target="targetIndex: 0" id="targetEntity">
+            <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
         </a-entity>
     </a-scene>
 </div>
 
 <script>
     const langs = {
-        tr: { scan: "TARAMA", title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "HATIRAYA DÖNÜŞTÜR", listen: "DİNLE", stop: "DURDUR", rec: "SESİ KAYDET", create: "Oluştur" },
-        en: { scan: "SCAN", title: "CREATE TATTOO", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", stop: "STOP", rec: "RECORD", create: "Create" },
-        ru: { scan: "СКАН", title: "СОЗДАТЬ ТАТУ", select: "ФАЙЛ", down: "СОЗДАТЬ ВОСПОМИНАНИЕ", listen: "СЛУШАТЬ", stop: "СТОП", rec: "ЗАПИСЬ", create: "Создать" },
-        de: { scan: "SCAN", title: "TATTOO ERSTELLEN", select: "DATEI", down: "IN ERINNERUNG", listen: "HÖREN", stop: "STOPP", rec: "AUFNAHME", create: "Erstellen" },
-        fr: { scan: "SCAN", title: "CRÉER TATOUAGE", select: "FICHIER", down: "SOUVENIR", listen: "ÉCOUTER", stop: "ARRÊTER", rec: "ENREGISTRER", create: "Créer" },
-        es: { scan: "ESCANEAR", title: "CREAR TATUAJE", select: "ARCHIVO", down: "CONVERTIR EN MEMORIA", listen: "ESCUCHAR", stop: "DETENER", rec: "GRABAR", create: "Crear" },
-        zh: { scan: "扫描", title: "制作纹身", select: "文件", down: "转换内容", listen: "倾听", stop: "停止", rec: "录音", create: "创建" }
+        tr: { scan: "SCANET", title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "HATIRAYA DÖNÜŞTÜR", listen: "DİNLE", rec: "SESİ KAYDET" },
+        en: { scan: "SCANET", title: "CREATE FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY", listen: "LISTEN", rec: "RECORD" },
+        ru: { scan: "СКАНЕТ", title: "ТАТУ ИЗ ФАЙЛА", select: "ФАЙЛ", down: "СОЗДАТЬ ВОСПОМИНАНИЕ", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ" }
     };
 
-    let audio, analyser, dataArray, animFrame, staticData = [], isPlaying = false;
+    let audio, analyser, dataArray, animFrame, staticData = [];
     const canvas = document.getElementById('waveCanvas'), ctx = canvas.getContext('2d');
 
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
-        const d = langs[l];
+        const d = langs[l] || langs.tr;
         document.getElementById('ui-scan').innerText = "🔍 " + d.scan;
         document.getElementById('ui-title').innerText = d.title;
         document.getElementById('ui-select').innerText = d.select;
         document.getElementById('ui-down').innerText = d.down;
         document.getElementById('ui-rec').innerText = d.rec;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
-        document.getElementById('ui-listen').innerText = isPlaying ? d.stop : d.listen;
     }
 
-    // --- AR İDARƏETMƏ (Yalnız düymə ilə) ---
+    // AR İdarəsi
     function startAR() {
         document.getElementById('ar-view').style.display = 'block';
         const sceneEl = document.querySelector('a-scene');
-        sceneEl.systems['mindar-image-system'].start(); // Kameranı indi açır
+        sceneEl.systems['mindar-image-system'].start();
+        
+        // Target tapılanda səs oynasın
+        const target = document.getElementById('targetEntity');
+        target.addEventListener("targetFound", () => { if(audio) audio.play(); });
+        target.addEventListener("targetLost", () => { if(audio) audio.pause(); });
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.systems['mindar-image-system'].stop(); // Kameranı tam bağlayır
+        document.querySelector('a-scene').systems['mindar-image-system'].stop();
     }
 
-    // --- CANAVAR ANİMASYON VƏ SES ---
+    // Səs və Animasiya
     async function processAudio(blob) {
-        const url = URL.createObjectURL(blob);
-        audio = new Audio(url);
+        audio = new Audio(URL.createObjectURL(blob));
         const buffer = await blob.arrayBuffer();
-        const aCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const aCtx = new AudioContext();
         const decoded = await aCtx.decodeAudioData(buffer);
         
         audio.ontimeupdate = () => { if(audio.currentTime >= 8) { audio.pause(); audio.currentTime = 0; stopPlayback(); } };
         
-        // Statik dalğanı hesabla
-        const raw = decoded.getChannelData(0);
-        const samples = 60, blockSize = Math.floor((decoded.sampleRate * 8) / samples);
+        generateStatic(decoded);
+        document.getElementById('btn-play').style.display = 'flex';
+    }
+
+    function generateStatic(buffer) {
+        const raw = buffer.getChannelData(0);
+        const samples = 60, blockSize = Math.floor((buffer.sampleRate * 8) / samples);
         staticData = [];
         for (let i = 0; i < samples; i++) {
             let sum = 0;
             for (let j = 0; j < blockSize; j++) { sum += Math.abs(raw[(blockSize * i) + j] || 0); }
             staticData.push(sum / blockSize);
         }
-        document.getElementById('btn-play').style.display = 'flex';
         drawStatic();
     }
 
@@ -165,29 +182,21 @@
         });
     }
 
-    function handlePlayToggle() {
+    function playAudio() {
         if(!audio) return;
-        if(isPlaying) { audio.pause(); audio.currentTime = 0; stopPlayback(); } 
-        else {
-            isPlaying = true; updateLang(localStorage.getItem('sonikLang') || 'tr');
-            const aCtx = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = aCtx.createAnalyser();
-            const source = aCtx.createMediaElementSource(audio);
-            source.connect(analyser); analyser.connect(aCtx.destination);
-            analyser.fftSize = 128; dataArray = new Uint8Array(analyser.frequencyBinCount);
-            renderAnim(); audio.play();
-        }
+        const aCtx = new AudioContext();
+        analyser = aCtx.createAnalyser();
+        const source = aCtx.createMediaElementSource(audio);
+        source.connect(analyser); analyser.connect(aCtx.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        render(); audio.play();
     }
 
-    function stopPlayback() { isPlaying = false; cancelAnimationFrame(animFrame); updateLang(localStorage.getItem('sonikLang') || 'tr'); drawStatic(); }
-
-    function renderAnim() {
-        animFrame = requestAnimationFrame(renderAnim);
+    function render() {
+        animFrame = requestAnimationFrame(render);
         analyser.getByteFrequencyData(dataArray);
         ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        const grad = ctx.createLinearGradient(0,0,canvas.width,0);
-        grad.addColorStop(0,'#00c3ff'); grad.addColorStop(0.5,'#ffff1c'); grad.addColorStop(1,'#ff1744');
-        ctx.strokeStyle = grad; ctx.lineWidth = 4; ctx.beginPath();
+        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 4; ctx.beginPath();
         let x = 0, barW = (canvas.width / dataArray.length) * 2.5;
         for(let i=0; i<dataArray.length; i++){
             let h = dataArray[i]/2; ctx.moveTo(x, canvas.height/2 - h/2); ctx.lineTo(x, canvas.height/2 + h/2); x += barW + 2;
@@ -195,18 +204,22 @@
         ctx.stroke();
     }
 
+    function stopPlayback() { cancelAnimationFrame(animFrame); drawStatic(); }
+
     function initMic() {
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             const mediaRec = new MediaRecorder(stream); mediaRec.start();
             let chunks = [], sec = 0;
-            const tInt = setInterval(() => { sec++; document.getElementById('timer').innerText = `00:0${sec} / 00:08`; if(sec>=8){ clearInterval(tInt); mediaRec.stop(); stream.getTracks().forEach(t=>t.stop()); } }, 1000);
-            mediaRec.onstop = () => processAudio(new Blob(chunks)); mediaRec.ondataavailable = e => chunks.push(e.data);
+            const t = setInterval(() => { sec++; document.getElementById('timer').innerText = `00:0${sec} / 00:08`; if(sec>=8){ clearInterval(t); mediaRec.stop(); stream.getTracks().forEach(t=>t.stop()); } }, 1000);
+            mediaRec.onstop = () => processAudio(new Blob(chunks));
+            mediaRec.ondataavailable = e => chunks.push(e.data);
         });
     }
 
     function handleFile(e) { if(e.target.files[0]) processAudio(e.target.files[0]); }
     function resetPage() { window.location.reload(); }
 
+    // Dil Menüsü
     const menu = document.getElementById('langMenu');
     Object.keys(langs).forEach(l => {
         const s = document.createElement('span'); s.innerText = l.toUpperCase();
