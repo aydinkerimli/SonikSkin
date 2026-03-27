@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Camera Fixed</title>
+    <title>Sonik Skin - Ultimate Fix</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -28,6 +28,7 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
+        /* DİL MENYUSU FIX */
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
@@ -45,6 +46,7 @@
             position: relative; z-index: 10;
         }
 
+        /* SCANET DÜYMESİ ÜSTTE */
         .btn-scan-top {
             width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 50px;
             background: transparent; border: 2px solid var(--neon); color: var(--neon);
@@ -75,12 +77,13 @@
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-main { background: var(--neon); color: #000; }
         
+        /* PLAY & STOP YAN-YANA */
         .audio-group { display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .btn-stop { background: var(--red); color: white; }
 
         #success-btn { display: none; background: #00c3ff; color: #fff; border: 2px solid #fff; }
 
-        /* AR EKRANI - BU HİSSƏ ƏN VACİBDİR */
+        /* AR EKRANI (FULL FIX) */
         #ar-view { display: none; position: fixed; inset: 0; z-index: 10000; background: #000; }
         #manual-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 80; }
         a-scene { position: absolute; inset: 0; z-index: 85; }
@@ -143,7 +146,7 @@
     <video id="manual-video" autoplay playsinline muted></video>
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+        <a-entity mindar-image-target="targetIndex: 0">
             <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
         </a-entity>
     </a-scene>
@@ -159,7 +162,7 @@
         fr: { title: "CRÉER TATOUAGE", scan: "SCANNER", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", stop: "STOP", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
         zh: { title: "纹身制作", scan: "扫描", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", stop: "停止", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", scan: "SCANNER", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", stop: "STOPP", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
-        es: { title: "CREAR TATUAJE", scan: "ESCANEAR", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", stop: "PARAR", rec: "GRABAR", success: "¡PAGO EXITOSO!", lockT: "🔒 BLOQUEADO", lockM: "Pague por la versión completa" }
+        es: { title: "CREAR TATUAJE", scan: "ESCANEAR", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", stop: "PARAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO!", lockT: "🔒 BLOQUEADO", lockM: "Pague por la versión completa" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -201,7 +204,6 @@
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
-    // --- 8 SANİYE LİMİTİ ---
     async function processAudioData(data) {
         if (audio) stopAudio();
         audioURL = URL.createObjectURL(data);
@@ -288,28 +290,20 @@
         } catch(e) { alert("Mikrofon hatası!"); }
     }
 
-    // --- UNIVERSAL KAMERA BYPASS (ƏSAS FİX BURADADIR) ---
+    // --- SEHRLI KAMERA BYPASS ---
     async function startARUniversal() {
         const v = document.getElementById('manual-video');
         const arView = document.getElementById('ar-view');
-        
         try {
-            // 1. Öncə kameranı manual olaraq açırıq
             const s = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
+                video: { facingMode: "environment" } 
             });
             v.srcObject = s;
             arView.style.display = 'block';
-
-            // 2. Video tam yükləndikdən sonra MindAR-ı işə salırıq
             v.onloadedmetadata = () => {
-                const sceneEl = document.querySelector('a-scene');
-                // Bu əmr MindAR-ın qara ekranını bypass edir
-                sceneEl.systems['mindar-image-system'].start(); 
+                document.querySelector('a-scene').systems['mindar-image-system'].start();
             };
-        } catch(e) { 
-            alert("Kamera hatası! Lütfen tarayıcı ayarlarından kamera izni verin."); 
-        }
+        } catch(e) { alert("Kamera izni gerekiyor!"); }
     }
 
     function handleFile(e) { if(e.target.files[0]) processAudioData(e.target.files[0]); }
