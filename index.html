@@ -29,21 +29,6 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
-        /* SCANET DÜYMƏSİ */
-        .scan-container { position: absolute; top: 75px; left: 20px; z-index: 100; }
-        .btn-scan {
-            background: rgba(212, 255, 0, 0.4); color: var(--neon); border: 2px solid var(--neon);
-            padding: 10px 20px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer;
-            backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(212,255,0,0.3);
-        }
-
-        /* AR EKRANI */
-        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; }
-        .close-ar { position: absolute; top: 30px; right: 30px; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; z-index: 10001; cursor: pointer; font-weight: bold; }
-        
-        /* MindAR-ın öz yüklənmə ekranlarını gizlədirik ki, qaranlıq qalmasın */
-        .mindar-ui-overlay, .mindar-ui-compatibility { display: none !important; }
-
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
@@ -85,6 +70,13 @@
         .btn-main { background: var(--neon); color: #000; }
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
+
+        /* AR EKRANI STİLLƏRİ */
+        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; }
+        .close-ar { position: absolute; top: 30px; right: 30px; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; z-index: 10001; cursor: pointer; font-weight: bold; }
+        #webcam-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9998; }
+        a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; }
+        .mindar-ui-overlay, .mindar-ui-compatibility { display: none !important; }
     </style>
 </head>
 <body>
@@ -104,10 +96,6 @@
     </div>
 </header>
 
-<div class="scan-container">
-    <button class="btn-scan" onclick="startAR()">🔍 SCANET</button>
-</div>
-
 <div class="container">
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
@@ -119,23 +107,28 @@
                 <p id="ui-lock-msg" style="font-size: 11px; margin-top: 5px; opacity: 0.8;"></p>
             </div>
         </div>
+
         <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
+        
         <div id="action-area">
             <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
             <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
             <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
             <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+            <button class="btn btn-gray" style="border: 2px solid var(--neon); color: var(--neon);" onclick="startARFull()">🔍 SCANET (AR TEST)</button>
         </div>
     </div>
 </div>
 
 <div id="ar-view">
     <div class="close-ar" onclick="stopAR()">KAPAT</div>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiError: no;" embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <video id="webcam-video" autoplay playsinline muted></video>
+    
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiError: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
-            <a-plane position="0 0 0" height="0.6" width="0.6" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
+            <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
         </a-entity>
     </a-scene>
 </div>
@@ -147,7 +140,7 @@
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
         ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为 memory (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
         es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
     };
@@ -175,52 +168,39 @@
         }
     };
 
-    // --- ƏN GÜCLÜ KAMERA AÇMA ƏMRİ ---
-    async function startAR() {
+    // --- MÜSTƏQİL KAMERA VƏ AR SİSTEMİ ---
+    async function startARFull() {
         const arView = document.getElementById('ar-view');
+        const video = document.getElementById('webcam-video');
         arView.style.display = 'block';
 
         try {
-            // Brauzeri kameranı açmağa məcbur edirik
+            // Birbaşa kameranı açırıq (MindAR hələ işə düşməyib)
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = stream;
             
+            // Kamera açıldıqdan sonra MindAR-ı işə salırıq
             const sceneEl = document.querySelector('a-scene');
             sceneEl.systems['mindar-image-system'].start();
-
-            // iPhone/Samsung üçün "zorla oynatma" dövrü
-            const forcePlay = setInterval(() => {
-                const video = document.querySelector('video');
-                if (video) {
-                    video.setAttribute('playsinline', '');
-                    video.setAttribute('webkit-playsinline', '');
-                    video.play().catch(() => {});
-                    if (!video.paused) clearInterval(forcePlay);
-                }
-            }, 400);
 
             const targetEl = document.getElementById('ar-target');
             targetEl.addEventListener("targetFound", () => { if(audio) audio.play(); });
             targetEl.addEventListener("targetLost", () => { if(audio) audio.pause(); });
-
         } catch (err) {
-            alert("Kamera açılmadı: " + err.message);
+            alert("Kamera xətası! Brauzer icazəsini yoxlayın.");
             arView.style.display = 'none';
         }
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
+        const video = document.getElementById('webcam-video');
+        if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         const sceneEl = document.querySelector('a-scene');
         if(sceneEl.systems['mindar-image-system']) sceneEl.systems['mindar-image-system'].stop();
-        if(audio) audio.pause();
-        const videos = document.querySelectorAll('video');
-        videos.forEach(v => {
-            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-            v.remove();
-        });
     }
 
-    // --- SƏS VƏ DİL FUNKSİYALARI ---
+    // --- ORİJİNAL SƏS VƏ DİL FUNKSİYALARI ---
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
         document.getElementById('ui-title').innerText = langs[l].title;
