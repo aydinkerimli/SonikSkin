@@ -71,12 +71,12 @@
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
 
-        /* AR EKRANI STİLLƏRİ */
+        /* AR EKRANI (ZORLA KAMERA ÜÇÜN) */
         #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; }
-        .close-ar { position: absolute; top: 30px; right: 30px; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; z-index: 10001; cursor: pointer; font-weight: bold; }
-        #webcam-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9998; }
-        a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; }
-        .mindar-ui-overlay, .mindar-ui-compatibility { display: none !important; }
+        #raw-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9997; }
+        a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; }
+        .close-ar { position: absolute; top: 30px; right: 20px; z-index: 10000; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
     </style>
 </head>
 <body>
@@ -99,6 +99,7 @@
 <div class="container">
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
+        
         <div class="wave-box" id="captureZone">
             <canvas id="waveCanvas"></canvas>
             <div id="timer">00:00 / 00:08</div>
@@ -116,16 +117,15 @@
             <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
             <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
             <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
-            <button class="btn btn-gray" style="border: 2px solid var(--neon); color: var(--neon);" onclick="startARFull()">🔍 SCANET (AR TEST)</button>
+            <button class="btn btn-gray" style="border: 2px solid var(--neon); color: var(--neon);" onclick="startARFull()">🔍 SCANET</button>
         </div>
     </div>
 </div>
 
 <div id="ar-view">
-    <div class="close-ar" onclick="stopAR()">KAPAT</div>
-    <video id="webcam-video" autoplay playsinline muted></video>
-    
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiError: no;" embedded vr-mode-ui="enabled: false">
+    <button class="close-ar" onclick="stopAR()">KAPAT</button>
+    <video id="raw-video" autoplay playsinline muted></video>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
             <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
@@ -135,12 +135,13 @@
 
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
+    
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
         ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为 memory (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
         es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
     };
@@ -168,39 +169,37 @@
         }
     };
 
-    // --- MÜSTƏQİL KAMERA VƏ AR SİSTEMİ ---
+    // --- KAMERA BYPASS METODU ---
     async function startARFull() {
         const arView = document.getElementById('ar-view');
-        const video = document.getElementById('webcam-video');
+        const video = document.getElementById('raw-video');
         arView.style.display = 'block';
 
         try {
-            // Birbaşa kameranı açırıq (MindAR hələ işə düşməyib)
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
             
-            // Kamera açıldıqdan sonra MindAR-ı işə salırıq
             const sceneEl = document.querySelector('a-scene');
             sceneEl.systems['mindar-image-system'].start();
-
+            
             const targetEl = document.getElementById('ar-target');
             targetEl.addEventListener("targetFound", () => { if(audio) audio.play(); });
             targetEl.addEventListener("targetLost", () => { if(audio) audio.pause(); });
         } catch (err) {
-            alert("Kamera xətası! Brauzer icazəsini yoxlayın.");
+            alert("Kamera hatası!");
             arView.style.display = 'none';
         }
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
-        const video = document.getElementById('webcam-video');
+        const video = document.getElementById('raw-video');
         if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         const sceneEl = document.querySelector('a-scene');
         if(sceneEl.systems['mindar-image-system']) sceneEl.systems['mindar-image-system'].stop();
     }
 
-    // --- ORİJİNAL SƏS VƏ DİL FUNKSİYALARI ---
+    // --- SƏNİN ORİJİNAL FUNKSİYALARIN ---
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
         document.getElementById('ui-title').innerText = langs[l].title;
