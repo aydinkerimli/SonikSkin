@@ -35,7 +35,7 @@
         .btn-scan {
             background: rgba(212, 255, 0, 0.2); color: var(--neon); border: 2px solid var(--neon);
             padding: 10px 20px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer;
-            backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(212,255,0,0.3);
+            backdrop-filter: blur(10px);
         }
 
         .lang-dropdown { position: relative; }
@@ -59,11 +59,12 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* AR EKRANI ÜÇÜN ŞƏFFAF STYLE */
-        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: transparent; }
-        .close-ar { position: absolute; top: 30px; right: 30px; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; z-index: 3001; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* AR EKRANI - QARA EKRAN PROBLEMİNİN HƏLLİ */
+        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: transparent !important; }
+        .close-ar { position: absolute; top: 30px; right: 30px; background: red; color: white; padding: 10px 20px; border-radius: 10px; z-index: 3001; cursor: pointer; font-weight: bold; }
         
-        .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
+        /* MindAR-ın avtomatik qara örtüklərini söndürürük */
+        .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
 
         canvas { width: 100%; height: 100%; background: #000; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; z-index: 5; }
@@ -99,7 +100,7 @@
 </header>
 
 <div class="scan-container">
-    <button class="btn-scan" onclick="initCamera()">🔍 SCANET</button>
+    <button class="btn-scan" onclick="startAR()">🔍 SCANET</button>
 </div>
 
 <div class="container">
@@ -163,49 +164,34 @@
         updateLang(savedLang);
     };
 
-    // KAMERA İCAZƏSİ SİSTEMİ (iPhone & Samsung Uyğunluğu)
-    async function initCamera() {
-        try {
-            // Brauzerin orijinal icazə pəncərəsini dərhal çağırırıq
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            
-            // İcazə verildisə, AR-ı başladırıq
-            if(stream) {
-                // Kameranı müvəqqəti bağlayırıq ki, MindAR özü yenidən açsın
-                stream.getTracks().forEach(track => track.stop());
-                startAR();
-            }
-        } catch (err) {
-            console.error("Kamera xətası:", err);
-            alert("Kamera icazəsi verilmədi. Zəhmət olmasa brauzer tənzimləmələrindən icazə verin.");
-        }
-    }
-
-    function startAR() {
+    // YENİ START_AR - NASTROYKA PROBLEMİNİ HƏLL EDƏN VERSİYA
+    async function startAR() {
         document.getElementById('ar-view').style.display = 'block';
         const sceneEl = document.querySelector('a-scene');
-        
-        // MindAR-ı işə salırıq
-        sceneEl.systems['mindar-image-system'].start();
+
+        // Əvvəlcə brauzerə "kameranı mütləq yoxla" deyirik
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (stream) {
+                // Əgər icazə varsa, dərhal MindAR-ı işə salırıq
+                sceneEl.systems['mindar-image-system'].start();
+                stream.getTracks().forEach(track => track.stop()); // Müvəqqəti stream-i bağla ki MindAR idarəni alsın
+            }
+        } catch (e) {
+            // Əgər catch-ə düşərsə, heç bir xəbərdarlıq vermirik, MindAR-ın öz daxili sisteminin açılmasını gözləyirik
+            sceneEl.systems['mindar-image-system'].start();
+        }
         
         const targetEl = document.getElementById('ar-target');
-        targetEl.addEventListener("targetFound", event => {
-            if(audio) playAudio();
-        });
-        targetEl.addEventListener("targetLost", event => {
-            if(audio) audio.pause();
-        });
+        targetEl.addEventListener("targetFound", event => { if(audio) playAudio(); });
+        targetEl.addEventListener("targetLost", event => { if(audio) audio.pause(); });
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
         const sceneEl = document.querySelector('a-scene');
-        if(sceneEl.systems['mindar-image-system']) {
-            sceneEl.systems['mindar-image-system'].stop();
-        }
+        if(sceneEl.systems['mindar-image-system']) sceneEl.systems['mindar-image-system'].stop();
         if(audio) audio.pause();
-        
-        // Kameranı tamamilə dayandırırıq (iPhone üçün vacibdir)
         const video = document.querySelector('video');
         if(video && video.srcObject) {
             video.srcObject.getTracks().forEach(track => track.stop());
@@ -213,7 +199,6 @@
         }
     }
 
-    // DİL VƏ DİGƏR FUNKSİYALAR (Dəyişilməyib)
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
         document.getElementById('ui-title').innerText = langs[l].title;
@@ -230,12 +215,7 @@
     function setupStreamAnalyser(streamOrElement) {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
-        let source;
-        if (streamOrElement instanceof MediaStream) {
-            source = audioCtx.createMediaStreamSource(streamOrElement);
-        } else {
-            source = audioCtx.createMediaElementSource(streamOrElement);
-        }
+        let source = (streamOrElement instanceof MediaStream) ? audioCtx.createMediaStreamSource(streamOrElement) : audioCtx.createMediaElementSource(streamOrElement);
         source.connect(analyser);
         if (!(streamOrElement instanceof MediaStream)) analyser.connect(audioCtx.destination);
         analyser.fftSize = 128;
@@ -319,7 +299,7 @@
             }, 1000);
             recorder.onstop = () => processAudioData(new Blob(chunks));
             recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon izni gerekli!"); }
+        } catch(e) { }
     }
 
     function handleFile(e) { if(e.target.files[0]) { processAudioData(e.target.files[0]); } }
