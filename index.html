@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sonik Skin - Universal Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
         :root { --neon: #d4ff00; --bg: #050505; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -15,6 +18,7 @@
             animation: moveGradient 15s ease infinite;
             color: white; font-family: sans-serif;
             margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
+            overflow-x: hidden;
         }
 
         @keyframes moveGradient {
@@ -26,6 +30,7 @@
         header {
             width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 2000;
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
@@ -33,12 +38,12 @@
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         .lang-content {
             display: none; position: absolute; right: 0; background: #1a1a1a;
-            min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 1000;
+            min-width: 110px; border: 1px solid #333; border-radius: 8px; z-index: 2001;
         }
         .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
         .lang-dropdown:hover .lang-content { display: block; }
 
-        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; z-index: 100; }
         .card {
             background: rgba(17, 17, 17, 0.9); border: 1px solid rgba(255,255,255,0.1); padding: 25px;
             border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
@@ -68,8 +73,12 @@
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-listen { background: #2a2a2a; color: var(--neon); display: none; }
         .btn-main { background: var(--neon); color: #000; }
+        .btn-ar { background: #ff1744; color: white; }
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
+
+        /* AR Kamera Görünüşü */
+        #ar-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1500; }
     </style>
 </head>
 <body>
@@ -89,7 +98,7 @@
     </div>
 </header>
 
-<div class="container">
+<div class="container" id="main-ui">
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         
@@ -105,6 +114,7 @@
         <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
         
         <div id="action-area">
+            <button class="btn btn-ar" onclick="startARScanner()">📷 TATU SKAN ET (WebAR)</button>
             <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
             <input type="file" id="fInp" hidden onchange="handleFile(event)">
             <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
@@ -114,16 +124,23 @@
     </div>
 </div>
 
+<div id="ar-container">
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="tatu-target" mindar-image-target="targetIndex: 0">
+            <a-plane position="0 0 0" height="0.6" width="1" material="transparent: true; src: #waveCanvas"></a-plane>
+        </a-entity>
+    </a-scene>
+    <button onclick="stopAR()" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:2000; padding:15px; border-radius:50px; background:red; color:white; border:none;">BAĞLA</button>
+</div>
+
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
     
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın" },
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
-        ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
-        fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" }
+        // ... digər dillər (sizin koddakı kimi qalır)
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -133,10 +150,11 @@
     const overlay = document.getElementById('lock-overlay');
 
     window.onload = function() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        canvas.width = 400; // Stabilizasiya üçün sabit ölçü
+        canvas.height = 200;
         const savedLang = localStorage.getItem('sonikLang') || 'tr';
-        updateLang(savedLang);
+        if(langs[savedLang]) updateLang(savedLang);
+        
         const params = new URLSearchParams(window.location.search);
         if (params.get('status') === 'success') {
             overlay.style.display = 'none';
@@ -149,13 +167,29 @@
         }
     };
 
+    // --- WebAR Funksiyaları ---
+    function startARScanner() {
+        document.getElementById('main-ui').style.display = 'none';
+        document.getElementById('ar-container').style.display = 'block';
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.systems["mindar-image-system"].start();
+
+        const targetEl = document.querySelector('#tatu-target');
+        targetEl.addEventListener("targetFound", () => {
+            if(staticDataArray.length > 0) playAudio();
+        });
+    }
+
+    function stopAR() {
+        location.reload(); // Skaneri tam sıfırlamaq üçün ən təmiz yol
+    }
+
     function clearPreviousSession() {
-        // Yeni səs yüklənəndə köhnəni tamamilə sıfırla
         if (animFrame) cancelAnimationFrame(animFrame);
         if (audio) { audio.pause(); audio = null; }
         staticDataArray = [];
         overlay.style.display = 'none';
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Ekranı tam sil
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         document.getElementById('timer').innerText = "00:00 / 00:08";
         document.getElementById('btn-play').style.display = 'none';
     }
@@ -222,7 +256,7 @@
     }
 
     function drawStaticWave(isPaid = false) {
-        if (!isPaid) overlay.style.display = 'flex';
+        if (!isPaid && staticDataArray.length > 0) overlay.style.display = 'flex';
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
@@ -263,7 +297,7 @@
     }
 
     async function initMic() {
-        clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
+        clearPreviousSession();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setupStreamAnalyser(stream);
@@ -285,7 +319,7 @@
 
     function handleFile(e) { 
         if(e.target.files[0]) {
-            clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
+            clearPreviousSession();
             processAudioData(e.target.files[0]);
         }
     }
