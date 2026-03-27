@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Universal Pro</title>
+    <title>Sonik Skin - Ultimate Fix</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -71,11 +71,13 @@
         
         #success-btn { display: none; background: #00c3ff; color: #fff; animation: pulse 1.5s infinite; border: 2px solid #fff; }
 
-        /* AR EKRANI (ZORLA KAMERA ÜÇÜN) */
+        /* AR EKRANI - TAM FIX */
         #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; }
-        #raw-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9997; }
+        #manual-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 9997; }
         a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; }
         .close-ar { position: absolute; top: 30px; right: 20px; z-index: 10000; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        
+        /* MindAR-ın qara ekran elementlərini söndürürük */
         .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
     </style>
 </head>
@@ -92,11 +94,12 @@
             <span onclick="updateLang('fr')">Français</span>
             <span onclick="updateLang('zh')">中文</span>
             <span onclick="updateLang('de')">Deutsch</span>
-            <span onclick="updateLang('es')">Español</span> </div>
+            <span onclick="updateLang('es')">Español</span>
+        </div>
     </div>
 </header>
 
-<div class="container">
+<div class="container" id="main-ui">
     <div class="card">
         <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
         
@@ -117,14 +120,14 @@
             <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
             <button class="btn btn-listen" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
             <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
-            <button class="btn btn-gray" style="border: 2px solid var(--neon); color: var(--neon);" onclick="startARFull()">🔍 SCANET</button>
+            <button class="btn btn-gray" style="border: 2px solid var(--neon); color: var(--neon);" onclick="startARUniversal()">🔍 SCANET</button>
         </div>
     </div>
 </div>
 
 <div id="ar-view">
     <button class="close-ar" onclick="stopAR()">KAPAT</button>
-    <video id="raw-video" autoplay playsinline muted></video>
+    <video id="manual-video" autoplay playsinline muted></video>
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
@@ -141,7 +144,7 @@
         en: { title: "CREATE TATTOO FROM FILE", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
         ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
-        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为 memory (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
+        zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
         es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
     };
@@ -169,49 +172,40 @@
         }
     };
 
-    // --- KAMERA ZƏMANƏTLİ BYPASS METODU ---
-    async function startARFull() {
+    // --- UNIVERSAL KAMERA FIX ---
+    async function startARUniversal() {
         const arView = document.getElementById('ar-view');
-        const video = document.getElementById('raw-video');
-        arView.style.display = 'block';
-
+        const video = document.getElementById('manual-video');
+        
         try {
-            // Sənin şəkildə gördüyün o icazələri burada real işə salırıq
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: { ideal: "environment" } } 
+            });
             video.srcObject = stream;
-            
-            // Kamera açıldıqdan sonra MindAR-ı oyadırıq
-            const sceneEl = document.querySelector('a-scene');
-            sceneEl.systems['mindar-image-system'].start();
-            
+            arView.style.display = 'block';
+
+            video.onloadedmetadata = () => {
+                const sceneEl = document.querySelector('a-scene');
+                sceneEl.systems['mindar-image-system'].start();
+            };
+
             const targetEl = document.getElementById('ar-target');
             targetEl.addEventListener("targetFound", () => { if(audio) audio.play(); });
             targetEl.addEventListener("targetLost", () => { if(audio) audio.pause(); });
         } catch (err) {
-            alert("Kamera açılmadı. Lütfen ayarlardan izin verin.");
-            arView.style.display = 'none';
+            alert("Kamera hatası! Lütfen ayarlardan izin verin.");
         }
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
-        const video = document.getElementById('raw-video');
+        const video = document.getElementById('manual-video');
         if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         const sceneEl = document.querySelector('a-scene');
         if(sceneEl.systems['mindar-image-system']) sceneEl.systems['mindar-image-system'].stop();
     }
 
-    // --- SƏNİN DİGƏR FUNKSİYALARIN (SƏS YAZMA VƏ S.) ---
-    function clearPreviousSession() {
-        if (animFrame) cancelAnimationFrame(animFrame);
-        if (audio) { audio.pause(); audio = null; }
-        staticDataArray = [];
-        overlay.style.display = 'none';
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('timer').innerText = "00:00 / 00:08";
-        document.getElementById('btn-play').style.display = 'none';
-    }
-
+    // --- DİGƏR FUNKSİYALAR ---
     function updateLang(l) {
         localStorage.setItem('sonikLang', l);
         document.getElementById('ui-title').innerText = langs[l].title;
@@ -223,6 +217,22 @@
         document.getElementById('ui-lock-title').innerText = langs[l].lockT;
         document.getElementById('ui-lock-msg').innerText = langs[l].lockM;
         document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
+    }
+
+    async function initMic() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setupStreamAnalyser(stream);
+            recorder = new MediaRecorder(stream);
+            recorder.start(); chunks = [];
+            let s = 0; 
+            const t = setInterval(() => {
+                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); }
+            }, 1000);
+            recorder.onstop = () => processAudioData(new Blob(chunks));
+            recorder.ondataavailable = e => chunks.push(e.data);
+        } catch(e) { alert("Mikrofon hatası!"); }
     }
 
     function setupStreamAnalyser(streamOrElement) {
@@ -237,16 +247,13 @@
     }
 
     async function processAudioData(data) {
-        overlay.style.display = 'none';
         audioURL = URL.createObjectURL(data);
         audio = new Audio(audioURL);
         const arrayBuffer = await data.arrayBuffer();
         const audioCtx = new AudioContext();
         const decodedData = await audioCtx.decodeAudioData(arrayBuffer);
-        audio.onended = () => { cancelAnimationFrame(animFrame); drawStaticWave(); };
         generateStaticWave(decodedData);
         document.getElementById('btn-play').style.display = 'flex';
-        document.getElementById('timer').innerText = `00:08 / 00:08`;
     }
 
     function generateStaticWave(buffer) {
@@ -278,16 +285,12 @@
         });
     }
 
-    function playAudio() { if(!audio) return; overlay.style.display = 'none'; setupStreamAnalyser(audio); audio.play(); }
-
     function drawWave() {
         if (!analyser) return;
         animFrame = requestAnimationFrame(drawWave);
         analyser.getByteFrequencyData(dataArray);
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        grad.addColorStop(0, '#00c3ff'); grad.addColorStop(0.5, '#ffff1c'); grad.addColorStop(1, '#ff1744');
-        ctx.strokeStyle = grad; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.strokeStyle = '#d4ff00'; ctx.lineWidth = 4;
         ctx.beginPath();
         const barWidth = (canvas.width / dataArray.length) * 2.5;
         let x = 0;
@@ -299,28 +302,11 @@
         ctx.stroke();
     }
 
-    async function initMic() {
-        if (animFrame) cancelAnimationFrame(animFrame);
-        if (audio) { audio.pause(); audio = null; }
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            setupStreamAnalyser(stream);
-            recorder = new MediaRecorder(stream);
-            recorder.start(); chunks = [];
-            let s = 0; 
-            const t = setInterval(() => {
-                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
-                if(s >= 8) { clearInterval(t); recorder.stop(); stream.getTracks().forEach(tr => tr.stop()); cancelAnimationFrame(animFrame); }
-            }, 1000);
-            recorder.onstop = () => processAudioData(new Blob(chunks));
-            recorder.ondataavailable = e => chunks.push(e.data);
-        } catch(e) { alert("Mikrofon hatası!"); }
-    }
-
+    function playAudio() { if(audio) { setupStreamAnalyser(audio); audio.play(); } }
     function handleFile(e) { if(e.target.files[0]) processAudioData(e.target.files[0]); }
-    function handleCheckoutFlow() { if(staticDataArray.length === 0) return; window.location.href = LEMON_LINK; }
+    function handleCheckoutFlow() { if(staticDataArray.length > 0) window.location.href = LEMON_LINK; }
     function downloadPNG() { drawStaticWave(true); const link = document.createElement('a'); link.download = 'sonik-skin.png'; link.href = canvas.toDataURL(); link.click(); }
-    function resetPage() { localStorage.removeItem('lastStaticWave'); window.location.href = window.location.origin + window.location.pathname; }
+    function resetPage() { localStorage.removeItem('lastStaticWave'); location.reload(); }
 </script>
 </body>
 </html>
