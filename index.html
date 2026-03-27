@@ -3,38 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Full & Camera Fixed</title>
+    <title>Sonik Skin - Ultimate Hybrid</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --neon: #d4ff00; --bg: #050505; --red: #ff3b3b; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
             background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f2027);
-            background-size: 400% 400%; animation: moveGradient 15s ease infinite;
-            color: white; font-family: sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
+            background-size: 400% 400%;
+            animation: moveGradient 15s ease infinite;
+            color: white; font-family: sans-serif;
+            margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;
         }
+
         @keyframes moveGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        header { width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5000; }
+
+        header {
+            width: 100%; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative; z-index: 5000;
+        }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
+
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .lang-content { display: none; position: absolute; right: 0; background: #1a1a1a; min-width: 130px; border: 1px solid #333; border-radius: 8px; z-index: 9999; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .lang-content {
+            display: none; position: absolute; right: 0; background: #1a1a1a;
+            min-width: 130px; border: 1px solid #333; border-radius: 8px; z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
         .lang-content span { padding: 12px; display: block; cursor: pointer; border-bottom: 1px solid #222; font-size: 13px; }
         .lang-dropdown:hover .lang-content { display: block; }
+
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; }
-        .card { background: rgba(17, 17, 17, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 25px; width: 100%; max-width: 380px; text-align: center; position: relative; z-index: 10; }
-        .btn-scan-top { width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 50px; background: transparent; border: 2px solid var(--neon); color: var(--neon); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .wave-box { background: #000; height: 140px; border-radius: 20px; margin-bottom: 20px; position: relative; border: 1px solid #1a1a1a; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: #fff; text-align: center; padding: 10px; }
+        .card {
+            background: rgba(17, 17, 17, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 25px;
+            border-radius: 25px; width: 100%; max-width: 380px; text-align: center;
+            position: relative; z-index: 10;
+        }
+
+        .btn-scan-top {
+            width: 100%; padding: 14px; margin-bottom: 20px; border-radius: 50px;
+            background: transparent; border: 2px solid var(--neon); color: var(--neon);
+            font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        .wave-box {
+            background: #000; height: 140px; border-radius: 20px; margin-bottom: 20px;
+            position: relative; border: 1px solid #1a1a1a; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        #lock-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; color: #fff; text-align: center; padding: 10px;
+        }
+
         canvas { width: 100%; height: 100%; background: #000; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; z-index: 5; }
-        .btn { width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .btn {
+            width: 100%; padding: 18px; margin-bottom: 12px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
         .btn-gray { background: #222; color: #fff; border: 1px solid #333; }
         .btn-main { background: var(--neon); color: #000; }
+        
         .audio-group { display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .btn-stop { background: var(--red); color: white; }
+
+        #success-btn { display: none; background: #00c3ff; color: #fff; border: 2px solid #fff; }
+
+        /* AR Kamera Bypass Qatı */
         #ar-view { display: none; position: fixed; inset: 0; z-index: 10000; background: #000; }
         #manual-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 80; }
         a-scene { position: absolute; inset: 0; z-index: 85; }
@@ -42,6 +87,7 @@
     </style>
 </head>
 <body>
+
 <header>
     <div class="logo" onclick="resetPage()">SONIK SKIN</div>
     <div class="lang-dropdown">
@@ -57,22 +103,54 @@
         </div>
     </div>
 </header>
-<div class="container"><div class="card">
-    <button class="btn-scan-top" onclick="startARUniversal()">🔍 <span id="ui-scan">SCANET</span></button>
-    <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
-    <div class="wave-box"><canvas id="waveCanvas"></canvas><div id="timer">00:00 / 00:08</div><div id="lock-overlay"><span id="ui-lock-title">🔒 ÖNİZLEME KİLİTLİ</span><p id="ui-lock-msg" style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Tam sürüm için ödeme yapın</p></div></div>
-    <button class="btn btn-main" id="success-btn" style="display:none; background:#00c3ff" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
-    <div id="action-area">
-        <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
-        <input type="file" id="fInp" hidden onchange="handleFile(event)" accept="audio/*">
-        <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
-        <div class="audio-group" id="audio-ctrl"><button class="btn btn-gray" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button><button class="btn btn-stop" onclick="stopAudio()">🛑 <span id="ui-stop">STOP</span></button></div>
-        <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+
+<div class="container">
+    <div class="card">
+        <button class="btn-scan-top" onclick="startARUniversal()">🔍 <span id="ui-scan">SCANET</span></button>
+
+        <h2 id="ui-title">DOSYADAN DÖVME YAP</h2>
+        
+        <div class="wave-box" id="captureZone">
+            <canvas id="waveCanvas"></canvas>
+            <div id="timer">00:00 / 00:08</div>
+            <div id="lock-overlay">
+                <span id="ui-lock-title" style="font-weight: bold;">🔒 ÖNİZLEME KİLİTLİ</span>
+                <p id="ui-lock-msg" style="font-size: 11px; margin-top: 5px; opacity: 0.8;">Tam sürüm için ödeme yapın</p>
+            </div>
+        </div>
+
+        <button class="btn btn-main" id="success-btn" onclick="downloadPNG()">✅ <span id="ui-success">ÖDEME BAŞARILI! TIKLA İNDİR</span></button>
+        
+        <div id="action-area">
+            <button class="btn btn-gray" id="btn-rec" onclick="initMic()">🎤 <span id="ui-rec">SESİ KAYDET</span></button>
+            <input type="file" id="fInp" hidden onchange="handleFile(event)" accept="audio/*">
+            <button class="btn btn-gray" id="btn-file" onclick="document.getElementById('fInp').click()">📁 <span id="ui-select">DOSYA SEÇ</span></button>
+            
+            <div class="audio-group" id="audio-ctrl">
+                <button class="btn btn-gray" id="btn-play" onclick="playAudio()">🔊 <span id="ui-listen">DİNLE</span></button>
+                <button class="btn btn-stop" onclick="stopAudio()">🛑 <span id="ui-stop">STOP</span></button>
+            </div>
+
+            <button class="btn btn-main" onclick="handleCheckoutFlow()" id="ui-down">BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)</button>
+        </div>
     </div>
-</div></div>
-<div id="ar-view"><button class="close-ar" onclick="location.reload()">KAPAT</button><video id="manual-video" autoplay playsinline muted></video><a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false"><a-camera position="0 0 0" look-controls="enabled: false"></a-camera><a-entity mindar-image-target="targetIndex: 0"><a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane></a-entity></a-scene></div>
+</div>
+
+<div id="ar-view">
+    <button class="close-ar" onclick="location.reload()">KAPAT</button>
+    <video id="manual-video" autoplay playsinline muted></video>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
+        </a-entity>
+    </a-scene>
+</div>
+
 <script>
     const LEMON_LINK = "https://sonikskin.lemonsqueezy.com/checkout/buy/7997dd0f-76bd-4a1c-99f5-b2253aeb1ee6";
+    
+    // Bütün 7 dili bura qaytardım
     const langs = {
         tr: { title: "DOSYADAN DÖVME YAP", scan: "SCANET", select: "DOSYA SEÇ", down: "BUNU HATIRAYA DÖNÜŞTÜR (İNDİR)", listen: "DİNLE", stop: "STOP", rec: "SESİ KAYDET", success: "ÖDEME BAŞARILI! TIKLA İNDİR", lockT: "🔒 ÖNİZLEME KİLİTLİ", lockM: "Tam sürüm için ödeme yapın" },
         en: { title: "CREATE TATTOO FROM FILE", scan: "SCANET", select: "CHOOSE FILE", down: "CONVERT TO MEMORY (DOWNLOAD)", listen: "LISTEN", stop: "STOP", rec: "RECORD", success: "PAYMENT SUCCESS! CLICK TO DOWNLOAD", lockT: "🔒 PREVIEW LOCKED", lockM: "Pay for the full version" },
@@ -82,21 +160,41 @@
         de: { title: "TATTOO DATEI", scan: "SCANNER", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN", listen: "ANHÖREN", stop: "STOPP", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH!", lockT: "🔒 GESPERRT", lockM: "Zahlen" },
         es: { title: "CREAR TATUAJE", scan: "ESCANEAR", select: "ELEGIR ARCHIVO", down: "CONVERTIR (DESCARGAR)", listen: "ESCUCHAR", stop: "PARAR", rec: "GRABAR", success: "¡PAGO EXITOSO!", lockT: "🔒 BLOQUEADO", lockM: "Pague" }
     };
+
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray, staticDataArray = [];
     const canvas = document.getElementById('waveCanvas'), ctx = canvas.getContext('2d'), overlay = document.getElementById('lock-overlay');
-    window.onload = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; updateLang(localStorage.getItem('sonikLang') || 'tr'); if (new URLSearchParams(window.location.search).get('status') === 'success') { overlay.style.display = 'none'; document.getElementById('success-btn').style.display = 'flex'; document.getElementById('action-area').style.display = 'none'; if(localStorage.getItem('lastStaticWave')) { staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave')); drawStaticWave(true); } } };
-    function updateLang(l) { localStorage.setItem('sonikLang', l); const ln = langs[l]; document.getElementById('ui-title').innerText = ln.title; document.getElementById('ui-scan').innerText = ln.scan; document.getElementById('ui-select').innerText = ln.select; document.getElementById('ui-down').innerText = ln.down; document.getElementById('ui-listen').innerText = ln.listen; document.getElementById('ui-stop').innerText = ln.stop; document.getElementById('ui-rec').innerText = ln.rec; document.getElementById('ui-success').innerText = ln.success; document.getElementById('ui-lock-title').innerText = ln.lockT; document.getElementById('ui-lock-msg').innerText = ln.lockM; document.getElementById('curLang').innerText = l.toUpperCase() + " ▾"; }
-    
-    async function startARUniversal() {
-        const v = document.getElementById('manual-video');
-        const arView = document.getElementById('ar-view');
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            v.srcObject = stream; arView.style.display = 'block';
-            v.onloadedmetadata = () => { v.play(); setTimeout(() => { document.querySelector('a-scene').systems['mindar-image-system'].start(); }, 600); };
-        } catch(e) { alert("Camera error!"); }
+
+    window.onload = () => {
+        canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+        updateLang(localStorage.getItem('sonikLang') || 'tr');
+        if (new URLSearchParams(window.location.search).get('status') === 'success') {
+            overlay.style.display = 'none';
+            document.getElementById('success-btn').style.display = 'flex';
+            document.getElementById('action-area').style.display = 'none';
+            if(localStorage.getItem('lastStaticWave')) {
+                staticDataArray = JSON.parse(localStorage.getItem('lastStaticWave'));
+                drawStaticWave(true);
+            }
+        }
+    };
+
+    function updateLang(l) {
+        localStorage.setItem('sonikLang', l);
+        const ln = langs[l];
+        document.getElementById('ui-title').innerText = ln.title;
+        document.getElementById('ui-scan').innerText = ln.scan;
+        document.getElementById('ui-select').innerText = ln.select;
+        document.getElementById('ui-down').innerText = ln.down;
+        document.getElementById('ui-listen').innerText = ln.listen;
+        document.getElementById('ui-stop').innerText = ln.stop;
+        document.getElementById('ui-rec').innerText = ln.rec;
+        document.getElementById('ui-success').innerText = ln.success;
+        document.getElementById('ui-lock-title').innerText = ln.lockT;
+        document.getElementById('ui-lock-msg').innerText = ln.lockM;
+        document.getElementById('curLang').innerText = l.toUpperCase() + " ▾";
     }
 
+    // --- SƏS FUNKSİYALARI (ORİJİNAL) ---
     async function processAudioData(data) {
         if (audio) stopAudio();
         audioURL = URL.createObjectURL(data); audio = new Audio(audioURL);
@@ -152,6 +250,20 @@
             const t = setInterval(() => { sec++; document.getElementById('timer').innerText = `00:0${sec} / 00:08`; if(sec >= 8) { clearInterval(t); recorder.stop(); s.getTracks().forEach(tr => tr.stop()); } }, 1000);
             recorder.onstop = () => processAudioData(new Blob(chunks)); recorder.ondataavailable = e => chunks.push(e.data);
         } catch(e) { alert("Mic error!"); }
+    }
+
+    // --- YENİ İŞLƏYƏN KAMERA BYPASS FUNKSİYASI ---
+    async function startARUniversal() {
+        const v = document.getElementById('manual-video');
+        const arView = document.getElementById('ar-view');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            v.srcObject = stream; arView.style.display = 'block';
+            v.onloadedmetadata = () => { 
+                v.play(); 
+                setTimeout(() => { document.querySelector('a-scene').systems['mindar-image-system'].start(); }, 800); 
+            };
+        } catch(e) { alert("Kamera açılmadı!"); }
     }
 
     function handleFile(e) { if(e.target.files[0]) processAudioData(e.target.files[0]); }
