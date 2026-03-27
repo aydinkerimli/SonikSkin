@@ -2,55 +2,140 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sonik Skin - Real Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sonik Skin - Final Zero Black Screen</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
-        #ui { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0a0a0a; }
-        .btn { padding: 20px 40px; background: #d4ff00; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; }
-        #ar-screen { display: none; position: fixed; inset: 0; z-index: 200; }
-        /* KAMERA BURADADIR */
-        video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-        a-scene { position: absolute; inset: 0; z-index: 2; }
-        .mindar-ui-overlay, .mindar-ui-loading { display: none !important; }
+        :root { --neon: #d4ff00; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
+        
+        /* Əsas UI */
+        #main-container { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(-45deg, #0f0c29, #24243e); }
+        .card { background: rgba(0,0,0,0.8); padding: 20px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 350px; text-align: center; }
+        .wave-box { background: #000; height: 120px; border-radius: 15px; margin: 15px 0; border: 1px solid var(--neon); }
+        canvas { width: 100%; height: 100%; }
+        .btn { width: 100%; padding: 15px; margin-top: 10px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-main { background: var(--neon); color: #000; }
+        .btn-gray { background: #333; color: #fff; }
+
+        /* AR EKRANI - BURA ÇOX VACİBDİR */
+        #ar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #000; }
+        #manual-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 5; }
+        a-scene { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+        .close-btn { position: absolute; top: 30px; right: 20px; z-index: 2000; background: red; color: white; padding: 10px 20px; border-radius: 10px; }
+        
+        /* MindAR-ın qara ekran verən bütün daxili elementlərini silirik */
+        .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="ui">
-    <h1 style="color:#d4ff00">SONIK SKIN</h1>
-    <p>Kameranı açmaq üçün aşağıdakı düyməyə bas:</p>
-    <button class="btn" onclick="startNow()">🔍 SCANET (KAMERA)</button>
+<div id="main-container">
+    <div class="card">
+        <h2 id="ui-title">SONIK SKIN</h2>
+        <div class="wave-box">
+            <canvas id="waveCanvas"></canvas>
+        </div>
+        <button class="btn btn-gray" onclick="initMic()">🎤 SESİ KAYDET</button>
+        <button class="btn btn-main" onclick="openAR()">🔍 SCANET (AR)</button>
+    </div>
 </div>
 
-<div id="ar-screen">
-    <video id="v" autoplay playsinline muted></video>
+<div id="ar-overlay">
+    <button class="close-btn" onclick="location.reload()">KAPAT</button>
+    <video id="manual-video" autoplay playsinline muted></video>
+    
     <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-plane position="0 0 0" height="0.5" width="0.5" color="red" opacity="0.5"></a-plane>
+        <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+            <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
         </a-entity>
     </a-scene>
 </div>
 
 <script>
-    async function startNow() {
-        const video = document.getElementById('v');
-        try {
-            // Sənə yalan demirəm qardaş, bu kod brauzerin ana qapısını döyür:
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            video.srcObject = stream;
-            
-            document.getElementById('ui').style.display = 'none';
-            document.getElementById('ar-screen').style.display = 'block';
+    let audio, analyser, dataArray, animFrame;
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
 
-            const sceneEl = document.querySelector('a-scene');
-            sceneEl.systems['mindar-image-system'].start();
-        } catch (e) {
-            alert("Kamera xətası: " + e.message + "\nZəhmət olmasa Safari-dən kameraya icazə verin.");
+    // --- 1. KAMERANI "ZORLA" AÇMAQ ---
+    async function openAR() {
+        const video = document.getElementById('manual-video');
+        const overlay = document.getElementById('ar-overlay');
+        
+        try {
+            // Sənin şəkildə gördüyün o icazələri burada real işə salırıq
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "environment",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            
+            video.srcObject = stream;
+            overlay.style.display = 'block';
+
+            // Video tam hazır olanda MindAR-ı oyadırıq
+            video.onloadedmetadata = () => {
+                const sceneEl = document.querySelector('a-scene');
+                // MindAR-a deyirik ki, kameranı YOX, bu video axınını istifadə etsin
+                sceneEl.systems['mindar-image-system'].start();
+            };
+
+        } catch (err) {
+            alert("Kamera açılmadı. Xəta kodu: " + err.name);
         }
+    }
+
+    // --- 2. SƏS VƏ DALĞA (SƏNİN ORİJİNAL KODUN) ---
+    async function initMic() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+            let chunks = [];
+            recorder.start();
+            setTimeout(() => {
+                recorder.stop();
+                stream.getTracks().forEach(t => t.stop());
+            }, 5000);
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                audio = new Audio(URL.createObjectURL(new Blob(chunks)));
+                setupAnalyser();
+            };
+        } catch(e) { alert("Mikrofon icazəsi yoxdur!"); }
+    }
+
+    function setupAnalyser() {
+        const audioCtx = new AudioContext();
+        const source = audioCtx.createMediaElementSource(audio);
+        analyser = audioCtx.createAnalyser();
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        dataArray = new Uint8Array(analyser.frequencyBinCount);
+        audio.play();
+        renderWave();
+    }
+
+    function renderWave() {
+        animFrame = requestAnimationFrame(renderWave);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#d4ff00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let x = 0;
+        let slice = canvas.width / dataArray.length;
+        for(let i=0; i<dataArray.length; i++) {
+            let v = dataArray[i] / 128.0;
+            let y = v * canvas.height / 2;
+            if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            x += slice;
+        }
+        ctx.stroke();
     }
 </script>
 </body>
