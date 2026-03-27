@@ -31,7 +31,6 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
-        /* SCANET DÜYMƏSİ ÜÇÜN STYLE */
         .scan-container { position: absolute; top: 70px; left: 20px; z-index: 999; }
         .btn-scan {
             background: rgba(212, 255, 0, 0.15); color: var(--neon); border: 1px solid var(--neon);
@@ -60,9 +59,12 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* AR EKRANI ÜÇÜN STYLE */
-        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: #000; }
+        /* AR GÖRÜNTÜSÜ ÜÇÜN QARA EKRANI ARADAN QALDIRAN STYLE */
+        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: transparent !important; }
         .close-ar { position: absolute; top: 30px; right: 30px; background: red; color: white; padding: 10px 20px; border-radius: 10px; z-index: 3001; cursor: pointer; font-weight: bold; }
+        
+        /* A-Frame-in daxili qara örtüyünü şəffaflaşdırırıq */
+        .mindar-ui-loading, .mindar-ui-compatibility { background: transparent !important; display: none !important; }
 
         canvas { width: 100%; height: 100%; background: #000; }
         #timer { position: absolute; top: 12px; right: 15px; color: var(--neon); font-family: monospace; font-size: 14px; z-index: 5; }
@@ -128,7 +130,7 @@
 
 <div id="ar-view">
     <div class="close-ar" onclick="stopAR()">KAPAT</div>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false;" embedded vr-mode-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no;" embedded vr-mode-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
             <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
@@ -172,25 +174,41 @@
         }
     };
 
-    // AR İDARƏETMƏSİ
-    function startAR() {
-        document.getElementById('ar-view').style.display = 'block';
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.systems['mindar-image-system'].start();
-        
-        const targetEl = document.getElementById('ar-target');
-        targetEl.addEventListener("targetFound", event => {
-            if(audio) playAudio();
-        });
-        targetEl.addEventListener("targetLost", event => {
-            if(audio) audio.pause();
-        });
+    // AR İDARƏETMƏSİ - KAMERA İCAZƏSİ VƏ ŞƏFFAFLIQ TƏMİN EDİLDİ
+    async function startAR() {
+        try {
+            // İstifadəçidən kamera icazəsini əvvəlcədən alırıq
+            await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('ar-view').style.display = 'block';
+            const sceneEl = document.querySelector('a-scene');
+            sceneEl.systems['mindar-image-system'].start();
+            
+            const targetEl = document.getElementById('ar-target');
+            targetEl.addEventListener("targetFound", event => {
+                if(audio) playAudio();
+            });
+            targetEl.addEventListener("targetLost", event => {
+                if(audio) audio.pause();
+            });
+        } catch(err) {
+            alert("Kamera izni gereklidir.");
+        }
     }
 
     function stopAR() {
         document.getElementById('ar-view').style.display = 'none';
-        document.querySelector('a-scene').systems['mindar-image-system'].stop();
+        const sceneEl = document.querySelector('a-scene');
+        if(sceneEl.systems['mindar-image-system']) {
+            sceneEl.systems['mindar-image-system'].stop();
+        }
         if(audio) audio.pause();
+        
+        // Kameranı tamamilə söndürmək üçün:
+        const video = document.querySelector('video');
+        if(video && video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.remove();
+        }
     }
 
     function clearPreviousSession() {
