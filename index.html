@@ -31,7 +31,6 @@
         }
         .logo { font-weight: 900; color: var(--neon); font-size: 1.1rem; cursor: pointer; }
 
-        /* AR / Scanet düyməsi üçün stillər əlavə edildi */
         .scan-container { position: absolute; top: 70px; left: 20px; z-index: 999; }
         .btn-scan {
             background: rgba(212, 255, 0, 0.2); color: var(--neon); border: 2px solid var(--neon);
@@ -39,11 +38,12 @@
             backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(212,255,0,0.3);
         }
 
-        /* Qara Ekranı önləyən AR stilləri */
-        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: transparent !important; }
+        /* AR EKRANI ÜÇÜN STILLƏR - YÜKLƏNMƏ EKRANINI QAYTARDIQ */
+        #ar-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: #000; }
         .close-ar { position: absolute; top: 30px; right: 30px; background: #ff1744; color: white; padding: 12px 25px; border-radius: 12px; z-index: 3001; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        video { object-fit: cover !important; }
-        .mindar-ui-overlay, .mindar-ui-loading, .mindar-ui-compatibility { display: none !important; }
+        
+        /* Sadəcə xəta/icazə sorğusu verən qara ekranı gizlədirik, yüklənmə fırlanan ikonu qalır */
+        .mindar-ui-overlay, .mindar-ui-compatibility { display: none !important; }
 
         .lang-dropdown { position: relative; }
         .lang-btn { background: #222; border: 1px solid #444; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
@@ -136,7 +136,7 @@
 
 <div id="ar-view">
     <div class="close-ar" onclick="stopAR()">KAPAT</div>
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiError: no;" embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: yes; uiError: no;" embedded vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
             <a-plane position="0 0 0" height="0.5" width="0.5" material="src: #waveCanvas; transparent: true; opacity: 0.9"></a-plane>
@@ -154,7 +154,7 @@
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
         zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
-        es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" } // İspan dili dataları əlavə edildi
+        es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -180,22 +180,13 @@
         }
     };
 
-    // --- YENİ KAMERA / AR FUNKSİYALARI BURA ƏLAVƏ EDİLDİ ---
-    async function startAR() {
+    // --- ƏN TƏMİZ VƏ ZİDDİYYƏTSİZ AR BAŞLATMA ---
+    function startAR() {
         document.getElementById('ar-view').style.display = 'block';
         const sceneEl = document.querySelector('a-scene');
 
-        try {
-            // Səssizcə yoxlayır, heç bir alert vermir
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                sceneEl.systems['mindar-image-system'].start();
-            }
-        } catch (e) {
-            // Xəta olsa belə brauzerin öz pəncərəsi açılsın deyə start edirik
-            sceneEl.systems['mindar-image-system'].start();
-        }
+        // Bütün kənar müdaxilələri sildim. İcazə və yüklənməni birbaşa sistemə buraxırıq.
+        sceneEl.systems['mindar-image-system'].start();
         
         const targetEl = document.getElementById('ar-target');
         targetEl.addEventListener("targetFound", event => { if(audio) playAudio(); });
@@ -218,7 +209,7 @@
             video.remove();
         });
     }
-    // --------------------------------------------------------
+    // ------------------------------------------------
 
     function clearPreviousSession() {
         if (animFrame) cancelAnimationFrame(animFrame);
