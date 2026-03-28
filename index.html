@@ -125,7 +125,7 @@
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
         zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
         de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
-        es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
+        es: { title: "CREAR TATUAJE", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO!", lockT: "🔒 KİLİTLİ", lockM: "Ödeme yapın" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -223,7 +223,7 @@
     }
 
     function drawStaticWave(isPaid = false) {
-        if (!isPaid) overlay.style.display = 'none'; // DINLEYENDE KILIT GELMESIN DEDIYIN UCUN
+        if (!isPaid) overlay.style.display = 'none'; 
         ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const barWidth = canvas.width / staticDataArray.length;
         staticDataArray.forEach((val, i) => {
@@ -272,10 +272,11 @@
             recorder.start(); chunks = [];
             let s = 0; 
             const t = setInterval(() => {
-                s++; document.getElementById('timer').innerText = `00:0${s} / 00:08`;
+                s++; 
+                document.getElementById('timer').innerText = `00:0${s} / 00:08`;
                 if(s >= 8) { 
                     clearInterval(t); 
-                    if(recorder.state !== 'inactive') recorder.stop(); // 8 SANİYƏDƏ AVTOMATİK STOP
+                    if(recorder.state !== 'inactive') recorder.stop(); // AVTOMATİK DAYAN
                     stream.getTracks().forEach(tr => tr.stop());
                     cancelAnimationFrame(animFrame);
                 }
@@ -294,7 +295,7 @@
 
     function handleCheckoutFlow() { if(staticDataArray.length === 0) return; window.location.href = LEMON_LINK; }
     function downloadPNG() { drawStaticWave(true); const link = document.createElement('a'); link.download = 'sonik-skin.png'; link.href = canvas.toDataURL(); link.click(); }
-    function resetPage() { localStorage.removeItem('lastStaticWave'); window.location.href = window.location.origin + window.location.pathname; }
+    function resetPage() { localStorage.removeItem('lastStaticWave'); window.location.reload(); }
 </script>
 </body>
 </html>
