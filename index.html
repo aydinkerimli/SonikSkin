@@ -85,6 +85,7 @@
             <span onclick="updateLang('fr')">Français</span>
             <span onclick="updateLang('zh')">中文</span>
             <span onclick="updateLang('de')">Deutsch</span>
+            <span onclick="updateLang('es')">Español</span> 
         </div>
     </div>
 </header>
@@ -123,7 +124,8 @@
         ru: { title: "ТАТУ ИЗ ФАЙЛА", select: "ВЫБРАТЬ ФАЙЛ", down: "ПРЕВРАТИТЬ В ПАМЯТЬ (СКАЧАТЬ)", listen: "СЛУШАТЬ", rec: "ЗАПИСЬ", success: "ОПЛАТА УСПЕШНА! СКАЧАТЬ", lockT: "🔒 ПРЕДПРОСМОТР ЗАБЛОКИРОВАН", lockM: "Оплатите полную версию" },
         fr: { title: "CRÉER TATOUAGE", select: "CHOISIR UN FICHIER", down: "CONVERTIR EN SOUVENIR (TÉLÉCHARGER)", listen: "ÉCOUTER", rec: "ENREGISTRER", success: "PAIEMENT RÉUSSI ! TÉLÉCHARGER", lockT: "🔒 APERÇU VERROUILLÉ", lockM: "Payez pour la version complète" },
         zh: { title: "纹身制作", select: "选择文件", down: "将其转化为记忆 (下载)", listen: "倾听", rec: "录音", success: "支付成功！点击下载", lockT: "🔒 预览已锁定", lockM: "支付以获取完整版" },
-        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" }
+        de: { title: "TATTOO DATEI", select: "WÄHLEN", down: "IN ERINNERUNG VERWANDELN (DOWNLOAD)", listen: "ANHÖREN", rec: "AUFNAHME", success: "ZAHLUNG ERFOLGREICH! HERUNTERLADEN", lockT: "🔒 VORSCHAU GESPERRT", lockM: "Für Vollversion bezahlen" },
+        es: { title: "CREAR TATUAJE DESDE ARCHIVO", select: "ELEGIR ARCHIVO", down: "CONVERTIR EN MEMORIA (DESCARGAR)", listen: "ESCUCHAR", rec: "GRABAR SONIDO", success: "¡PAGO EXITOSO! CLICK PARA DESCARGAR", lockT: "🔒 VISTA PREVIA BLOQUEADA", lockM: "Pague por la versión completa" }
     };
 
     let recorder, chunks = [], audioURL, audio, animFrame, analyser, dataArray;
@@ -150,12 +152,11 @@
     };
 
     function clearPreviousSession() {
-        // Yeni səs yüklənəndə köhnəni tamamilə sıfırla
         if (animFrame) cancelAnimationFrame(animFrame);
         if (audio) { audio.pause(); audio = null; }
         staticDataArray = [];
         overlay.style.display = 'none';
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Ekranı tam sil
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         document.getElementById('timer').innerText = "00:00 / 00:08";
         document.getElementById('btn-play').style.display = 'none';
     }
@@ -263,7 +264,7 @@
     }
 
     async function initMic() {
-        clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
+        clearPreviousSession();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setupStreamAnalyser(stream);
@@ -285,7 +286,7 @@
 
     function handleFile(e) { 
         if(e.target.files[0]) {
-            clearPreviousSession(); // KÖHNƏ SESSİYANI SİL
+            clearPreviousSession();
             processAudioData(e.target.files[0]);
         }
     }
